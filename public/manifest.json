@@ -1,0 +1,21 @@
+{
+  "name": "Banda BMB - Botucatu",
+  "short_name": "Banda BMB",
+  "description": "Progressive Web App da Banda BMB de Botucatu-SP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1B263B",
+  "theme_color": "#1B263B",
+  "icons": [
+    {
+      "src": "https://img.usecurling.com/i?q=marching-band&shape=outline&color=solid-black&size=192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.usecurling.com/i?q=marching-band&shape=outline&color=solid-black&size=512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

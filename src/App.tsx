@@ -1,28 +1,56 @@
-/* Main App Component - Handles routing (using react-router-dom), query client and other providers - use this file to add all routes */
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import Index from './pages/Index'
-import NotFound from './pages/NotFound'
-import Layout from './components/Layout'
+import { AuthProvider } from '@/lib/auth-context'
 
-// ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
-// AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
+import Layout from '@/components/Layout'
+import PortalLayout from '@/pages/portal/PortalLayout'
+import NotFound from '@/pages/NotFound'
+
+// Public Pages
+import Index from '@/pages/Index'
+import About from '@/pages/About'
+import Agenda from '@/pages/Agenda'
+import Media from '@/pages/Media'
+import Contact from '@/pages/Contact'
+import Login from '@/pages/Login'
+
+// Restricted Pages
+import Dashboard from '@/pages/portal/Dashboard'
+import DigitalId from '@/pages/portal/DigitalId'
+import Library from '@/pages/portal/Library'
+import Videos from '@/pages/portal/Videos'
 
 const App = () => (
   <BrowserRouter>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          {/* Public Routes with standard Layout */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/sobre" element={<About />} />
+            <Route path="/agenda" element={<Agenda />} />
+            <Route path="/media" element={<Media />} />
+            <Route path="/contato" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+          </Route>
+
+          {/* Restricted Routes with Portal Layout */}
+          <Route path="/portal" element={<PortalLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="id" element={<DigitalId />} />
+            <Route path="biblioteca" element={<Library />} />
+            <Route path="videos" element={<Videos />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
+    </AuthProvider>
   </BrowserRouter>
 )
 
