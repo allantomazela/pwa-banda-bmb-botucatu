@@ -142,20 +142,20 @@ BEGIN
 END $$;
 
 INSERT INTO public.events (id, title, description, event_date, location) VALUES
-  ('e0000001-0000-0000-0000-000000000001', 'Desfile de Aniversário da Cidade', 'Apresentação civica na avenida principal com todo o corpo musical.', '2026-08-14T09:00:00Z', 'Av. Dom Lucio, Botucatu-SP'),
-  ('e0000002-0000-0000-0000-000000000001', 'Ensaio Geral Aberto', 'Ensaio de preparacao para o campeonato estadual.', '2026-08-20T19:30:00Z', 'Sede da Banda BMB'),
-  ('e0000003-0000-0000-0000-000000000001', 'Campeonato Estadual de Bandas', 'Competicao oficial da federacao.', '2026-09-05T14:00:00Z', 'Ginasio do Ibirapuera, Sao Paulo-SP')
+  ('a0000001-0000-0000-0000-000000000001', 'Desfile de Aniversário da Cidade', 'Apresentação civica na avenida principal com todo o corpo musical.', '2026-08-14T09:00:00Z', 'Av. Dom Lucio, Botucatu-SP'),
+  ('a0000002-0000-0000-0000-000000000001', 'Ensaio Geral Aberto', 'Ensaio de preparacao para o campeonato estadual.', '2026-08-20T19:30:00Z', 'Sede da Banda BMB'),
+  ('a0000003-0000-0000-0000-000000000001', 'Campeonato Estadual de Bandas', 'Competicao oficial da federacao.', '2026-09-05T14:00:00Z', 'Ginasio do Ibirapuera, Sao Paulo-SP')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.materials (id, title, file_path, category) VALUES
-  ('m0000001-0000-0000-0000-000000000001', 'Hino de Botucatu (Grade)', 'scores/hino-botucatu.pdf', 'Partituras'),
-  ('m0000002-0000-0000-0000-000000000001', 'Metodo Essencial - Trompete Vol. 1', 'methods/metodo-trompete-vol1.pdf', 'Metodos'),
-  ('m0000003-0000-0000-0000-000000000001', 'Regulamento Interno 2026', 'docs/regulamento-2026.pdf', 'Avisos'),
-  ('m0000004-0000-0000-0000-000000000001', 'Marcha Radetzky (Trompete 1)', 'scores/radetzky-trompete1.pdf', 'Partituras')
+  ('b0000001-0000-0000-0000-000000000001', 'Hino de Botucatu (Grade)', 'scores/hino-botucatu.pdf', 'Partituras'),
+  ('b0000002-0000-0000-0000-000000000001', 'Metodo Essencial - Trompete Vol. 1', 'methods/metodo-trompete-vol1.pdf', 'Metodos'),
+  ('b0000003-0000-0000-0000-000000000001', 'Regulamento Interno 2026', 'docs/regulamento-2026.pdf', 'Avisos'),
+  ('b0000004-0000-0000-0000-000000000001', 'Marcha Radetzky (Trompete 1)', 'scores/radetzky-trompete1.pdf', 'Partituras')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.videos (id, title, video_url, description, category) VALUES
-  ('v0000001-0000-0000-0000-000000000001', 'Postura Basica de Marcha', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Instrucoes iniciais para novos membros.', 'Marcha'),
-  ('v0000002-0000-0000-0000-000000000001', 'Coreografia - Peca de Confronto', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Revisao dos movimentos do compasso 40 ao 80.', 'Coreografia'),
-  ('v0000003-0000-0000-0000-000000000001', 'Aquecimento Diario de Metais', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Rotina de 15 minutos.', 'Instrumento')
+  ('c0000001-0000-0000-0000-000000000001', 'Postura Basica de Marcha', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Instrucoes iniciais para novos membros.', 'Marcha'),
+  ('c0000002-0000-0000-0000-000000000001', 'Coreografia - Peca de Confronto', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Revisao dos movimentos do compasso 40 ao 80.', 'Coreografia'),
+  ('c0000003-0000-0000-0000-000000000001', 'Aquecimento Diario de Metais', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'Rotina de 15 minutos.', 'Instrumento')
 ON CONFLICT (id) DO NOTHING;
