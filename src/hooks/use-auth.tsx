@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { User, Session } from '@supabase/supabase-js'
+import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 
 export interface Profile {
@@ -19,9 +19,9 @@ interface AuthContextType {
     email: string,
     password: string,
     metadata?: Record<string, string>,
-  ) => Promise<{ error: unknown }>
-  signIn: (email: string, password: string) => Promise<{ error: unknown }>
-  signOut: () => Promise<{ error: unknown }>
+  ) => Promise<{ error: AuthError | null }>
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
+  signOut: () => Promise<{ error: AuthError | null }>
   loading: boolean
   profileLoading: boolean
 }

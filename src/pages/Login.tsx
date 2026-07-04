@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Loader2, Music } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2, Music, AlertCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import type { AuthError } from '@supabase/supabase-js'
 
 export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -18,22 +20,46 @@ export default function Login() {
   const { signIn, signUp, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (user) navigate('/portal')
   }, [user, navigate])
+
+  const getErrorMessage = (error: unknown, fallback: string): string => {
+    const authError = error as AuthError
+    if (authError?.message) {
+      if (authError.message.includes('Invalid login credentials')) {
+        return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.'
+      }
+      if (authError.message.includes('Email not confirmed')) {
+        return 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.'
+      }
+      if (authError.message.includes('User already registered')) {
+        return 'Este e-mail já está cadastrado. Tente fazer login.'
+      }
+      if (authError.message.includes('Password should be at least')) {
+        return 'A senha deve ter pelo menos 6 caracteres.'
+      }
+      return authError.message
+    }
+    return fallback
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (mode === 'login') {
       const { error } = await signIn(email, password)
       if (error) {
+        const msg = getErrorMessage(error, 'Credenciais inválidas.')
+        setErrorMessage(msg)
         toast({
           title: 'Erro ao entrar',
-          description: 'Credenciais invalidas.',
+          description: msg,
           variant: 'destructive',
         })
       } else {
+        setErrorMessage(null)
         toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
       }
     } else {
@@ -43,13 +69,20 @@ export default function Login() {
         registration_number: regNumber,
       })
       if (error) {
+        const msg = getErrorMessage(error, 'Não foi possível criar a conta.')
+        setErrorMessage(msg)
         toast({
           title: 'Erro ao cadastrar',
-          description: 'Nao foi possivel criar a conta.',
+          description: msg,
           variant: 'destructive',
         })
       } else {
-        toast({ title: 'Conta criada!', description: 'Voce ja pode fazer login.' })
+        setErrorMessage(null)
+        toast({
+          title: 'Conta criada!',
+          description:
+            'Verifique seu e-mail para confirmar o cadastro, ou faça login se a confirmação não for necessária.',
+        })
         setMode('login')
       }
     }
@@ -73,9 +106,20 @@ export default function Login() {
               ? 'Acesso restrito para membros da BMB'
               : 'Cadastre-se como membro da BMB'}
           </CardDescription>
+          {mode === 'login' && (
+            <p className="text-xs text-muted-foreground pt-1">
+              Demonstração: allantomazela@gmail.com / Skip@Pass
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             {mode === 'register' && (
               <>
                 <div className="space-y-2">
@@ -150,9 +194,12 @@ export default function Login() {
             <button
               type="button"
               className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+              onClick={() => {
+                setMode(mode === 'login' ? 'register' : 'login')
+                setErrorMessage(null)
+              }}
             >
-              {mode === 'login' ? 'Nao tem conta? Cadastre-se' : 'Ja tem conta? Faca login'}
+              {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
           </form>
         </CardContent>

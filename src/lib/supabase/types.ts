@@ -9,7 +9,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_date: string
+          id: string
+          location: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_date: string
+          id?: string
+          location?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          location?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      materials: {
+        Row: {
+          category: string
+          created_at: string
+          file_path: string
+          id: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_path: string
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_path?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          full_name: string
+          id: string
+          instrument: string
+          registration_number: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string
+          id: string
+          instrument?: string
+          registration_number?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string
+          id?: string
+          instrument?: string
+          registration_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          title: string
+          video_url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          title: string
+          video_url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
