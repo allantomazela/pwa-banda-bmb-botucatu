@@ -24,14 +24,9 @@ CREATE TABLE IF NOT EXISTS public.materials (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.videos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  video_url TEXT NOT NULL,
-  description TEXT NOT NULL DEFAULT '',
-  category TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+ALTER TABLE public.videos ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.videos ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.videos ALTER COLUMN description SET DEFAULT '';
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
