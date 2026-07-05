@@ -21,37 +21,47 @@ export default function Login() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user) navigate('/portal')
-  }, [user, navigate])
-
-  const getErrorMessage = (error: unknown, fallback: string): string => {
+    if (user && !submitting) navigate('/')
+  }, [user, submitting, navigate])
+  const getErrorMessage = (error: unknown): string => {
     const authError = error as AuthError
     if (authError?.message) {
-      if (authError.message.includes('Invalid login credentials')) {
-        return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.'
+      if (
+        authError.message.includes('Invalid login credentials') ||
+        authError.message.includes('Email not confirmed') ||
+        authError.message.includes('User already registered') ||
+        authError.message.includes('Password should be at least')
+      ) {
+        return 'E-mail ou senha inválidos'
       }
-      if (authError.message.includes('Email not confirmed')) {
-        return 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.'
-      }
-      if (authError.message.includes('User already registered')) {
-        return 'Este e-mail já está cadastrado. Tente fazer login.'
-      }
-      if (authError.message.includes('Password should be at least')) {
-        return 'A senha deve ter pelo menos 6 caracteres.'
-      }
-      return authError.message
+      return 'E-mail ou senha inválidos'
     }
-    return fallback
+    return 'Não foi possível conectar ao servidor. Tente novamente mais tarde.'
+  }
+
+  const validateEmail = (value: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!validateEmail(email)) {
+      setErrorMessage('E-mail ou senha inválidos')
+      return
+    }
+    if (!password.trim()) {
+      setErrorMessage('E-mail ou senha inválidos')
+      return
+    }
+
     if (mode === 'login') {
       const { error } = await signIn(email, password)
       if (error) {
-        const msg = getErrorMessage(error, 'Credenciais inválidas.')
+        const msg = getErrorMessage(error)
         setErrorMessage(msg)
         toast({
           title: 'Erro ao entrar',
@@ -61,6 +71,7 @@ export default function Login() {
       } else {
         setErrorMessage(null)
         toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
+        navigate('/')
       }
     } else {
       const { error } = await signUp(email, password, {
@@ -69,7 +80,7 @@ export default function Login() {
         registration_number: regNumber,
       })
       if (error) {
-        const msg = getErrorMessage(error, 'Não foi possível criar a conta.')
+        const msg = getErrorMessage(error)
         setErrorMessage(msg)
         toast({
           title: 'Erro ao cadastrar',
@@ -182,7 +193,11 @@ export default function Login() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full h-12 font-bold text-base" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full h-12 font-bold text-base"
+              disabled={loading || submitting}
+            >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : mode === 'login' ? (

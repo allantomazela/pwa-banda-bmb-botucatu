@@ -85,7 +85,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error }
+    if (error) return { error }
+
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    if (authUser) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', authUser.id)
+        .maybeSingle()
+
+      if (profileError || !profileData) {
+        await supabase.auth.signOut()
+        return {
+          error: {
+            message: 'Perfil não encontrado. Contate o administrador.',
+          } as AuthError,
+        }
+      }
+    }
+
+    return { error: null }
   }
 
   const signOut = async () => {
