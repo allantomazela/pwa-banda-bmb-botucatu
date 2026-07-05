@@ -29,13 +29,20 @@ export default function Login() {
   const getErrorMessage = (error: unknown): string => {
     const authError = error as AuthError
     if (authError?.message) {
-      if (
-        authError.message.includes('Invalid login credentials') ||
-        authError.message.includes('Email not confirmed') ||
-        authError.message.includes('User already registered') ||
-        authError.message.includes('Password should be at least')
-      ) {
+      if (authError.message.includes('Invalid login credentials')) {
         return 'E-mail ou senha inválidos'
+      }
+      if (authError.message.includes('Email not confirmed')) {
+        return 'E-mail não confirmado. Verifique sua caixa de entrada.'
+      }
+      if (authError.message.includes('User already registered')) {
+        return 'Este e-mail já está cadastrado. Tente fazer login.'
+      }
+      if (authError.message.includes('Password should be at least')) {
+        return 'A senha deve ter pelo menos 6 caracteres.'
+      }
+      if (authError.message.includes('Perfil não encontrado')) {
+        return authError.message
       }
       return 'E-mail ou senha inválidos'
     }
@@ -58,44 +65,49 @@ export default function Login() {
       return
     }
 
-    if (mode === 'login') {
-      const { error } = await signIn(email, password)
-      if (error) {
-        const msg = getErrorMessage(error)
-        setErrorMessage(msg)
-        toast({
-          title: 'Erro ao entrar',
-          description: msg,
-          variant: 'destructive',
-        })
+    setSubmitting(true)
+    try {
+      if (mode === 'login') {
+        const { error } = await signIn(email, password)
+        if (error) {
+          const msg = getErrorMessage(error)
+          setErrorMessage(msg)
+          toast({
+            title: 'Erro ao entrar',
+            description: msg,
+            variant: 'destructive',
+          })
+        } else {
+          setErrorMessage(null)
+          toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
+          navigate('/')
+        }
       } else {
-        setErrorMessage(null)
-        toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
-        navigate('/')
-      }
-    } else {
-      const { error } = await signUp(email, password, {
-        full_name: fullName,
-        instrument,
-        registration_number: regNumber,
-      })
-      if (error) {
-        const msg = getErrorMessage(error)
-        setErrorMessage(msg)
-        toast({
-          title: 'Erro ao cadastrar',
-          description: msg,
-          variant: 'destructive',
+        const { error } = await signUp(email, password, {
+          full_name: fullName,
+          instrument,
+          registration_number: regNumber,
         })
-      } else {
-        setErrorMessage(null)
-        toast({
-          title: 'Conta criada!',
-          description:
-            'Verifique seu e-mail para confirmar o cadastro, ou faça login se a confirmação não for necessária.',
-        })
-        setMode('login')
+        if (error) {
+          const msg = getErrorMessage(error)
+          setErrorMessage(msg)
+          toast({
+            title: 'Erro ao cadastrar',
+            description: msg,
+            variant: 'destructive',
+          })
+        } else {
+          setErrorMessage(null)
+          toast({
+            title: 'Conta criada!',
+            description:
+              'Verifique seu e-mail para confirmar o cadastro, ou faça login se a confirmação não for necessária.',
+          })
+          setMode('login')
+        }
       }
+    } finally {
+      setSubmitting(false)
     }
   }
 

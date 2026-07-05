@@ -84,17 +84,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { error }
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser()
-    if (authUser) {
+    if (data.user) {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', authUser.id)
+        .eq('id', data.user.id)
         .maybeSingle()
 
       if (profileError || !profileData) {
