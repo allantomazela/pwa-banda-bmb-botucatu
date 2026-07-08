@@ -22,8 +22,7 @@ UPDATE public.profiles
 SET
   birth_date = COALESCE(birth_date, '1995-03-15'::DATE),
   valid_until = COALESCE(valid_until, '2026-12-31'::DATE)
-WHERE email = 'allantomazela@gmail.com'
-   OR id IN (SELECT id FROM auth.users WHERE email = 'allantomazela@gmail.com');
+WHERE id IN (SELECT id FROM auth.users WHERE email = 'allantomazela@gmail.com');
 
 UPDATE public.profiles
 SET
