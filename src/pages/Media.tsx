@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play } from 'lucide-react'
+import { Play, ImageIcon, VideoOff } from 'lucide-react'
 
 export default function Media() {
   const [activeTab, setActiveTab] = useState('fotos')
@@ -10,8 +10,16 @@ export default function Media() {
     'https://img.usecurling.com/p/600/400?q=trumpet&color=yellow',
     'https://img.usecurling.com/p/600/400?q=snare%20drum&color=black',
     'https://img.usecurling.com/p/600/400?q=parade&color=blue',
-    'https://img.usecurling.com/p/600/400?q=brass&color=yellow',
-    'https://img.usecurling.com/p/600/400?q=marching&color=black',
+    'https://img.usecurling.com/p/600/400?q=brass%20instruments&color=yellow',
+    'https://img.usecurling.com/p/600/400?q=marching%20band%20performance&color=black',
+  ]
+
+  const videos = [
+    {
+      title: 'Apresentação Campeonato Estadual 2024',
+      desc: 'Assista na íntegra nossa performance premiada.',
+    },
+    { title: 'Ensaio Geral - Desfile Cívico', desc: 'Momentos dos nossos ensaios preparatórios.' },
   ]
 
   return (
@@ -34,53 +42,57 @@ export default function Media() {
         </Tabs>
       </div>
 
-      <div className={activeTab === 'fotos' ? 'block' : 'hidden'}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {fotos.map((src, i) => (
-            <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-card">
-              <img
-                src={src}
-                alt={`Galeria ${i}`}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="text-white font-medium">Ampliar</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={activeTab === 'videos' ? 'block' : 'hidden'}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="bg-card rounded-xl border border-white/5 overflow-hidden shadow-lg"
-            >
-              <div className="aspect-video relative bg-background/50 flex items-center justify-center group cursor-pointer">
+      <Tabs value={activeTab} className="w-full">
+        <TabsContent value="fotos" className="mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {fotos.map((src, i) => (
+              <div
+                key={i}
+                className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-card border border-white/5 hover:border-primary/30 transition-colors"
+              >
                 <img
-                  src={`https://img.usecurling.com/p/800/450?q=concert&color=blue&seed=${i}`}
-                  alt="Video thumbnail"
-                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                  src={src}
+                  alt={`Galeria Banda BMB ${i + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
                 />
-                <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 text-primary-foreground ml-1" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <span className="text-white font-medium flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Ampliar
+                  </span>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold mb-2">
-                  Apresentação Campeonato Estadual {2025 - i}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Assista na íntegra nossa performance premiada.
-                </p>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="videos" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {videos.map((video, i) => (
+              <div
+                key={i}
+                className="bg-card rounded-xl border border-white/5 overflow-hidden shadow-lg hover:border-primary/30 transition-colors group"
+              >
+                <div className="aspect-video relative bg-background/50 flex items-center justify-center cursor-pointer">
+                  <img
+                    src={`https://img.usecurling.com/p/800/450?q=concert%20band&color=blue&seed=${i + 1}`}
+                    alt={video.title}
+                    className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300"
+                  />
+                  <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 shadow-glow">
+                    <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-lg font-bold mb-2 text-white">{video.title}</h3>
+                  <p className="text-sm text-muted-foreground">{video.desc}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
