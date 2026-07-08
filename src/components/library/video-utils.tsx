@@ -34,16 +34,16 @@ export function getCategoryThumbnail(video: VideoItem): string {
 export function getCategoryColor(category: string): string {
   switch (category) {
     case 'Método I':
-      return 'bg-blue-500/90'
+      return 'bg-blue-600 text-white'
     case 'Método II':
-      return 'bg-purple-500/90'
+      return 'bg-purple-600 text-white'
     case 'Marcha':
-      return 'bg-orange-500/90'
+      return 'bg-orange-600 text-white'
     case 'Coreografia':
-      return 'bg-pink-500/90'
+      return 'bg-pink-600 text-white'
     case 'Instrumento':
-      return 'bg-green-500/90'
+      return 'bg-emerald-600 text-white'
     default:
-      return 'bg-primary/90'
+      return 'bg-primary text-primary-foreground'
   }
 }

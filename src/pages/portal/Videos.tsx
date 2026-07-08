@@ -1,26 +1,45 @@
-import { useFetch } from '@/hooks/use-fetch'
+import { useEffect, useState } from 'react'
 import { getVideos, type VideoItem } from '@/services/videos'
 import { VideoGrid } from '@/components/library/VideoGrid'
-import { PlayCircle, Loader2 } from 'lucide-react'
+import { Video, Loader2 } from 'lucide-react'
 
 export default function Videos() {
-  const { data: videos, loading } = useFetch<VideoItem[]>(getVideos)
+  const [videos, setVideos] = useState<VideoItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getVideos()
+        setVideos(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
 
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
-      <header>
-        <h1 className="text-3xl font-bold font-display mb-2">Videoaulas</h1>
-        <p className="text-muted-foreground">Tutoriais, coreografias e fundamentos práticos.</p>
-      </header>
+    <div className="container max-w-6xl py-8 md:py-12 animate-fade-in">
+      <div className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold font-display text-white flex items-center gap-4 mb-3">
+          <div className="p-2.5 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-sm">
+            <Video className="w-7 h-7" />
+          </div>
+          Videoaulas
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl">
+          Tutoriais, coreografias e fundamentos práticos para o seu desenvolvimento musical na Banda
+          BMB.
+        </p>
+      </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : !videos || videos.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <PlayCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
-          <p>Nenhum vídeo disponível no momento.</p>
+        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground bg-card/20 rounded-xl border border-white/5">
+          <Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" />
+          <p className="text-lg">Carregando acervo de vídeos...</p>
         </div>
       ) : (
         <VideoGrid videos={videos} />
