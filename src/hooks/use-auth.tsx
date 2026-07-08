@@ -8,6 +8,8 @@ export interface Profile {
   instrument: string
   registration_number: string
   avatar_url: string
+  birth_date: string | null
+  valid_until: string | null
   updated_at: string
 }
 
