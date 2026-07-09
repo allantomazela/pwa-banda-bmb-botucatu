@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Loader2, Save, AlertCircle } from 'lucide-react'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 import { formatCPF, isValidCPF } from '@/lib/formatters'
+import { AvatarUpload } from '@/components/AvatarUpload'
 
 export default function ProfileSettings() {
   const { user, profile, refreshProfile } = useAuth()
@@ -61,6 +62,18 @@ export default function ProfileSettings() {
     const formatted = formatCPF(value)
     handleChange('cpf', formatted)
     setCpfError(!isValidCPF(formatted))
+  }
+
+  const handleAvatarUploaded = async (url: string) => {
+    if (!user) return
+    handleChange('avatar_url', url)
+    const { error } = await updateProfile(user.id, { avatar_url: url })
+    if (error) {
+      toast({ title: 'Erro ao salvar foto', description: error, variant: 'destructive' })
+    } else {
+      await refreshProfile()
+      toast({ title: 'Foto atualizada!', description: 'Sua foto de perfil foi salva com sucesso.' })
+    }
   }
 
   const handleSave = async () => {
@@ -122,6 +135,14 @@ export default function ProfileSettings() {
           <CardDescription>Estes dados aparecem em sua carteirinha digital.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {user && (
+            <AvatarUpload
+              userId={user.id}
+              currentUrl={form.avatar_url}
+              name={form.full_name || 'U'}
+              onUploaded={handleAvatarUploaded}
+            />
+          )}
           <div className="space-y-2">
             <Label htmlFor="full_name">Nome Completo</Label>
             <Input
@@ -200,25 +221,14 @@ export default function ProfileSettings() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="birth_date">Data de Nascimento</Label>
-              <Input
-                id="birth_date"
-                type="date"
-                value={form.birth_date}
-                onChange={(e) => handleChange('birth_date', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="avatar_url">URL do Avatar</Label>
-              <Input
-                id="avatar_url"
-                placeholder="https://..."
-                value={form.avatar_url}
-                onChange={(e) => handleChange('avatar_url', e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="birth_date">Data de Nascimento</Label>
+            <Input
+              id="birth_date"
+              type="date"
+              value={form.birth_date}
+              onChange={(e) => handleChange('birth_date', e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="disability_info">

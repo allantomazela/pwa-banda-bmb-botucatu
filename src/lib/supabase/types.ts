@@ -72,6 +72,7 @@ export type Database = {
           instrument: string
           registration_number: string
           rg: string
+          role: string
           state: string
           updated_at: string
           valid_until: string | null
@@ -87,6 +88,7 @@ export type Database = {
           instrument?: string
           registration_number?: string
           rg?: string
+          role?: string
           state?: string
           updated_at?: string
           valid_until?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           instrument?: string
           registration_number?: string
           rg?: string
+          role?: string
           state?: string
           updated_at?: string
           valid_until?: string | null
@@ -140,7 +143,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

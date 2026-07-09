@@ -106,6 +106,9 @@ export default function DigitalId() {
                   src={avatarSrc}
                   alt={profile.full_name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile.id}`
+                  }}
                 />
               </div>
 

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera, Loader2, User } from 'lucide-react'
 import { useAvatarUpload } from '@/hooks/use-avatar-upload'
 import { useToast } from '@/hooks/use-toast'
 
@@ -41,14 +41,18 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
   return (
     <div className="flex items-center gap-4">
       <Avatar className="h-20 w-20 border-2 border-primary">
-        <AvatarImage src={currentUrl} />
-        <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+        <AvatarImage
+          src={currentUrl || `https://img.usecurling.com/ppl/medium?gender=male&seed=${userId}`}
+        />
+        <AvatarFallback>
+          <User className="w-8 h-8 text-muted-foreground" />
+        </AvatarFallback>
       </Avatar>
       <div>
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="hidden"
           onChange={handleFileChange}
         />
@@ -65,7 +69,7 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
           )}
           {uploading ? 'Enviando...' : 'Alterar foto'}
         </Button>
-        <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou GIF. Máx 2MB.</p>
+        <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Máx 2MB.</p>
       </div>
     </div>
   )
