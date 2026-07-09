@@ -1,7 +1,17 @@
 import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
-import { RefreshCcw, ShieldCheck, Music2, CalendarDays, Hash } from 'lucide-react'
+import {
+  RefreshCcw,
+  ShieldCheck,
+  Music2,
+  CalendarDays,
+  Hash,
+  MapPin,
+  CreditCard,
+  IdCard,
+  type LucideIcon,
+} from 'lucide-react'
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '--/--/----'
@@ -11,6 +21,33 @@ function formatDate(dateStr: string | null): string {
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const year = d.getFullYear()
   return `${day}/${month}/${year}`
+}
+
+function displayOrDash(value: string | null | undefined): string {
+  if (!value || value.trim() === '') return '—'
+  return value
+}
+
+function InfoCell({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string
+}) {
+  return (
+    <div className="bg-white/5 rounded-lg px-2 py-1.5">
+      <div className="flex items-center gap-1 mb-0.5">
+        <Icon className="w-2.5 h-2.5 text-primary shrink-0" />
+        <span className="text-[8px] text-muted-foreground uppercase tracking-wide truncate">
+          {label}
+        </span>
+      </div>
+      <p className="text-[10px] font-medium text-white truncate font-mono">{value}</p>
+    </div>
+  )
 }
 
 export default function DigitalId() {
@@ -32,6 +69,7 @@ export default function DigitalId() {
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(verifyUrl)}&size=200x200`
   const avatarSrc =
     profile.avatar_url || `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile.id}`
+  const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-8 animate-fade-in">
@@ -50,20 +88,19 @@ export default function DigitalId() {
             isFlipped ? 'rotate-y-180' : '',
           )}
         >
-          {/* Front */}
           <div className="absolute inset-0 w-full h-full backface-hidden bg-gradient-to-br from-[#1B263B] to-[#0A101D] rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col">
-            <div className="h-20 bg-primary relative flex items-center justify-center">
-              <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="h-14 bg-primary relative flex items-center justify-center">
+              <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-black/20 to-transparent" />
               <div className="flex items-center gap-2">
-                <Music2 className="w-6 h-6 text-[#1B263B]" strokeWidth={2.5} />
-                <span className="font-display font-black text-xl sm:text-2xl text-[#1B263B] tracking-widest uppercase">
+                <Music2 className="w-5 h-5 text-[#1B263B]" strokeWidth={2.5} />
+                <span className="font-display font-black text-lg text-[#1B263B] tracking-widest uppercase">
                   Banda BMB
                 </span>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col items-center pt-5 px-5 relative z-10">
-              <div className="w-28 h-28 rounded-full border-4 border-primary/80 overflow-hidden mb-4 shadow-xl bg-card">
+            <div className="flex-1 flex flex-col items-center pt-4 px-4 relative z-10">
+              <div className="w-20 h-20 rounded-full border-2 border-primary/80 overflow-hidden mb-3 shadow-xl bg-card">
                 <img
                   src={avatarSrc}
                   alt={profile.full_name}
@@ -71,57 +108,45 @@ export default function DigitalId() {
                 />
               </div>
 
-              <h2 className="text-lg font-bold text-white text-center w-full truncate">
+              <h2 className="text-base font-bold text-white text-center w-full truncate mb-3">
                 {profile.full_name}
               </h2>
 
-              <div className="mt-3 w-full space-y-2">
-                <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
-                  <Music2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wide w-16">
-                    Instrumento
-                  </span>
-                  <span className="text-xs font-medium text-white ml-auto truncate">
-                    {profile.instrument || '—'}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
-                  <Hash className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wide w-16">
-                    Matrícula
-                  </span>
-                  <span className="text-xs font-mono text-white ml-auto truncate">
-                    {profile.registration_number || '—'}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
-                  <CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wide w-16">
-                    Nascimento
-                  </span>
-                  <span className="text-xs font-mono text-white ml-auto">
-                    {formatDate(profile.birth_date)}
-                  </span>
-                </div>
+              <div className="w-full grid grid-cols-2 gap-1.5">
+                <InfoCell
+                  icon={Music2}
+                  label="Instrumento"
+                  value={displayOrDash(profile.instrument)}
+                />
+                <InfoCell
+                  icon={Hash}
+                  label="Matrícula"
+                  value={displayOrDash(profile.registration_number)}
+                />
+                <InfoCell icon={MapPin} label="Cidade/UF" value={cityUF} />
+                <InfoCell
+                  icon={CalendarDays}
+                  label="Nascimento"
+                  value={formatDate(profile.birth_date)}
+                />
+                <InfoCell icon={CreditCard} label="CPF" value={displayOrDash(profile.cpf)} />
+                <InfoCell icon={IdCard} label="RG" value={displayOrDash(profile.rg)} />
               </div>
 
-              <div className="mt-auto mb-4 w-full pt-3 border-t border-white/10 flex justify-between items-end">
+              <div className="mt-auto mb-3 w-full pt-2 border-t border-white/10 flex justify-between items-end">
                 <div>
-                  <p className="text-[9px] text-muted-foreground uppercase tracking-wide">
+                  <p className="text-[8px] text-muted-foreground uppercase tracking-wide">
                     Validade
                   </p>
-                  <p className="text-sm font-mono text-primary font-bold">
+                  <p className="text-xs font-mono text-primary font-bold">
                     {formatDate(profile.valid_until)}
                   </p>
                 </div>
-                <ShieldCheck className="w-6 h-6 text-primary/60" />
+                <ShieldCheck className="w-5 h-5 text-primary/60" />
               </div>
             </div>
           </div>
 
-          {/* Back */}
           <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-[#2B3950] to-[#1B263B] rounded-2xl border border-white/10 shadow-2xl flex flex-col items-center justify-between p-6">
             <div className="w-full text-center pt-2">
               <div className="flex items-center justify-center gap-2 mb-1">

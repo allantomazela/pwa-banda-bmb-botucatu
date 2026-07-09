@@ -31,9 +31,14 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground mb-4">
               Acesse sua carteirinha para identificacao em eventos e ensaios.
             </p>
-            <Button asChild className="w-full sm:w-auto shadow-glow">
-              <Link to="/portal/id">Ver Minha Identidade</Link>
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button asChild className="w-full sm:w-auto shadow-glow">
+                <Link to="/portal/id">Ver Minha Identidade</Link>
+              </Button>
+              <Link to="/portal/perfil" className="text-sm text-primary hover:underline">
+                Editar Perfil
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

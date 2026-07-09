@@ -10,6 +10,10 @@ export interface Profile {
   avatar_url: string
   birth_date: string | null
   valid_until: string | null
+  city: string
+  state: string
+  cpf: string
+  rg: string
   updated_at: string
 }
 
@@ -26,6 +30,7 @@ interface AuthContextType {
   signOut: () => Promise<{ error: AuthError | null }>
   loading: boolean
   profileLoading: boolean
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -76,6 +81,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user])
 
+  const refreshProfile = async () => {
+    if (!user) return
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    if (!error && data) {
+      setProfile(data as Profile)
+    }
+  }
+
   const signUp = async (email: string, password: string, metadata?: Record<string, string>) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -116,7 +129,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, profile, signUp, signIn, signOut, loading, profileLoading }}
+      value={{
+        user,
+        session,
+        profile,
+        signUp,
+        signIn,
+        signOut,
+        loading,
+        profileLoading,
+        refreshProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

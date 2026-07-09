@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { IdCard, LayoutDashboard, Library, Video, LogOut } from 'lucide-react'
+import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 const PORTAL_NAV = [
   { name: 'Dashboard', path: '/portal', icon: LayoutDashboard },
   { name: 'Identidade', path: '/portal/id', icon: IdCard },
+  { name: 'Perfil', path: '/portal/perfil', icon: UserCog },
   { name: 'Biblioteca', path: '/portal/biblioteca', icon: Library },
   { name: 'Videos', path: '/portal/videos', icon: Video },
 ]

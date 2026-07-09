@@ -19,6 +19,7 @@ import Login from '@/pages/Login'
 // Restricted Pages
 import Dashboard from '@/pages/portal/Dashboard'
 import DigitalId from '@/pages/portal/DigitalId'
+import ProfileSettings from '@/pages/portal/ProfileSettings'
 import Library from '@/pages/portal/Library'
 import Videos from '@/pages/portal/Videos'
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/portal" element={<PortalLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="id" element={<DigitalId />} />
+            <Route path="perfil" element={<ProfileSettings />} />
             <Route path="biblioteca" element={<Library />} />
             <Route path="videos" element={<Videos />} />
           </Route>
