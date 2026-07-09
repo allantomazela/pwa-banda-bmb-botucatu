@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ export default function ProfileSettings() {
     rg: '',
     birth_date: '',
     avatar_url: '',
+    disability_info: '',
   })
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function ProfileSettings() {
         rg: profile.rg || '',
         birth_date: profile.birth_date ? profile.birth_date.split('T')[0] : '',
         avatar_url: profile.avatar_url || '',
+        disability_info: profile.disability_info || '',
       })
     }
   }, [profile])
@@ -82,6 +85,7 @@ export default function ProfileSettings() {
       rg: form.rg,
       birth_date: form.birth_date || null,
       avatar_url: form.avatar_url,
+      disability_info: form.disability_info || null,
     })
     setSaving(false)
     if (error) {
@@ -215,6 +219,18 @@ export default function ProfileSettings() {
                 onChange={(e) => handleChange('avatar_url', e.target.value)}
               />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="disability_info">
+              Observação de deficiência ou limitação de mobilidade
+            </Label>
+            <Textarea
+              id="disability_info"
+              placeholder="Descreva qualquer deficiência ou limitação de mobilidade que precise ser informada à organização."
+              value={form.disability_info}
+              onChange={(e) => handleChange('disability_info', e.target.value)}
+              rows={3}
+            />
           </div>
         </CardContent>
       </Card>

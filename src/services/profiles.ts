@@ -11,6 +11,7 @@ export interface Profile {
   city: string
   state: string
   cpf: string
+  disability_info: string | null
   rg: string
   updated_at: string
 }

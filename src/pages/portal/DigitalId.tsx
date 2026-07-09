@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import {
+  Accessibility,
   RefreshCcw,
   ShieldCheck,
   Music2,
@@ -132,6 +133,20 @@ export default function DigitalId() {
                 <InfoCell icon={CreditCard} label="CPF" value={displayOrDash(profile.cpf)} />
                 <InfoCell icon={IdCard} label="RG" value={displayOrDash(profile.rg)} />
               </div>
+
+              {profile.disability_info && profile.disability_info.trim() !== '' && (
+                <div className="w-full mt-1.5 bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <Accessibility className="w-2.5 h-2.5 text-primary shrink-0" />
+                    <span className="text-[8px] text-primary uppercase tracking-wide font-semibold">
+                      Acessibilidade
+                    </span>
+                  </div>
+                  <p className="text-[9px] text-white/90 leading-tight">
+                    {profile.disability_info}
+                  </p>
+                </div>
+              )}
 
               <div className="mt-auto mb-3 w-full pt-2 border-t border-white/10 flex justify-between items-end">
                 <div>
