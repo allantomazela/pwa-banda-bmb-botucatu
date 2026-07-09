@@ -20,8 +20,12 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: 'Arquivo muito grande', description: 'Máximo 2MB.', variant: 'destructive' })
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Arquivo muito grande',
+        description: 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.',
+        variant: 'destructive',
+      })
       return
     }
     const url = await upload(userId, file)
@@ -69,7 +73,7 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
           )}
           {uploading ? 'Enviando...' : 'Alterar foto'}
         </Button>
-        <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Máx 2MB.</p>
+        <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Tamanho máximo: 5MB.</p>
       </div>
     </div>
   )
