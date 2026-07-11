@@ -24,7 +24,7 @@ export async function getAllEvents(): Promise<EventItem[]> {
 
 export async function updateProfileAdmin(
   userId: string,
-  data: { registration_number?: string; valid_until?: string | null; role?: string },
+  data: Partial<Omit<Profile, 'id' | 'updated_at'>>,
 ): Promise<{ error: string | null }> {
   const { error } = await supabase.from('profiles').update(data).eq('id', userId)
   if (error) return { error: error.message }

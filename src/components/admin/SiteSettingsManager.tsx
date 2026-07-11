@@ -99,6 +99,12 @@ export function SiteSettingsManager() {
             textarea
           />
           <Field
+            id="header_logo_url"
+            label="URL do Logo do Cabeçalho (vazio = letra B)"
+            value={form.header_logo_url || ''}
+            onChange={set('header_logo_url')}
+          />
+          <Field
             id="hero_image_url"
             label="URL da Imagem do Hero (vazio = padrão)"
             value={form.hero_image_url || ''}

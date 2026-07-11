@@ -24,9 +24,17 @@ export function Header() {
   return (
     <header className="hidden md:flex glass sticky top-0 z-50 w-full h-16 items-center px-6 lg:px-12 justify-between">
       <Link to="/" className="flex items-center gap-3 group">
-        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:scale-105 transition-transform shadow-glow">
-          B
-        </div>
+        {settings.header_logo_url ? (
+          <img
+            src={settings.header_logo_url}
+            alt="Logo Banda BMB"
+            className="w-9 h-9 rounded-lg object-cover group-hover:scale-105 transition-transform"
+          />
+        ) : (
+          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:scale-105 transition-transform shadow-glow">
+            B
+          </div>
+        )}
         <span className="font-display font-bold text-xl tracking-wide">
           {settings.header_title || 'Banda BMB'}
         </span>
@@ -93,9 +101,17 @@ export function MobileHeader() {
   return (
     <header className="md:hidden glass sticky top-0 z-50 w-full h-14 flex items-center justify-between px-4">
       <Link to="/" className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-base shadow-glow">
-          B
-        </div>
+        {settings.header_logo_url ? (
+          <img
+            src={settings.header_logo_url}
+            alt="Logo Banda BMB"
+            className="w-8 h-8 rounded-lg object-cover"
+          />
+        ) : (
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-base shadow-glow">
+            B
+          </div>
+        )}
         <span className="font-display font-bold text-base tracking-wide">
           {settings.header_title || 'Banda BMB'}
         </span>

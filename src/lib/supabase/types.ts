@@ -36,6 +36,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_photos: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          image_url: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          title?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          title?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string
@@ -108,6 +132,27 @@ export type Database = {
           state?: string
           updated_at?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }

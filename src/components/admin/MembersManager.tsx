@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getAllProfiles, updateProfileAdmin } from '@/services/admin'
+import { getAllProfiles } from '@/services/admin'
 import type { Profile } from '@/services/profiles'
 import {
   Table,
@@ -9,36 +9,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Pencil, Search, Loader2, Eye } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { MemberEditDialog } from '@/components/admin/MemberEditDialog'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
 
 export function MembersManager() {
-  const { toast } = useToast()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Profile | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({ registration_number: '', valid_until: '', role: 'member' })
+  const [editProfile, setEditProfile] = useState<Profile | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
   const [cardProfile, setCardProfile] = useState<Profile | null>(null)
 
   const fetchProfiles = async () => {
@@ -67,31 +50,8 @@ export function MembersManager() {
   }, [profiles, search])
 
   const handleEdit = (p: Profile) => {
-    setEditing(p)
-    setForm({
-      registration_number: p.registration_number,
-      valid_until: p.valid_until ? p.valid_until.split('T')[0] : '',
-      role: p.role || 'member',
-    })
-    setDialogOpen(true)
-  }
-
-  const handleSave = async () => {
-    if (!editing) return
-    setSaving(true)
-    const { error } = await updateProfileAdmin(editing.id, {
-      registration_number: form.registration_number,
-      valid_until: form.valid_until || null,
-      role: form.role,
-    })
-    setSaving(false)
-    if (error) {
-      toast({ title: 'Erro', description: error, variant: 'destructive' })
-    } else {
-      toast({ title: 'Membro atualizado!', description: 'Dados administrativos salvos.' })
-      setDialogOpen(false)
-      fetchProfiles()
-    }
+    setEditProfile(p)
+    setEditOpen(true)
   }
 
   if (loading)
@@ -156,52 +116,12 @@ export function MembersManager() {
         </Table>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Membro: {editing?.full_name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="reg_number">Matrícula</Label>
-              <Input
-                id="reg_number"
-                value={form.registration_number}
-                onChange={(e) => setForm({ ...form, registration_number: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="valid_until">Validade da Carteirinha</Label>
-              <Input
-                id="valid_until"
-                type="date"
-                value={form.valid_until}
-                onChange={(e) => setForm({ ...form, valid_until: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Função</Label>
-              <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
-                <SelectTrigger id="role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">Membro</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <MemberEditDialog
+        profile={editProfile}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={fetchProfiles}
+      />
 
       <Dialog open={!!cardProfile} onOpenChange={(open) => !open && setCardProfile(null)}>
         <DialogContent className="max-w-[400px]">

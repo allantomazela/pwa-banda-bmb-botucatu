@@ -12,6 +12,7 @@ const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(u
 const DEFAULTS: Record<string, string> = {
   header_title: 'Banda BMB',
   header_subtitle: 'A Tradição Musical de Botucatu',
+  header_logo_url: '',
   hero_title: 'A Tradição Musical de Botucatu',
   hero_subtitle:
     'Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.',
