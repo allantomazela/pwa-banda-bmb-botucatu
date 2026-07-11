@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Accessibility,
@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import './digital-id-card.css'
 
 export interface DigitalIdProfile {
   id: string
@@ -52,12 +53,47 @@ function displayOrDash(value: string | null | undefined): string {
   return value
 }
 
-function getStatus(validUntil: string | null): { label: string; active: boolean; color: string } {
-  if (!validUntil) return { label: 'Sem validade', active: false, color: 'bg-yellow-500' }
+function getStatus(validUntil: string | null): {
+  label: string
+  active: boolean
+  color: string
+  glowClass: string
+  borderClass: string
+} {
+  if (!validUntil)
+    return {
+      label: 'Sem validade',
+      active: false,
+      color: 'bg-yellow-500',
+      glowClass: 'id-glow-warning',
+      borderClass: 'ring-yellow-500/40',
+    }
   const expiry = new Date(validUntil)
   const now = new Date()
-  if (expiry > now) return { label: 'Ativo', active: true, color: 'bg-green-500' }
-  return { label: 'Expirado', active: false, color: 'bg-red-500' }
+  if (expiry > now)
+    return {
+      label: 'Ativo',
+      active: true,
+      color: 'bg-green-500',
+      glowClass: 'id-glow-active',
+      borderClass: 'ring-green-500/40',
+    }
+  return {
+    label: 'Expirado',
+    active: false,
+    color: 'bg-red-500',
+    glowClass: 'id-glow-expired',
+    borderClass: 'ring-red-500/40',
+  }
+}
+
+function getNameFontSize(name: string): string {
+  const len = name.trim().length
+  if (len <= 18) return 'text-base'
+  if (len <= 26) return 'text-sm'
+  if (len <= 35) return 'text-[13px]'
+  if (len <= 45) return 'text-xs'
+  return 'text-[11px]'
 }
 
 function InfoCell({
@@ -70,14 +106,15 @@ function InfoCell({
   value: string
 }) {
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/5 min-w-0">
+    <div className="bg-white/5 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/5 min-w-0 overflow-hidden">
       <div className="flex items-center gap-1 mb-0.5">
-        <Icon className="w-2.5 h-2.5 text-primary shrink-0" />
-        <span className="text-[8px] text-muted-foreground uppercase tracking-wide truncate">
-          {label}
-        </span>
+        <Icon className="w-2.5 h-2.5 text-amber-400/90 shrink-0" />
+        <span className="text-[8px] text-slate-400 uppercase tracking-wide truncate">{label}</span>
       </div>
-      <p className="text-[10px] font-medium text-white font-mono break-words leading-tight">
+      <p
+        className="text-[10px] font-medium text-white font-mono break-words leading-tight"
+        style={{ textWrap: 'balance' as const }}
+      >
         {value}
       </p>
     </div>
@@ -101,46 +138,66 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
   const status = getStatus(profile.valid_until)
   const roleLabel = roleLabels[profile.role] || profile.role || 'Membro'
+  const nameFontSize = useMemo(() => getNameFontSize(profile.full_name), [profile.full_name])
 
   return (
     <div className={cn('flex flex-col items-center w-full', className)}>
       <div
-        className="printable-id relative w-full max-w-[340px] min-h-[540px] perspective-1000 cursor-pointer select-none"
+        className="printable-id id-card-perspective relative w-full max-w-[340px] min-h-[540px] cursor-pointer select-none"
         onClick={() => setIsFlipped(!isFlipped)}
+        role="button"
+        tabIndex={0}
+        aria-label={`Carteirinha digital de ${profile.full_name}. Toque para ${isFlipped ? 'ver a frente' : 'ver o verso'}.`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setIsFlipped(!isFlipped)
+          }
+        }}
       >
         <div
           className={cn(
-            'w-full h-full min-h-[540px] relative transition-transform duration-700 transform-style-3d',
-            isFlipped ? 'rotate-y-180' : '',
+            'id-card-inner w-full h-full min-h-[540px] relative',
+            isFlipped && 'flipped',
           )}
         >
           {/* Front face */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl overflow-hidden shadow-2xl print:[print-color-adjust:exact] print:[-webkit-print-color-adjust:exact]">
+          <div
+            className={cn(
+              'id-card-face absolute inset-0 w-full h-full rounded-2xl overflow-hidden shadow-2xl ring-1',
+              status.borderClass,
+            )}
+            style={
+              { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
+            }
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-[#1B263B] via-[#15203A] to-[#0A101D]" />
+            <div className="absolute inset-0 id-holo-pattern" />
             <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
-            <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary/10 blur-2xl" />
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-primary/5 blur-xl" />
+            <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-amber-500/10 blur-2xl" />
+            <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-amber-500/5 blur-xl" />
 
             <div className="relative z-10 h-full min-h-[540px] flex flex-col">
-              <div className="h-14 bg-primary/90 backdrop-blur-sm relative flex items-center justify-center shrink-0">
+              <div className="h-14 bg-gradient-to-r from-amber-600/90 via-amber-500/90 to-amber-600/90 backdrop-blur-sm relative flex items-center justify-center shrink-0 overflow-hidden">
+                <div className="absolute inset-0 id-card-shimmer" />
                 <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-black/20 to-transparent" />
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#1B263B] flex items-center justify-center">
-                    <Music2 className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                <div className="flex items-center gap-2 relative z-10">
+                  <div className="w-7 h-7 rounded-full bg-[#1B263B] flex items-center justify-center shadow-md">
+                    <Music2 className="w-4 h-4 text-amber-400" strokeWidth={2.5} />
                   </div>
-                  <span className="font-display font-black text-base text-[#1B263B] tracking-widest uppercase">
+                  <span className="font-bold text-base text-[#1B263B] tracking-widest uppercase">
                     Banda BMB
                   </span>
                 </div>
               </div>
 
-              <div className="flex-1 flex flex-col items-center pt-3 px-3 pb-2">
+              <div className="flex-1 flex flex-col items-center pt-3 px-3 pb-2 overflow-hidden">
                 <div className="relative mb-2 shrink-0">
-                  <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-primary/50 to-primary/30 blur-[2px]" />
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400/50 to-amber-300/30 blur-[2px]" />
                   <div className="relative w-20 h-20 rounded-full border-2 border-white/30 overflow-hidden shadow-xl bg-card">
                     <img
                       src={avatarSrc}
-                      alt={profile.full_name}
+                      alt={`Foto de ${profile.full_name}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.currentTarget.src = `https://img.usecurling.com/ppl/large?gender=male&seed=${profile.id}&dpr=2`
@@ -149,13 +206,19 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                   </div>
                 </div>
 
-                <h2 className="text-base font-bold text-white text-center w-full mb-0.5 leading-tight break-words hyphens-auto">
+                <h2
+                  className={cn(
+                    'font-bold text-white text-center w-full mb-0.5 leading-tight break-words hyphens-auto',
+                    nameFontSize,
+                  )}
+                  style={{ textWrap: 'balance' as const }}
+                >
                   {profile.full_name}
                 </h2>
 
-                <div className="inline-flex items-center gap-1 bg-primary/15 border border-primary/30 rounded-full px-2.5 py-0.5 mb-2 shrink-0">
-                  <BadgeCheck className="w-2.5 h-2.5 text-primary" />
-                  <span className="text-[9px] text-primary font-semibold uppercase tracking-wide break-words">
+                <div className="inline-flex items-center gap-1 bg-amber-500/15 border border-amber-500/30 rounded-full px-2.5 py-0.5 mb-2 shrink-0 max-w-full overflow-hidden">
+                  <BadgeCheck className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                  <span className="text-[9px] text-amber-300 font-semibold uppercase tracking-wide truncate">
                     {roleLabel}
                   </span>
                 </div>
@@ -182,10 +245,10 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                 </div>
 
                 {profile.disability_info && profile.disability_info.trim() !== '' && (
-                  <div className="w-full mt-1.5 bg-primary/10 border border-primary/20 rounded-lg px-2 py-1.5 backdrop-blur-sm">
+                  <div className="w-full mt-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1.5 backdrop-blur-sm">
                     <div className="flex items-center gap-1 mb-0.5">
-                      <Accessibility className="w-2.5 h-2.5 text-primary shrink-0" />
-                      <span className="text-[8px] text-primary uppercase tracking-wide font-semibold">
+                      <Accessibility className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      <span className="text-[8px] text-amber-300 uppercase tracking-wide font-semibold">
                         Acessibilidade
                       </span>
                     </div>
@@ -197,14 +260,17 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
 
                 <div className="mt-auto w-full pt-2 border-t border-white/10 flex justify-between items-end shrink-0">
                   <div className="min-w-0">
-                    <p className="text-[8px] text-muted-foreground uppercase tracking-wide">
-                      Expira em
-                    </p>
-                    <p className="text-xs font-mono text-primary font-bold">
+                    <p className="text-[8px] text-slate-400 uppercase tracking-wide">Expira em</p>
+                    <p className="text-xs font-mono text-amber-400 font-bold">
                       {formatDate(profile.valid_until)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-white/5 rounded-full px-2 py-0.5 border border-white/10 shrink-0">
+                  <div
+                    className={cn(
+                      'flex items-center gap-1.5 bg-white/5 rounded-full px-2 py-0.5 border border-white/10 shrink-0',
+                      status.glowClass,
+                    )}
+                  >
                     <span
                       className={cn(
                         'w-2 h-2 rounded-full',
@@ -220,20 +286,26 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
           </div>
 
           {/* Back face */}
-          <div className="absolute inset-0 w-full h-full min-h-[540px] backface-hidden rotate-y-180 rounded-2xl overflow-hidden shadow-2xl print:[print-color-adjust:exact] print:[-webkit-print-color-adjust:exact]">
+          <div
+            className="id-card-face id-card-back absolute inset-0 w-full h-full min-h-[540px] rounded-2xl overflow-hidden shadow-2xl"
+            style={
+              { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
+            }
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-[#2B3950] via-[#1B263B] to-[#0A101D]" />
+            <div className="absolute inset-0 id-holo-pattern" />
             <div className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
-            <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-primary/10 blur-2xl" />
+            <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-amber-500/10 blur-2xl" />
 
             <div className="relative z-10 h-full min-h-[540px] flex flex-col items-center justify-between p-6">
               <div className="w-full text-center pt-2 shrink-0">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <Music2 className="w-5 h-5 text-primary" />
-                  <span className="font-display font-bold text-sm text-primary tracking-widest uppercase">
+                  <Music2 className="w-5 h-5 text-amber-400" />
+                  <span className="font-bold text-sm text-amber-400 tracking-widest uppercase">
                     Banda BMB
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wide">
                   Carteira de Identificação
                 </p>
               </div>
@@ -247,18 +319,18 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               </div>
 
               <div className="w-full space-y-2 shrink-0">
-                <p className="text-[11px] text-center text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-center text-slate-300 leading-relaxed">
                   Escaneie o QR Code para validar a autenticidade desta carteirinha.
                 </p>
                 <div className="w-full border-t border-white/10 pt-2 text-center">
-                  <p className="text-[9px] text-muted-foreground leading-tight">
+                  <p className="text-[9px] text-slate-400 leading-tight">
                     Documento estritamente pessoal e intransferível.
                     <br />
                     Uso restrito a membros ativos da Banda BMB - Botucatu/SP.
                   </p>
                 </div>
                 <div className="flex justify-center pt-1">
-                  <ShieldCheck className="w-4 h-4 text-primary/40" />
+                  <ShieldCheck className="w-4 h-4 text-amber-400/40" />
                 </div>
               </div>
             </div>
