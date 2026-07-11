@@ -139,3 +139,28 @@
     animation: shimmer 1.5s infinite;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-id,
+  .printable-id * {
+    visibility: visible;
+  }
+  .printable-id {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) !important;
+  }
+  .printable-id > div {
+    transform: none !important;
+  }
+  .printable-id .backface-hidden.rotate-y-180 {
+    display: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

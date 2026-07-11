@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Save, AlertCircle } from 'lucide-react'
+import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 import { formatCPF, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
@@ -120,6 +121,22 @@ export default function ProfileSettings() {
     )
   }
 
+  const MANDATORY_FIELDS: (keyof typeof form)[] = [
+    'full_name',
+    'instrument',
+    'registration_number',
+    'city',
+    'state',
+    'cpf',
+    'rg',
+    'birth_date',
+    'avatar_url',
+  ]
+  const filledCount = MANDATORY_FIELDS.filter(
+    (f) => form[f] && String(form[f]).trim() !== '',
+  ).length
+  const completion = Math.round((filledCount / MANDATORY_FIELDS.length) * 100)
+
   return (
     <div className="p-6 lg:p-10 max-w-3xl mx-auto space-y-6 animate-fade-in">
       <header>
@@ -128,6 +145,21 @@ export default function ProfileSettings() {
           Atualize suas informações pessoais e de identificação.
         </p>
       </header>
+
+      <Card className="bg-card/50 border-white/5">
+        <CardContent className="p-4 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Completude do Perfil</span>
+            <span className="font-bold text-primary">{completion}%</span>
+          </div>
+          <Progress value={completion} className="h-2" />
+          {completion < 100 && (
+            <p className="text-xs text-muted-foreground">
+              Preencha todos os campos obrigatórios para ter um perfil completo.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

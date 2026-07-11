@@ -15,6 +15,7 @@ export interface Profile {
   cpf: string
   disability_info: string | null
   rg: string
+  role: string
   updated_at: string
 }
 

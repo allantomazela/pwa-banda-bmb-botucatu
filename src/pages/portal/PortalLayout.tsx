@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog } from 'lucide-react'
+import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -54,6 +54,15 @@ export default function PortalLayout() {
               {item.name}
             </Link>
           ))}
+          {profile?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors border-t border-white/5 pt-4"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              Centro Admin
+            </Link>
+          )}
         </nav>
         <div className="p-4 border-t border-white/5">
           <Button

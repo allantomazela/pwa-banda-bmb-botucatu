@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, FileText, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 export default function Dashboard() {
   const { profile } = useAuth()
   const { data: nextEvent } = useFetch<EventItem | null>(getNextEvent)
-  const { data: materials } = useFetch<Material[]>(() => getMaterials().then((m) => m.slice(0, 2)))
+  const { data: materials } = useFetch<Material[]>(() => getMaterials().then((m) => m.slice(0, 3)))
 
   const firstName = profile?.full_name?.split(' ')[0] || 'membro'
 
@@ -28,9 +29,19 @@ export default function Dashboard() {
             <CardTitle className="flex items-center gap-2">Identidade Digital</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Acesse sua carteirinha para identificacao em eventos e ensaios.
-            </p>
+            <div className="flex items-center gap-4 mb-4">
+              <Avatar className="h-16 w-16 border-2 border-primary">
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback>{firstName.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="font-semibold text-white truncate">{profile?.full_name || '—'}</p>
+                <p className="text-sm text-muted-foreground">{profile?.instrument || '—'}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Matrícula: {profile?.registration_number || '—'}
+                </p>
+              </div>
+            </div>
             <div className="flex flex-col gap-2">
               <Button asChild className="w-full sm:w-auto shadow-glow">
                 <Link to="/portal/id">Ver Minha Identidade</Link>

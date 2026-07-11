@@ -11,8 +11,10 @@ import {
   MapPin,
   CreditCard,
   IdCard,
+  Printer,
   type LucideIcon,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '--/--/----'
@@ -80,7 +82,7 @@ export default function DigitalId() {
       </div>
 
       <div
-        className="relative w-full max-w-[340px] aspect-[5/8] perspective-1000 cursor-pointer select-none"
+        className="printable-id relative w-full max-w-[340px] aspect-[5/8] perspective-1000 cursor-pointer select-none"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div
@@ -202,8 +204,20 @@ export default function DigitalId() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-center text-xs text-muted-foreground gap-1.5 animate-pulse">
-        <RefreshCcw className="w-3.5 h-3.5" /> Toque para virar
+      <div className="mt-6 flex flex-col items-center gap-4">
+        <div className="flex items-center text-xs text-muted-foreground gap-1.5 animate-pulse no-print">
+          <RefreshCcw className="w-3.5 h-3.5" /> Toque para virar
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsFlipped(false)
+            setTimeout(() => window.print(), 100)
+          }}
+          className="no-print"
+        >
+          <Printer className="w-4 h-4 mr-2" /> Imprimir / Salvar PDF
+        </Button>
       </div>
     </div>
   )

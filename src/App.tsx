@@ -6,6 +6,8 @@ import { AuthProvider } from '@/hooks/use-auth'
 
 import Layout from '@/components/Layout'
 import PortalLayout from '@/pages/portal/PortalLayout'
+import AdminLayout from '@/pages/admin/AdminLayout'
+import { AdminGuard } from '@/components/admin/AdminGuard'
 import NotFound from '@/pages/NotFound'
 
 // Public Pages
@@ -22,6 +24,13 @@ import DigitalId from '@/pages/portal/DigitalId'
 import ProfileSettings from '@/pages/portal/ProfileSettings'
 import Library from '@/pages/portal/Library'
 import Videos from '@/pages/portal/Videos'
+
+// Admin Pages
+import AdminDashboard from '@/pages/admin/AdminDashboard'
+import AdminMembers from '@/pages/admin/AdminMembers'
+import AdminEvents from '@/pages/admin/AdminEvents'
+import AdminMaterials from '@/pages/admin/AdminMaterials'
+import AdminVideos from '@/pages/admin/AdminVideos'
 
 const App = () => (
   <BrowserRouter>
@@ -47,6 +56,17 @@ const App = () => (
             <Route path="perfil" element={<ProfileSettings />} />
             <Route path="biblioteca" element={<Library />} />
             <Route path="videos" element={<Videos />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route element={<AdminGuard />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="members" element={<AdminMembers />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="materials" element={<AdminMaterials />} />
+              <Route path="videos" element={<AdminVideos />} />
+            </Route>
           </Route>
 
           <Route path="*" element={<NotFound />} />

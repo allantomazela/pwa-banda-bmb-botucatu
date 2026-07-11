@@ -120,3 +120,38 @@ export async function uploadMaterialFile(file: File): Promise<string | null> {
   if (error) return null
   return fileName
 }
+
+export async function getAllMaterials(): Promise<Material[]> {
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data as Material[]) ?? []
+}
+
+export async function getAllVideos(): Promise<VideoItem[]> {
+  const { data, error } = await supabase
+    .from('videos')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data as VideoItem[]) ?? []
+}
+
+export async function getAdminStats(): Promise<{
+  totalMembers: number
+  totalMaterials: number
+  pendingEvents: number
+}> {
+  const [profiles, materials, eventsRes] = await Promise.all([
+    getAllProfiles(),
+    getAllMaterials(),
+    supabase.from('events').select('id').gte('event_date', new Date().toISOString()),
+  ])
+  return {
+    totalMembers: profiles.length,
+    totalMaterials: materials.length,
+    pendingEvents: eventsRes.data?.length ?? 0,
+  }
+}
