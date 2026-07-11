@@ -46,7 +46,9 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
     <div className="flex items-center gap-4">
       <Avatar className="h-20 w-20 border-2 border-primary">
         <AvatarImage
-          src={currentUrl || `https://img.usecurling.com/ppl/medium?gender=male&seed=${userId}`}
+          src={
+            currentUrl || `https://img.usecurling.com/ppl/medium?gender=male&seed=${userId}&dpr=2`
+          }
         />
         <AvatarFallback>
           <User className="w-8 h-8 text-muted-foreground" />

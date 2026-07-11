@@ -17,13 +17,17 @@ export default function PortalLayout() {
   const { user, profile, loading, profileLoading, signOut } = useAuth()
   const location = useLocation()
 
+  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
+
   if (loading)
     return <div className="flex-1 flex items-center justify-center min-h-screen">Carregando...</div>
   if (!user) return <Navigate to="/login" replace />
 
   const displayName = profile?.full_name || 'Usuario'
   const displayInstrument = profile?.instrument || ''
-  const displayAvatar = profile?.avatar_url || ''
+  const displayAvatar =
+    profile?.avatar_url ||
+    `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] md:min-h-screen bg-background">
@@ -57,7 +61,12 @@ export default function PortalLayout() {
           {profile?.role === 'admin' && (
             <Link
               to="/admin"
-              className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors border-t border-white/5 pt-4"
+              className={cn(
+                'mt-4 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border-t border-white/5 pt-4',
+                location.pathname.startsWith('/admin')
+                  ? 'bg-destructive/10 text-destructive'
+                  : 'text-destructive hover:bg-destructive/10',
+              )}
             >
               <ShieldCheck className="w-5 h-5" />
               Centro Admin
@@ -86,6 +95,20 @@ export default function PortalLayout() {
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
         <div className="flex items-center justify-around h-16 px-2">
+          {profile?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className={cn(
+                'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors',
+                location.pathname.startsWith('/admin')
+                  ? 'text-destructive'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <ShieldCheck className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Admin</span>
+            </Link>
+          )}
           {PORTAL_NAV.map((item) => {
             const isActive = location.pathname === item.path
             return (

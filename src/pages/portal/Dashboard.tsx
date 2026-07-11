@@ -31,7 +31,12 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="h-16 w-16 border-2 border-primary">
-                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarImage
+                  src={
+                    profile?.avatar_url ||
+                    `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
+                  }
+                />
                 <AvatarFallback>{firstName.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">

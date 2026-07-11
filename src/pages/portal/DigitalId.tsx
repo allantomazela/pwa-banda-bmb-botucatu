@@ -71,7 +71,8 @@ export default function DigitalId() {
   const verifyUrl = `${window.location.origin}/verify?id=${profile.id}`
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(verifyUrl)}&size=200x200`
   const avatarSrc =
-    profile.avatar_url || `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile.id}`
+    profile.avatar_url ||
+    `https://img.usecurling.com/ppl/large?gender=male&seed=${profile.id}&dpr=2`
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
 
   return (
@@ -109,7 +110,7 @@ export default function DigitalId() {
                   alt={profile.full_name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile.id}`
+                    e.currentTarget.src = `https://img.usecurling.com/ppl/large?gender=male&seed=${profile.id}&dpr=2`
                   }}
                 />
               </div>

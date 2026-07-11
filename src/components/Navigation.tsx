@@ -1,10 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Calendar, Image as ImageIcon, User, LogIn, Menu, Library } from 'lucide-react'
+import { Home, Calendar, Image as ImageIcon, User, LogIn, Library } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { useState } from 'react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 const PUBLIC_NAV = [
   { name: 'Início', path: '/', icon: Home },
@@ -14,9 +13,11 @@ const PUBLIC_NAV = [
 ]
 
 export function Header() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const location = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
+  const portalLabel = profile?.role === 'admin' ? 'Painel Admin' : 'Portal do Aluno'
 
   return (
     <header className="hidden md:flex glass sticky top-0 z-50 w-full h-16 items-center px-6 lg:px-12 justify-between">
@@ -53,9 +54,19 @@ export function Header() {
 
       <div className="flex items-center gap-4">
         {user ? (
-          <Button asChild variant="default" className="font-semibold shadow-glow">
-            <Link to="/portal">Portal do Aluno</Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link to={portalPath} className="flex items-center gap-2 group">
+              <Avatar className="h-9 w-9 border-2 border-primary/50 group-hover:border-primary transition-colors">
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
+                  {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+            <Button asChild variant="default" className="font-semibold shadow-glow">
+              <Link to={portalPath}>{portalLabel}</Link>
+            </Button>
+          </div>
         ) : (
           <Button
             asChild
@@ -70,11 +81,41 @@ export function Header() {
   )
 }
 
+export function MobileHeader() {
+  const { user, profile } = useAuth()
+  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
+
+  return (
+    <header className="md:hidden glass sticky top-0 z-50 w-full h-14 flex items-center justify-between px-4">
+      <Link to="/" className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-base shadow-glow">
+          B
+        </div>
+        <span className="font-display font-bold text-base tracking-wide">Banda BMB</span>
+      </Link>
+      {user ? (
+        <Link to={portalPath} className="flex items-center gap-2">
+          <Avatar className="h-8 w-8 border-2 border-primary/50">
+            <AvatarImage src={profile?.avatar_url || undefined} />
+            <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
+              {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
+      ) : (
+        <Button asChild variant="ghost" size="sm" className="text-primary font-semibold">
+          <Link to="/login">Entrar</Link>
+        </Button>
+      )}
+    </header>
+  )
+}
+
 export function BottomNav() {
   const { user } = useAuth()
   const location = useLocation()
 
-  if (location.pathname.startsWith('/portal')) return null
+  if (location.pathname.startsWith('/portal') || location.pathname.startsWith('/admin')) return null
 
   const navItems = [
     { name: 'Início', path: '/', icon: Home },

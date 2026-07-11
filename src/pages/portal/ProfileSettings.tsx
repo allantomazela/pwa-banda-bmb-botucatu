@@ -193,11 +193,20 @@ export default function ProfileSettings() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="registration_number">Matrícula</Label>
+              <Label htmlFor="registration_number">
+                Matrícula
+                {profile?.role !== 'admin' && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    (gerenciado pelo admin)
+                  </span>
+                )}
+              </Label>
               <Input
                 id="registration_number"
                 value={form.registration_number}
                 onChange={(e) => handleChange('registration_number', e.target.value)}
+                disabled={profile?.role !== 'admin'}
+                className={profile?.role !== 'admin' ? 'opacity-60 cursor-not-allowed' : ''}
               />
             </div>
           </div>
