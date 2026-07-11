@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookOpen, Calendar, Music, ArrowRight, IdCard, MapPin, Clock } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 import { useFetch } from '@/hooks/use-fetch'
 import { getNextEvent, type EventItem } from '@/services/events'
 
 export default function Index() {
   const { user, profile } = useAuth()
+  const { settings } = useSiteSettings()
   const { data: nextEvent } = useFetch<EventItem | null>(getNextEvent)
 
   const firstName = profile?.full_name?.split(' ')[0]
@@ -18,7 +20,10 @@ export default function Index() {
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://img.usecurling.com/p/1200/800?q=marching%20band%20instruments&color=blue"
+            src={
+              settings.hero_image_url ||
+              'https://img.usecurling.com/p/1200/800?q=marching%20band%20instruments&color=blue'
+            }
             alt="Banda BMB Performance"
             className="w-full h-full object-cover opacity-50 mix-blend-overlay"
           />
@@ -36,10 +41,11 @@ export default function Index() {
           ) : null}
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-display text-white mb-6 leading-tight">
-            A Tradição Musical de <br /> <span className="text-primary">Botucatu</span>
+            {settings.hero_title || 'A Tradição Musical de Botucatu'}
           </h1>
           <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">
-            Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.
+            {settings.hero_subtitle ||
+              'Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.'}
           </p>
 
           {nextEvent && (
@@ -138,9 +144,12 @@ export default function Index() {
                   <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <BookOpen className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold">Nossa História</h3>
+                  <h3 className="text-xl font-bold">
+                    {settings.tile_history_title || 'Nossa História'}
+                  </h3>
                   <p className="text-muted-foreground text-sm">
-                    Décadas de dedicação à cultura e educação musical na nossa região.
+                    {settings.tile_history_text ||
+                      'Décadas de dedicação à cultura e educação musical na nossa região.'}
                   </p>
                 </CardContent>
               </Card>
@@ -152,9 +161,12 @@ export default function Index() {
                   <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <Calendar className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold">Agenda de Eventos</h3>
+                  <h3 className="text-xl font-bold">
+                    {settings.tile_agenda_title || 'Agenda de Eventos'}
+                  </h3>
                   <p className="text-muted-foreground text-sm">
-                    Confira onde será nossa próxima apresentação e junte-se a nós.
+                    {settings.tile_agenda_text ||
+                      'Confira onde será nossa próxima apresentação e junte-se a nós.'}
                   </p>
                 </CardContent>
               </Card>
@@ -181,9 +193,12 @@ export default function Index() {
                     <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       <Music className="w-8 h-8" />
                     </div>
-                    <h3 className="text-xl font-bold">Nossos Valores</h3>
+                    <h3 className="text-xl font-bold">
+                      {settings.tile_values_title || 'Nossos Valores'}
+                    </h3>
                     <p className="text-muted-foreground text-sm">
-                      Disciplina, respeito, trabalho em equipe e excelência musical.
+                      {settings.tile_values_text ||
+                        'Disciplina, respeito, trabalho em equipe e excelência musical.'}
                     </p>
                   </CardContent>
                 </Card>
@@ -197,10 +212,12 @@ export default function Index() {
       {!user && (
         <section className="py-24 bg-card/30 border-y border-white/5">
           <div className="container max-w-4xl text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Quer fazer parte da banda?</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              {settings.join_cta_title || 'Quer fazer parte da banda?'}
+            </h2>
             <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
-              Não é necessário ter experiência prévia. Nós oferecemos aulas práticas e teóricas para
-              que você aprenda do zero. Venha construir essa história com a gente.
+              {settings.join_cta_text ||
+                'Não é necessário ter experiência prévia. Nós oferecemos aulas práticas e teóricas para que você aprenda do zero. Venha construir essa história com a gente.'}
             </p>
             <Button size="lg" asChild className="h-14 px-10 text-base">
               <Link to="/contato">

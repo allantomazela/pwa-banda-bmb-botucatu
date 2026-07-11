@@ -73,6 +73,18 @@ export function MaterialsManager() {
     setOpen(true)
   }
   const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast({ title: 'Erro', description: 'O título é obrigatório.', variant: 'destructive' })
+      return
+    }
+    if (!form.file_path.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'O caminho do arquivo é obrigatório.',
+        variant: 'destructive',
+      })
+      return
+    }
     setSaving(true)
     const { error } = editing ? await updateMaterial(editing.id, form) : await createMaterial(form)
     setSaving(false)

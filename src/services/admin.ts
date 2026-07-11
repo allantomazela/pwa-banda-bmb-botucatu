@@ -143,15 +143,18 @@ export async function getAdminStats(): Promise<{
   totalMembers: number
   totalMaterials: number
   pendingEvents: number
+  totalPhotos: number
 }> {
-  const [profiles, materials, eventsRes] = await Promise.all([
+  const [profiles, materials, eventsRes, photosRes] = await Promise.all([
     getAllProfiles(),
     getAllMaterials(),
     supabase.from('events').select('id').gte('event_date', new Date().toISOString()),
+    supabase.from('gallery_photos' as any).select('id'),
   ])
   return {
     totalMembers: profiles.length,
     totalMaterials: materials.length,
     pendingEvents: eventsRes.data?.length ?? 0,
+    totalPhotos: photosRes.data?.length ?? 0,
   }
 }

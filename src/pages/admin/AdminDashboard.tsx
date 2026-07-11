@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/use-fetch'
 import { getAdminStats } from '@/services/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, Calendar, ShieldCheck } from 'lucide-react'
+import { Users, FileText, Calendar, ShieldCheck, Image as ImageIcon, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +31,20 @@ export default function AdminDashboard() {
       color: 'text-orange-400',
       path: '/admin/events',
     },
+    {
+      label: 'Fotos da Galeria',
+      value: stats?.totalPhotos,
+      icon: ImageIcon,
+      color: 'text-green-400',
+      path: '/admin/gallery',
+    },
+    {
+      label: 'Config. do Site',
+      value: '—',
+      icon: Settings,
+      color: 'text-purple-400',
+      path: '/admin/site',
+    },
   ]
 
   return (
@@ -43,7 +57,7 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground">Visão geral do ecossistema da Banda BMB.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {cards.map((card) => (
           <Link key={card.label} to={card.path}>
             <Card className="bg-card/50 border-white/5 hover:border-white/10 hover:scale-[1.02] transition-all">

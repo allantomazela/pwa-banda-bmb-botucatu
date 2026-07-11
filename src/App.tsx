@@ -31,47 +31,54 @@ import AdminMembers from '@/pages/admin/AdminMembers'
 import AdminEvents from '@/pages/admin/AdminEvents'
 import AdminMaterials from '@/pages/admin/AdminMaterials'
 import AdminVideos from '@/pages/admin/AdminVideos'
+import AdminSiteSettings from '@/pages/admin/AdminSiteSettings'
+import AdminGallery from '@/pages/admin/AdminGallery'
+import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          {/* Public Routes with standard Layout */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/sobre" element={<About />} />
-            <Route path="/agenda" element={<Agenda />} />
-            <Route path="/media" element={<Media />} />
-            <Route path="/contato" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-          </Route>
-
-          {/* Restricted Routes with Portal Layout */}
-          <Route path="/portal" element={<PortalLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="id" element={<DigitalId />} />
-            <Route path="perfil" element={<ProfileSettings />} />
-            <Route path="biblioteca" element={<Library />} />
-            <Route path="videos" element={<Videos />} />
-          </Route>
-
-          {/* Admin Routes */}
-          <Route element={<AdminGuard />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="members" element={<AdminMembers />} />
-              <Route path="events" element={<AdminEvents />} />
-              <Route path="materials" element={<AdminMaterials />} />
-              <Route path="videos" element={<AdminVideos />} />
+      <SiteSettingsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            {/* Public Routes with standard Layout */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/sobre" element={<About />} />
+              <Route path="/agenda" element={<Agenda />} />
+              <Route path="/media" element={<Media />} />
+              <Route path="/contato" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
             </Route>
-          </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+            {/* Restricted Routes with Portal Layout */}
+            <Route path="/portal" element={<PortalLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="id" element={<DigitalId />} />
+              <Route path="perfil" element={<ProfileSettings />} />
+              <Route path="biblioteca" element={<Library />} />
+              <Route path="videos" element={<Videos />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route element={<AdminGuard />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="members" element={<AdminMembers />} />
+                <Route path="events" element={<AdminEvents />} />
+                <Route path="materials" element={<AdminMaterials />} />
+                <Route path="videos" element={<AdminVideos />} />
+                <Route path="site" element={<AdminSiteSettings />} />
+                <Route path="gallery" element={<AdminGallery />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </SiteSettingsProvider>
     </AuthProvider>
   </BrowserRouter>
 )

@@ -79,6 +79,20 @@ export function VideosManager() {
     setOpen(true)
   }
   const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast({ title: 'Erro', description: 'O título é obrigatório.', variant: 'destructive' })
+      return
+    }
+    if (!form.video_url.trim()) {
+      toast({ title: 'Erro', description: 'A URL do vídeo é obrigatória.', variant: 'destructive' })
+      return
+    }
+    try {
+      new URL(form.video_url)
+    } catch {
+      toast({ title: 'Erro', description: 'A URL do vídeo é inválida.', variant: 'destructive' })
+      return
+    }
     setSaving(true)
     const { error } = editing ? await updateVideo(editing.id, form) : await createVideo(form)
     setSaving(false)

@@ -7,6 +7,8 @@ import {
   Video,
   ArrowLeft,
   ShieldCheck,
+  Settings,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -17,6 +19,8 @@ const ADMIN_NAV = [
   { name: 'Eventos', path: '/admin/events', icon: Calendar },
   { name: 'Materiais', path: '/admin/materials', icon: FileText },
   { name: 'Vídeos', path: '/admin/videos', icon: Video },
+  { name: 'Site', path: '/admin/site', icon: Settings },
+  { name: 'Galeria', path: '/admin/gallery', icon: ImageIcon },
 ]
 
 export default function AdminLayout() {

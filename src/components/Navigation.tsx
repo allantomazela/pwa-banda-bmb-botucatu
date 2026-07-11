@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, Calendar, Image as ImageIcon, User, LogIn, Library } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
@@ -14,6 +15,7 @@ const PUBLIC_NAV = [
 
 export function Header() {
   const { user, profile } = useAuth()
+  const { settings } = useSiteSettings()
   const location = useLocation()
 
   const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
@@ -25,7 +27,9 @@ export function Header() {
         <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:scale-105 transition-transform shadow-glow">
           B
         </div>
-        <span className="font-display font-bold text-xl tracking-wide">Banda BMB</span>
+        <span className="font-display font-bold text-xl tracking-wide">
+          {settings.header_title || 'Banda BMB'}
+        </span>
       </Link>
 
       <nav className="flex items-center gap-8">
@@ -83,6 +87,7 @@ export function Header() {
 
 export function MobileHeader() {
   const { user, profile } = useAuth()
+  const { settings } = useSiteSettings()
   const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
 
   return (
@@ -91,7 +96,9 @@ export function MobileHeader() {
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-base shadow-glow">
           B
         </div>
-        <span className="font-display font-bold text-base tracking-wide">Banda BMB</span>
+        <span className="font-display font-bold text-base tracking-wide">
+          {settings.header_title || 'Banda BMB'}
+        </span>
       </Link>
       {user ? (
         <Link to={portalPath} className="flex items-center gap-2">

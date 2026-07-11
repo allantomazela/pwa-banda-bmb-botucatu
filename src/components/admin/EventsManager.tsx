@@ -71,6 +71,18 @@ export function EventsManager() {
     setOpen(true)
   }
   const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast({ title: 'Erro', description: 'O título é obrigatório.', variant: 'destructive' })
+      return
+    }
+    if (!form.event_date) {
+      toast({
+        title: 'Erro',
+        description: 'A data do evento é obrigatória.',
+        variant: 'destructive',
+      })
+      return
+    }
     setSaving(true)
     const payload = {
       title: form.title,
