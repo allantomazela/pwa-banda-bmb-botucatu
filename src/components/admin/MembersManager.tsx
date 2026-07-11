@@ -26,8 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Pencil, Search, Loader2 } from 'lucide-react'
+import { Pencil, Search, Loader2, Eye } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
 
 export function MembersManager() {
   const { toast } = useToast()
@@ -38,6 +39,7 @@ export function MembersManager() {
   const [editing, setEditing] = useState<Profile | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ registration_number: '', valid_until: '', role: 'member' })
+  const [cardProfile, setCardProfile] = useState<Profile | null>(null)
 
   const fetchProfiles = async () => {
     setLoading(true)
@@ -118,7 +120,7 @@ export function MembersManager() {
               <TableHead>Matrícula</TableHead>
               <TableHead>Instrumento</TableHead>
               <TableHead>Cidade</TableHead>
-              <TableHead className="w-12" />
+              <TableHead className="w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,15 +131,31 @@ export function MembersManager() {
                 <TableCell>{p.instrument || '—'}</TableCell>
                 <TableCell>{p.city || '—'}</TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => handleEdit(p)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setCardProfile(p)}
+                      title="Ver carteirinha"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleEdit(p)}
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -182,6 +200,19 @@ export function MembersManager() {
               {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}Salvar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!cardProfile} onOpenChange={(open) => !open && setCardProfile(null)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Carteirinha Digital</DialogTitle>
+          </DialogHeader>
+          {cardProfile && (
+            <div className="flex justify-center py-4 max-h-[70vh] overflow-y-auto">
+              <DigitalIdCard profile={cardProfile} showActions={false} />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
