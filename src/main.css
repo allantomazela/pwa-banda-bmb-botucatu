@@ -153,12 +153,20 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%) !important;
+    width: 340px !important;
+    max-width: 340px !important;
+    min-height: auto !important;
   }
   .printable-id > div {
     transform: none !important;
+    min-height: auto !important;
   }
   .printable-id .backface-hidden.rotate-y-180 {
     display: none !important;
+  }
+  .printable-id .backface-hidden {
+    position: relative !important;
+    min-height: auto !important;
   }
   .no-print {
     display: none !important;

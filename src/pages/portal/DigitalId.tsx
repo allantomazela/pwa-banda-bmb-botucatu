@@ -17,11 +17,13 @@ export default function DigitalId() {
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-8 animate-fade-in">
-      <div className="text-center mb-6 no-print">
+      <div className="text-center mb-6 no-print w-full max-w-[340px]">
         <h1 className="text-2xl sm:text-3xl font-bold font-display mb-1">Carteirinha Digital</h1>
         <p className="text-sm text-muted-foreground">Toque no cartão para ver o verso</p>
       </div>
-      <DigitalIdCard profile={profile} />
+      <div className="w-full max-w-[340px] flex justify-center">
+        <DigitalIdCard profile={profile} />
+      </div>
     </div>
   )
 }
