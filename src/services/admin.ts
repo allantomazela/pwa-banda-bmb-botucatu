@@ -31,6 +31,23 @@ export async function updateProfileAdmin(
   return { error: null }
 }
 
+export async function setMemberApproval(
+  userId: string,
+  status: 'approved' | 'rejected',
+  adminId: string,
+): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      approval_status: status,
+      approved_at: status === 'approved' ? new Date().toISOString() : null,
+      approved_by: status === 'approved' ? adminId : null,
+    })
+    .eq('id', userId)
+  if (error) return { error: error.message }
+  return { error: null }
+}
+
 export async function createEvent(data: {
   title: string
   description: string | null
@@ -149,7 +166,7 @@ export async function getAdminStats(): Promise<{
     getAllProfiles(),
     getAllMaterials(),
     supabase.from('events').select('id').gte('event_date', new Date().toISOString()),
-    supabase.from('gallery_photos' as any).select('id'),
+    supabase.from('gallery_photos').select('id'),
   ])
   return {
     totalMembers: profiles.length,

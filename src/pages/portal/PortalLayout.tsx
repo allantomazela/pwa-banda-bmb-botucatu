@@ -31,15 +31,17 @@ export default function PortalLayout() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] md:min-h-screen bg-background">
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-card/30 fixed h-[calc(100vh-4rem)]">
-        <div className="p-6 border-b border-white/5 flex items-center gap-4">
-          <Avatar className="h-12 w-12 border-2 border-primary">
+      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-gradient-to-b from-card/50 to-card/20 fixed h-[calc(100vh-4rem)]">
+        <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
+          <Avatar className="h-12 w-12 border-2 border-primary shadow-glow/30">
             <AvatarImage src={displayAvatar} />
             <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="overflow-hidden">
             <p className="font-semibold text-sm truncate">{displayName}</p>
-            <p className="text-xs text-muted-foreground truncate">{displayInstrument}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {displayInstrument || (profile?.role === 'admin' ? 'Professor' : 'Aluno')}
+            </p>
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-2">

@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+
 export interface Profile {
   id: string
   full_name: string
@@ -16,6 +18,10 @@ export interface Profile {
   disability_info: string | null
   rg: string
   role: string
+  email: string
+  approval_status: ApprovalStatus
+  approved_at: string | null
+  approved_by: string | null
   updated_at: string
 }
 
@@ -30,6 +36,7 @@ interface AuthContextType {
   ) => Promise<{ error: AuthError | null }>
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<{ error: AuthError | null }>
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>
   loading: boolean
   profileLoading: boolean
   refreshProfile: () => Promise<void>
@@ -43,6 +50,10 @@ export const useAuth = () => {
   return context
 }
 
+function asAuthError(message: string): AuthError {
+  return { message, name: 'AuthError', status: 403 } as AuthError
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -53,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -74,8 +85,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .select('*')
         .eq('id', user.id)
         .single()
-        .then(({ data, error }) => {
-          if (!error && data) setProfile(data as Profile)
+        .then(async ({ data, error }) => {
+          if (!error && data) {
+            const next = data as Profile
+            if (
+              next.approval_status &&
+              next.approval_status !== 'approved' &&
+              !window.location.pathname.startsWith('/redefinir-senha')
+            ) {
+              await supabase.auth.signOut()
+              setProfile(null)
+            } else {
+              setProfile(next)
+            }
+          }
           setProfileLoading(false)
         })
     } else {
@@ -92,12 +115,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signUp = async (email: string, password: string, metadata?: Record<string, string>) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/`, data: metadata },
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+        data: metadata,
+      },
     })
-    return { error }
+    if (error) return { error }
+
+    // Cadastro fica pendente de aprovação — não manter sessão ativa
+    if (data.session) {
+      await supabase.auth.signOut()
+    }
+
+    return { error: null }
   }
 
   const signIn = async (email: string, password: string) => {
@@ -107,21 +140,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data.user) {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, approval_status, role')
         .eq('id', data.user.id)
         .maybeSingle()
 
       if (profileError || !profileData) {
         await supabase.auth.signOut()
+        return { error: asAuthError('Perfil não encontrado. Contate o administrador.') }
+      }
+
+      if (profileData.approval_status === 'pending') {
+        await supabase.auth.signOut()
         return {
-          error: {
-            message: 'Perfil não encontrado. Contate o administrador.',
-          } as AuthError,
+          error: asAuthError(
+            'Seu cadastro ainda aguarda aprovação do administrador. Você receberá acesso após a liberação.',
+          ),
         }
+      }
+
+      if (profileData.approval_status === 'rejected') {
+        await supabase.auth.signOut()
+        return {
+          error: asAuthError(
+            'Seu cadastro foi recusado. Entre em contato com a administração da Banda BMB.',
+          ),
+        }
+      }
+
+      if (profileData.approval_status !== 'approved') {
+        await supabase.auth.signOut()
+        return { error: asAuthError('Conta sem permissão de acesso. Contate o administrador.') }
       }
     }
 
     return { error: null }
+  }
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    })
+    return { error }
   }
 
   const signOut = async () => {
@@ -138,6 +197,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signUp,
         signIn,
         signOut,
+        resetPassword,
         loading,
         profileLoading,
         refreshProfile,

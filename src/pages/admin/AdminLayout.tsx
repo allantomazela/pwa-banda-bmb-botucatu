@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Settings,
   Image as ImageIcon,
+  Inbox,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button'
 const ADMIN_NAV = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { name: 'Membros', path: '/admin/members', icon: Users },
+  { name: 'Interesses', path: '/admin/inquiries', icon: Inbox },
   { name: 'Eventos', path: '/admin/events', icon: Calendar },
   { name: 'Materiais', path: '/admin/materials', icon: FileText },
   { name: 'Vídeos', path: '/admin/videos', icon: Video },

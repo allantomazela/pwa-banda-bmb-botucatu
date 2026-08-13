@@ -1,10 +1,16 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 export function Footer() {
   const location = useLocation()
+  const { settings } = useSiteSettings()
 
   // Hide footer in restricted areas
-  if (location.pathname.startsWith('/portal') || location.pathname === '/login') {
+  if (
+    location.pathname.startsWith('/portal') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname === '/login'
+  ) {
     return null
   }
 
@@ -16,11 +22,13 @@ export function Footer() {
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
               B
             </div>
-            <span className="font-display font-bold text-xl">Banda BMB</span>
+            <span className="font-display font-bold text-xl">
+              {settings.header_title || 'Banda BMB'}
+            </span>
           </div>
           <p className="text-muted-foreground text-sm max-w-xs">
-            A tradição musical de Botucatu-SP, transformando vidas através da música e da
-            disciplina.
+            {settings.footer_about ||
+              'A tradição musical de Botucatu-SP, transformando vidas através da música e da disciplina.'}
           </p>
         </div>
 
@@ -53,10 +61,10 @@ export function Footer() {
         <div>
           <h4 className="font-semibold mb-4 text-foreground">Contato</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>Rua da Música, 123 - Centro</li>
-            <li>Botucatu - SP, 18600-000</li>
-            <li>contato@bandabmb.com.br</li>
-            <li>(14) 99999-9999</li>
+            {settings.footer_address ? <li>{settings.footer_address}</li> : null}
+            {settings.footer_city ? <li>{settings.footer_city}</li> : null}
+            {settings.contact_email ? <li>{settings.contact_email}</li> : null}
+            {settings.contact_phone ? <li>{settings.contact_phone}</li> : null}
           </ul>
         </div>
       </div>

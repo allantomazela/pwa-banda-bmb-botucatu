@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase/client'
 
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+
 export interface Profile {
   id: string
   full_name: string
@@ -14,6 +16,10 @@ export interface Profile {
   disability_info: string | null
   rg: string
   role: string
+  email: string
+  approval_status: ApprovalStatus
+  approved_at: string | null
+  approved_by: string | null
   updated_at: string
 }
 

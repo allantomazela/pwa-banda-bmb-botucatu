@@ -18,6 +18,7 @@ const DEFAULTS: Record<string, string> = {
     'Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.',
   hero_image_url: '',
   contact_email: 'contato@bandabmb.com.br',
+  contact_phone: '(14) 99999-9999',
   about_text: 'Décadas de dedicação à cultura e educação musical na nossa região.',
   join_cta_title: 'Quer fazer parte da banda?',
   join_cta_text:
@@ -30,6 +31,8 @@ const DEFAULTS: Record<string, string> = {
   tile_values_text: 'Disciplina, respeito, trabalho em equipe e excelência musical.',
   footer_about:
     'A tradição musical de Botucatu-SP, transformando vidas através da música e da disciplina.',
+  footer_address: 'Rua da Música, 123 - Centro',
+  footer_city: 'Botucatu - SP, 18600-000',
 }
 
 export const useSiteSettings = () => {

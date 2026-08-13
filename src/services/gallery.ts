@@ -1,37 +1,27 @@
 import { supabase } from '@/lib/supabase/client'
+import type { Tables, TablesInsert } from '@/lib/supabase/types'
 
-export interface GalleryPhoto {
-  id: string
-  title: string
-  image_url: string
-  category: string
-  created_at: string
-}
+export type GalleryPhoto = Tables<'gallery_photos'>
 
 export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   const { data, error } = await supabase
-    .from('gallery_photos' as any)
+    .from('gallery_photos')
     .select('*')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data as GalleryPhoto[]) ?? []
+  return data ?? []
 }
 
-export async function createGalleryPhoto(data: {
-  title: string
-  image_url: string
-  category: string
-}): Promise<{ error: string | null }> {
-  const { error } = await supabase.from('gallery_photos' as any).insert(data)
+export async function createGalleryPhoto(
+  data: Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>,
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.from('gallery_photos').insert(data)
   if (error) return { error: error.message }
   return { error: null }
 }
 
 export async function deleteGalleryPhoto(id: string): Promise<{ error: string | null }> {
-  const { error } = await supabase
-    .from('gallery_photos' as any)
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('gallery_photos').delete().eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
 }

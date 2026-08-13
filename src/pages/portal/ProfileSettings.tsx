@@ -14,11 +14,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, Save, AlertCircle } from 'lucide-react'
+import { Loader2, Save, AlertCircle, UserRound } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 import { formatCPF, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
+import { ChangePasswordCard } from '@/components/portal/ChangePasswordCard'
 
 export default function ProfileSettings() {
   const { user, profile, refreshProfile } = useAuth()
@@ -115,8 +116,8 @@ export default function ProfileSettings() {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
       </div>
     )
   }
@@ -138,16 +139,24 @@ export default function ProfileSettings() {
   const completion = Math.round((filledCount / MANDATORY_FIELDS.length) * 100)
 
   return (
-    <div className="p-6 lg:p-10 max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <header>
-        <h1 className="text-3xl font-bold font-display">Editar Perfil</h1>
-        <p className="text-muted-foreground">
-          Atualize suas informações pessoais e de identificação.
-        </p>
+    <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-6 lg:p-10">
+      <header className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-primary/10 via-card/60 to-transparent p-6">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+            <UserRound className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="font-display text-3xl font-bold">Editar Perfil</h1>
+            <p className="mt-1 text-muted-foreground">
+              Atualize seus dados pessoais, foto e senha de acesso.
+            </p>
+          </div>
+        </div>
       </header>
 
-      <Card className="bg-card/50 border-white/5">
-        <CardContent className="p-4 space-y-2">
+      <Card className="border-white/10 bg-card/50">
+        <CardContent className="space-y-2 p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Completude do Perfil</span>
             <span className="font-bold text-primary">{completion}%</span>
@@ -161,12 +170,12 @@ export default function ProfileSettings() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden border-white/10 bg-gradient-to-br from-card/90 to-card/40 shadow-subtle">
+        <CardHeader className="border-b border-white/5 bg-white/[0.02]">
           <CardTitle>Informações Pessoais</CardTitle>
           <CardDescription>Estes dados aparecem em sua carteirinha digital.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           {user && (
             <AvatarUpload
               userId={user.id}
@@ -183,7 +192,7 @@ export default function ProfileSettings() {
               onChange={(e) => handleChange('full_name', e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="instrument">Instrumento</Label>
               <Input
@@ -196,7 +205,7 @@ export default function ProfileSettings() {
               <Label htmlFor="registration_number">
                 Matrícula
                 {profile?.role !== 'admin' && (
-                  <span className="text-xs text-muted-foreground ml-1">
+                  <span className="ml-1 text-xs text-muted-foreground">
                     (gerenciado pelo admin)
                   </span>
                 )}
@@ -206,11 +215,11 @@ export default function ProfileSettings() {
                 value={form.registration_number}
                 onChange={(e) => handleChange('registration_number', e.target.value)}
                 disabled={profile?.role !== 'admin'}
-                className={profile?.role !== 'admin' ? 'opacity-60 cursor-not-allowed' : ''}
+                className={profile?.role !== 'admin' ? 'cursor-not-allowed opacity-60' : ''}
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="city">Cidade</Label>
               <Input
@@ -236,7 +245,7 @@ export default function ProfileSettings() {
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="cpf">CPF</Label>
               <Input
@@ -247,8 +256,8 @@ export default function ProfileSettings() {
                 className={cpfError ? 'border-destructive' : ''}
               />
               {cpfError && (
-                <p className="text-xs text-destructive flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> CPF inválido
+                <p className="flex items-center gap-1 text-xs text-destructive">
+                  <AlertCircle className="h-3 w-3" /> CPF inválido
                 </p>
               )}
             </div>
@@ -283,17 +292,19 @@ export default function ProfileSettings() {
               rows={3}
             />
           </div>
+
+          <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
+            {saving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Salvar Alterações
+          </Button>
         </CardContent>
       </Card>
 
-      <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
-        {saving ? (
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-        ) : (
-          <Save className="w-4 h-4 mr-2" />
-        )}
-        Salvar Alterações
-      </Button>
+      <ChangePasswordCard />
     </div>
   )
 }

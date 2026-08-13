@@ -1,26 +1,21 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, ImageIcon, VideoOff } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { useFetch } from '@/hooks/use-fetch'
+import { getGalleryPhotos, type GalleryPhoto } from '@/services/gallery'
+import { ImageIcon, Loader2, Lock, Play } from 'lucide-react'
 
 export default function Media() {
   const [activeTab, setActiveTab] = useState('fotos')
-
-  const fotos = [
-    'https://img.usecurling.com/p/600/400?q=marching%20band%20instruments&color=blue',
-    'https://img.usecurling.com/p/600/400?q=trumpet&color=yellow',
-    'https://img.usecurling.com/p/600/400?q=snare%20drum&color=black',
-    'https://img.usecurling.com/p/600/400?q=parade&color=blue',
-    'https://img.usecurling.com/p/600/400?q=brass%20instruments&color=yellow',
-    'https://img.usecurling.com/p/600/400?q=marching%20band%20performance&color=black',
-  ]
-
-  const videos = [
-    {
-      title: 'Apresentação Campeonato Estadual 2024',
-      desc: 'Assista na íntegra nossa performance premiada.',
-    },
-    { title: 'Ensaio Geral - Desfile Cívico', desc: 'Momentos dos nossos ensaios preparatórios.' },
-  ]
+  const [selected, setSelected] = useState<GalleryPhoto | null>(null)
+  const { data: photos, loading, error } = useFetch<GalleryPhoto[]>(getGalleryPhotos)
 
   return (
     <div className="container py-12 lg:py-20 animate-fade-in">
@@ -44,55 +39,87 @@ export default function Media() {
 
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="fotos" className="mt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {fotos.map((src, i) => (
-              <div
-                key={i}
-                className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-card border border-white/5 hover:border-primary/30 transition-colors"
-              >
-                <img
-                  src={src}
-                  alt={`Galeria Banda BMB ${i + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="text-white font-medium flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4" />
-                    Ampliar
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-20 text-muted-foreground">
+              <p>Não foi possível carregar a galeria.</p>
+            </div>
+          ) : !photos || photos.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground">
+              <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
+              <p>Nenhuma foto publicada no momento.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {photos.map((photo) => (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setSelected(photo)}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-card border border-white/5 hover:border-primary/30 transition-colors text-left"
+                >
+                  <img
+                    src={photo.image_url}
+                    alt={photo.title || 'Foto da galeria Banda BMB'}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="text-white font-medium flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />
+                      {photo.title || 'Ampliar'}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="videos" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {videos.map((video, i) => (
-              <div
-                key={i}
-                className="bg-card rounded-xl border border-white/5 overflow-hidden shadow-lg hover:border-primary/30 transition-colors group"
-              >
-                <div className="aspect-video relative bg-background/50 flex items-center justify-center cursor-pointer">
-                  <img
-                    src={`https://img.usecurling.com/p/800/450?q=concert%20band&color=blue&seed=${i + 1}`}
-                    alt={video.title}
-                    className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-300"
-                  />
-                  <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 shadow-glow">
-                    <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold mb-2 text-white">{video.title}</h3>
-                  <p className="text-sm text-muted-foreground">{video.desc}</p>
-                </div>
-              </div>
-            ))}
+          <div className="max-w-xl mx-auto text-center py-16 px-6 rounded-xl border border-white/5 bg-card/40">
+            <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3">Vídeos exclusivos para membros</h2>
+            <p className="text-muted-foreground mb-8">
+              Ensaios, métodos e apresentações completas ficam disponíveis no portal do membro após
+              o login.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button asChild>
+                <Link to="/login">
+                  <Play className="w-4 h-4 mr-2" />
+                  Acessar portal
+                </Link>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link to="/contato">Quero me juntar</Link>
+              </Button>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-card border-white/10">
+          {selected && (
+            <>
+              <DialogHeader className="px-6 pt-6 pb-2">
+                <DialogTitle>{selected.title || 'Foto da galeria'}</DialogTitle>
+              </DialogHeader>
+              <img
+                src={selected.image_url}
+                alt={selected.title || 'Foto da galeria Banda BMB'}
+                className="w-full max-h-[75vh] object-contain bg-black"
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

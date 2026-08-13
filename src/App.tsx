@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -17,6 +17,7 @@ import Agenda from '@/pages/Agenda'
 import Media from '@/pages/Media'
 import Contact from '@/pages/Contact'
 import Login from '@/pages/Login'
+import ResetPassword from '@/pages/ResetPassword'
 
 // Restricted Pages
 import Dashboard from '@/pages/portal/Dashboard'
@@ -33,6 +34,7 @@ import AdminMaterials from '@/pages/admin/AdminMaterials'
 import AdminVideos from '@/pages/admin/AdminVideos'
 import AdminSiteSettings from '@/pages/admin/AdminSiteSettings'
 import AdminGallery from '@/pages/admin/AdminGallery'
+import AdminInquiries from '@/pages/admin/AdminInquiries'
 import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 
 const App = () => (
@@ -51,6 +53,7 @@ const App = () => (
               <Route path="/media" element={<Media />} />
               <Route path="/contato" element={<Contact />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
             </Route>
 
             {/* Restricted Routes with Portal Layout */}
@@ -72,6 +75,7 @@ const App = () => (
                 <Route path="videos" element={<AdminVideos />} />
                 <Route path="site" element={<AdminSiteSettings />} />
                 <Route path="gallery" element={<AdminGallery />} />
+                <Route path="inquiries" element={<AdminInquiries />} />
               </Route>
             </Route>
 

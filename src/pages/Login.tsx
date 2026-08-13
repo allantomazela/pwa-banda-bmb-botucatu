@@ -6,26 +6,29 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Music, AlertCircle } from 'lucide-react'
+import { Loader2, Music, AlertCircle, KeyRound } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import type { AuthError } from '@supabase/supabase-js'
 
+type AuthMode = 'login' | 'register' | 'forgot'
+
 export default function Login() {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [mode, setMode] = useState<AuthMode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [instrument, setInstrument] = useState('')
   const [regNumber, setRegNumber] = useState('')
-  const { signIn, signUp, user, loading } = useAuth()
+  const { signIn, signUp, resetPassword, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user && !submitting) navigate('/')
-  }, [user, submitting, navigate])
+    if (user && !submitting && mode !== 'forgot') navigate('/')
+  }, [user, submitting, navigate, mode])
+
   const getErrorMessage = (error: unknown): string => {
     const authError = error as AuthError
     if (authError?.message) {
@@ -41,10 +44,15 @@ export default function Login() {
       if (authError.message.includes('Password should be at least')) {
         return 'A senha deve ter pelo menos 6 caracteres.'
       }
-      if (authError.message.includes('Perfil não encontrado')) {
+      if (
+        authError.message.includes('Perfil não encontrado') ||
+        authError.message.includes('aguarda aprovação') ||
+        authError.message.includes('foi recusado') ||
+        authError.message.includes('sem permissão')
+      ) {
         return authError.message
       }
-      return 'E-mail ou senha inválidos'
+      return authError.message
     }
     return 'Não foi possível conectar ao servidor. Tente novamente mais tarde.'
   }
@@ -53,20 +61,48 @@ export default function Login() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
   }
 
+  const switchMode = (next: AuthMode) => {
+    setMode(next)
+    setErrorMessage(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!validateEmail(email)) {
-      setErrorMessage('E-mail ou senha inválidos')
+      setErrorMessage('Informe um e-mail válido.')
       return
     }
-    if (!password.trim()) {
-      setErrorMessage('E-mail ou senha inválidos')
+
+    if (mode !== 'forgot' && !password.trim()) {
+      setErrorMessage('Informe a senha.')
       return
     }
 
     setSubmitting(true)
     try {
+      if (mode === 'forgot') {
+        const { error } = await resetPassword(email)
+        if (error) {
+          const msg = getErrorMessage(error)
+          setErrorMessage(msg)
+          toast({
+            title: 'Erro ao enviar recuperação',
+            description: msg,
+            variant: 'destructive',
+          })
+        } else {
+          setErrorMessage(null)
+          toast({
+            title: 'E-mail enviado',
+            description:
+              'Se existir uma conta com este e-mail, você receberá o link para redefinir a senha.',
+          })
+          switchMode('login')
+        }
+        return
+      }
+
       if (mode === 'login') {
         const { error } = await signIn(email, password)
         if (error) {
@@ -82,58 +118,64 @@ export default function Login() {
           toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
           navigate('/')
         }
-      } else {
-        const { error } = await signUp(email, password, {
-          full_name: fullName,
-          instrument,
-          registration_number: regNumber,
+        return
+      }
+
+      const { error } = await signUp(email, password, {
+        full_name: fullName,
+        instrument,
+        registration_number: regNumber,
+      })
+      if (error) {
+        const msg = getErrorMessage(error)
+        setErrorMessage(msg)
+        toast({
+          title: 'Erro ao cadastrar',
+          description: msg,
+          variant: 'destructive',
         })
-        if (error) {
-          const msg = getErrorMessage(error)
-          setErrorMessage(msg)
-          toast({
-            title: 'Erro ao cadastrar',
-            description: msg,
-            variant: 'destructive',
-          })
-        } else {
-          setErrorMessage(null)
-          toast({
-            title: 'Conta criada!',
-            description:
-              'Verifique seu e-mail para confirmar o cadastro, ou faça login se a confirmação não for necessária.',
-          })
-          setMode('login')
-        }
+      } else {
+        setErrorMessage(null)
+        toast({
+          title: 'Cadastro enviado!',
+          description:
+            'Seu pedido foi registrado e aguarda aprovação do administrador antes do primeiro login.',
+        })
+        switchMode('login')
+        setPassword('')
       }
     } finally {
       setSubmitting(false)
     }
   }
 
-  return (
-    <div className="flex-1 flex items-center justify-center p-4 bg-background relative overflow-hidden">
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+  const titles: Record<AuthMode, { title: string; description: string }> = {
+    login: {
+      title: 'Portal do Aluno',
+      description: 'Acesso restrito para membros aprovados da BMB',
+    },
+    register: {
+      title: 'Criar Conta',
+      description: 'Cadastre-se e aguarde a aprovação do administrador',
+    },
+    forgot: {
+      title: 'Recuperar senha',
+      description: 'Enviaremos um link de redefinição para o seu e-mail',
+    },
+  }
 
-      <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-white/10 shadow-2xl relative z-10 animate-fade-in">
-        <CardHeader className="space-y-3 text-center pb-6">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-2 shadow-glow">
-            <Music className="w-8 h-8 text-primary-foreground" />
+  return (
+    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background p-4">
+      <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+
+      <Card className="relative z-10 w-full max-w-md animate-fade-in border-white/10 bg-card/80 shadow-2xl backdrop-blur-xl">
+        <CardHeader className="space-y-3 pb-6 text-center">
+          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-glow">
+            <Music className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">
-            {mode === 'login' ? 'Portal do Aluno' : 'Criar Conta'}
-          </CardTitle>
-          <CardDescription>
-            {mode === 'login'
-              ? 'Acesso restrito para membros da BMB'
-              : 'Cadastre-se como membro da BMB'}
-          </CardDescription>
-          {mode === 'login' && (
-            <p className="text-xs text-muted-foreground pt-1">
-              Demonstração: allantomazela@gmail.com / Skip@Pass
-            </p>
-          )}
+          <CardTitle className="text-2xl font-bold">{titles[mode].title}</CardTitle>
+          <CardDescription>{titles[mode].description}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -150,7 +192,7 @@ export default function Login() {
                   <Input
                     id="fullName"
                     placeholder="Seu nome"
-                    className="bg-background/50 h-12"
+                    className="h-12 bg-background/50"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -162,21 +204,20 @@ export default function Login() {
                     <Input
                       id="instrument"
                       placeholder="Ex: Trompete"
-                      className="bg-background/50 h-12"
+                      className="h-12 bg-background/50"
                       value={instrument}
                       onChange={(e) => setInstrument(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="regNumber">Matricula</Label>
+                    <Label htmlFor="regNumber">Matrícula</Label>
                     <Input
                       id="regNumber"
                       placeholder="BMB-XXXX"
-                      className="bg-background/50 h-12"
+                      className="h-12 bg-background/50"
                       value={regNumber}
                       onChange={(e) => setRegNumber(e.target.value)}
-                      required
                     />
                   </div>
                 </div>
@@ -188,46 +229,73 @@ export default function Login() {
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
-                className="bg-background/50 h-12"
+                className="h-12 bg-background/50"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                className="bg-background/50 h-12"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {mode !== 'forgot' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="password">Senha</Label>
+                  {mode === 'login' && (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground transition-colors hover:text-primary"
+                      onClick={() => switchMode('forgot')}
+                    >
+                      Esqueci minha senha
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  className="h-12 bg-background/50"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             <Button
               type="submit"
-              className="w-full h-12 font-bold text-base"
+              className="h-12 w-full text-base font-bold"
               disabled={loading || submitting}
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+              {loading || submitting ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : mode === 'login' ? (
                 'Entrar no Portal'
+              ) : mode === 'register' ? (
+                'Enviar cadastro'
               ) : (
-                'Criar Conta'
+                <>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Enviar link de recuperação
+                </>
               )}
             </Button>
-            <button
-              type="button"
-              className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => {
-                setMode(mode === 'login' ? 'register' : 'login')
-                setErrorMessage(null)
-              }}
-            >
-              {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
-            </button>
+            <div className="space-y-2 text-center">
+              {mode === 'forgot' ? (
+                <button
+                  type="button"
+                  className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                  onClick={() => switchMode('login')}
+                >
+                  Voltar ao login
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                  onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
+                >
+                  {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
+                </button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>

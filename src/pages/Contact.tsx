@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Loader2, Send } from 'lucide-react'
+import { createContactInquiry } from '@/services/contact-inquiries'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -47,9 +48,17 @@ export default function Contact() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const { error } = await createContactInquiry(values)
     setIsSubmitting(false)
+
+    if (error) {
+      toast({
+        title: 'Não foi possível enviar',
+        description: 'Tente novamente em instantes.',
+        variant: 'destructive',
+      })
+      return
+    }
 
     toast({
       title: 'Mensagem enviada!',

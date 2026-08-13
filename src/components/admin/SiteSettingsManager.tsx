@@ -197,7 +197,7 @@ export function SiteSettingsManager() {
 
       <Card className="bg-card/50 border-white/5">
         <CardHeader>
-          <CardTitle className="text-base">Contato</CardTitle>
+          <CardTitle className="text-base">Contato & Rodapé</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Field
@@ -205,6 +205,24 @@ export function SiteSettingsManager() {
             label="E-mail de Contato"
             value={form.contact_email || ''}
             onChange={set('contact_email')}
+          />
+          <Field
+            id="contact_phone"
+            label="Telefone / WhatsApp"
+            value={form.contact_phone || ''}
+            onChange={set('contact_phone')}
+          />
+          <Field
+            id="footer_address"
+            label="Endereço (rodapé)"
+            value={form.footer_address || ''}
+            onChange={set('footer_address')}
+          />
+          <Field
+            id="footer_city"
+            label="Cidade / CEP (rodapé)"
+            value={form.footer_city || ''}
+            onChange={set('footer_city')}
           />
         </CardContent>
       </Card>

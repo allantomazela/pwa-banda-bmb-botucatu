@@ -60,6 +60,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_inquiries: {
+        Row: {
+          created_at: string
+          id: string
+          instrument: string
+          message: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instrument: string
+          message?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instrument?: string
+          message?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string
@@ -86,11 +116,15 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
           avatar_url: string | null
           birth_date: string | null
           city: string
           cpf: string
           disability_info: string | null
+          email: string
           full_name: string
           id: string
           instrument: string
@@ -102,11 +136,15 @@ export type Database = {
           valid_until: string | null
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           city?: string
           cpf?: string
           disability_info?: string | null
+          email?: string
           full_name?: string
           id: string
           instrument?: string
@@ -118,11 +156,15 @@ export type Database = {
           valid_until?: string | null
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           city?: string
           cpf?: string
           disability_info?: string | null
+          email?: string
           full_name?: string
           id?: string
           instrument?: string
