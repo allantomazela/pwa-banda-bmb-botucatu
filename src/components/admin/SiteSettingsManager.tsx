@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { ImageUrlField } from '@/components/admin/ImageUrlField'
 
 function Field({
   id,
@@ -98,16 +99,22 @@ export function SiteSettingsManager() {
             onChange={set('hero_subtitle')}
             textarea
           />
-          <Field
+          <ImageUrlField
             id="header_logo_url"
-            label="URL do Logo do Cabeçalho (vazio = letra B)"
+            label="Logo do Cabeçalho (vazio = letra B)"
+            hint="Formatos: WebP, PNG, SVG ou JPEG (máx 2MB). A imagem fica no Storage; no banco salvamos só a URL."
             value={form.header_logo_url || ''}
+            kind="logo"
+            accept="image/webp,image/png,image/svg+xml,image/jpeg"
             onChange={set('header_logo_url')}
           />
-          <Field
+          <ImageUrlField
             id="hero_image_url"
-            label="URL da Imagem do Hero (vazio = padrão)"
+            label="Imagem do Hero (vazio = padrão)"
+            hint="Formatos: WebP, JPEG ou PNG (máx 5MB). A imagem fica no Storage; no banco salvamos só a URL."
             value={form.hero_image_url || ''}
+            kind="hero"
+            accept="image/webp,image/jpeg,image/png"
             onChange={set('hero_image_url')}
           />
         </CardContent>
