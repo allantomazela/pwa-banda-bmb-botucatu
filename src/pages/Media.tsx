@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/use-fetch'
 import { getGalleryPhotos, type GalleryPhoto } from '@/services/gallery'
 import { ImageIcon, Loader2, Lock, Play } from 'lucide-react'
+import { CmsSections } from '@/components/cms/CmsSections'
 
 export default function Media() {
   const [activeTab, setActiveTab] = useState('fotos')
@@ -120,6 +121,10 @@ export default function Media() {
           )}
         </DialogContent>
       </Dialog>
+
+      <div className="mt-16">
+        <CmsSections slug="media" />
+      </div>
     </div>
   )
 }

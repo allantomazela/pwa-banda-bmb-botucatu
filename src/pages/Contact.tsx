@@ -24,6 +24,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Loader2, Send } from 'lucide-react'
 import { createContactInquiry } from '@/services/contact-inquiries'
+import { CmsSections } from '@/components/cms/CmsSections'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -68,8 +69,9 @@ export default function Contact() {
   }
 
   return (
-    <div className="container py-12 lg:py-20 animate-fade-in flex justify-center">
-      <Card className="w-full max-w-xl bg-card border-white/10 shadow-2xl">
+    <div className="container py-12 lg:py-20 animate-fade-in space-y-16">
+      <div className="flex justify-center">
+        <Card className="w-full max-w-xl bg-card border-white/10 shadow-2xl">
         <CardHeader className="text-center pb-8">
           <CardTitle className="text-3xl font-display font-bold text-primary">
             Junte-se a Nós
@@ -182,7 +184,9 @@ export default function Contact() {
             </form>
           </Form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
+      <CmsSections slug="contato" />
     </div>
   )
 }

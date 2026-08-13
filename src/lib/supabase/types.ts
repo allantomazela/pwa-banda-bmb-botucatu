@@ -177,6 +177,89 @@ export type Database = {
         }
         Relationships: []
       }
+      site_pages: {
+        Row: {
+          created_at: string
+          id: string
+          is_system: boolean
+          nav_label: string
+          show_in_nav: boolean
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          nav_label: string
+          show_in_nav?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          nav_label?: string
+          show_in_nav?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      site_sections: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_visible: boolean
+          link_label: string
+          link_url: string
+          media_url: string
+          page_id: string
+          section_type: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          link_label?: string
+          link_url?: string
+          media_url?: string
+          page_id: string
+          section_type: string
+          sort_order?: number
+          title?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          link_label?: string
+          link_url?: string
+          media_url?: string
+          page_id?: string
+          section_type?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'site_sections_page_id_fkey'
+            columns: ['page_id']
+            isOneToOne: false
+            referencedRelation: 'site_pages'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       site_settings: {
         Row: {
           id: string

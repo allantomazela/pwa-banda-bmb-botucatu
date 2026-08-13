@@ -3,6 +3,7 @@ import { getUpcomingEvents, type EventItem } from '@/services/events'
 import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Clock, Calendar, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CmsSections } from '@/components/cms/CmsSections'
 
 export default function Agenda() {
   const { data: events, loading, error } = useFetch<EventItem[]>(getUpcomingEvents)
@@ -88,6 +89,10 @@ export default function Agenda() {
           })}
         </div>
       )}
+
+      <div className="mt-16">
+        <CmsSections slug="agenda" />
+      </div>
     </div>
   )
 }

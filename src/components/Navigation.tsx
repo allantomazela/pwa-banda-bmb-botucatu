@@ -3,6 +3,8 @@ import { Home, Calendar, Image as ImageIcon, User, LogIn, Library } from 'lucide
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { useSiteSettings } from '@/hooks/use-site-settings'
+import { useSitePages } from '@/hooks/use-site-pages'
+import { publicPagePath } from '@/lib/cms'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
@@ -16,6 +18,7 @@ const PUBLIC_NAV = [
 export function Header() {
   const { user, profile } = useAuth()
   const { settings } = useSiteSettings()
+  const { navPages } = useSitePages()
   const location = useLocation()
 
   const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
@@ -62,6 +65,20 @@ export function Header() {
         >
           Contato
         </Link>
+        {navPages.map((page) => (
+          <Link
+            key={page.id}
+            to={publicPagePath(page.slug)}
+            className={cn(
+              'text-sm font-medium transition-colors hover:text-primary',
+              location.pathname === publicPagePath(page.slug)
+                ? 'text-primary'
+                : 'text-muted-foreground',
+            )}
+          >
+            {page.nav_label}
+          </Link>
+        ))}
       </nav>
 
       <div className="flex items-center gap-4">
@@ -85,7 +102,7 @@ export function Header() {
             variant="outline"
             className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold"
           >
-            <Link to="/login">Entrar</Link>
+            <Link to="/login">Área Restrita</Link>
           </Button>
         )}
       </div>
@@ -127,7 +144,7 @@ export function MobileHeader() {
         </Link>
       ) : (
         <Button asChild variant="ghost" size="sm" className="text-primary font-semibold">
-          <Link to="/login">Entrar</Link>
+          <Link to="/login">Área Restrita</Link>
         </Button>
       )}
     </header>
@@ -176,7 +193,9 @@ export function BottomNav() {
           )}
         >
           {user ? <User className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
-          <span className="text-[10px] font-medium">{user ? 'Perfil' : 'Entrar'}</span>
+          <span className="text-[10px] font-medium text-center leading-tight">
+            {user ? 'Perfil' : 'Área Restrita'}
+          </span>
         </Link>
       </div>
     </nav>

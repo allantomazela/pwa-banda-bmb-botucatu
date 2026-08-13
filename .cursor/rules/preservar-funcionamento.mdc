@@ -1,0 +1,11 @@
+---
+description: Nunca quebrar funcionalidades que já estão em produção e funcionando
+alwaysApply: true
+---
+
+# Preservar o que já funciona
+
+- Toda alteração deve ser **aditiva e local**. Não refatore, não remova e não altere fluxos, rotas, permissões, dados ou UI que já funcionam, salvo pedido explícito.
+- Antes de editar um arquivo, confirme que a mudança é necessária para a tarefa. Se um trecho não precisa mudar, deixe como está.
+- Login, portal do aluno, painel admin, eventos, mídia, contato, PWA e integração com Supabase são considerados estáveis: não mexa neles como efeito colateral.
+- Se um pedido parecer exigir mudança em área já funcional, isole o impacto no menor ponto possível e preserve o comportamento atual.

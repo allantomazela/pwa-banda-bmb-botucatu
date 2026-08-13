@@ -18,6 +18,7 @@ import Media from '@/pages/Media'
 import Contact from '@/pages/Contact'
 import Login from '@/pages/Login'
 import ResetPassword from '@/pages/ResetPassword'
+import CmsPage from '@/pages/CmsPage'
 
 // Restricted Pages
 import Dashboard from '@/pages/portal/Dashboard'
@@ -36,11 +37,13 @@ import AdminSiteSettings from '@/pages/admin/AdminSiteSettings'
 import AdminGallery from '@/pages/admin/AdminGallery'
 import AdminInquiries from '@/pages/admin/AdminInquiries'
 import { SiteSettingsProvider } from '@/hooks/use-site-settings'
+import { SitePagesProvider } from '@/hooks/use-site-pages'
 
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
       <SiteSettingsProvider>
+        <SitePagesProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -54,6 +57,7 @@ const App = () => (
               <Route path="/contato" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
+              <Route path="/pagina/:slug" element={<CmsPage />} />
             </Route>
 
             {/* Restricted Routes with Portal Layout */}
@@ -82,6 +86,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
+        </SitePagesProvider>
       </SiteSettingsProvider>
     </AuthProvider>
   </BrowserRouter>

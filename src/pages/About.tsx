@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { useRef } from 'react'
+import { CmsSections } from '@/components/cms/CmsSections'
 
 export default function About() {
   const plugin = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }))
@@ -84,6 +85,10 @@ export default function About() {
             música, mas valores para a vida toda.
           </p>
         </div>
+      </div>
+
+      <div className="mt-20">
+        <CmsSections slug="sobre" />
       </div>
     </div>
   )

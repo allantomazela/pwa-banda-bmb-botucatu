@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useSiteSettings } from '@/hooks/use-site-settings'
+import { useSitePages } from '@/hooks/use-site-pages'
+import { publicPagePath } from '@/lib/cms'
 
 export function Footer() {
   const location = useLocation()
   const { settings } = useSiteSettings()
+  const { navPages } = useSitePages()
 
   // Hide footer in restricted areas
   if (
@@ -55,6 +58,13 @@ export function Footer() {
                 Seja um Membro
               </Link>
             </li>
+            {navPages.map((page) => (
+              <li key={page.id}>
+                <Link to={publicPagePath(page.slug)} className="hover:text-primary transition-colors">
+                  {page.nav_label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -70,7 +80,7 @@ export function Footer() {
       </div>
       <div className="container max-w-6xl mx-auto mt-12 pt-6 border-t border-white/5 text-center text-xs text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} Banda BMB. Todos os direitos reservados.</p>
-        <p className="mt-1">Desenvolvido com tecnologia e paixão.</p>
+        <p className="mt-1">Criado por Allan Tomazela de Camargo</p>
       </div>
     </footer>
   )

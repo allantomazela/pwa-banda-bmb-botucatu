@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useSiteSettings } from '@/hooks/use-site-settings'
 import { useFetch } from '@/hooks/use-fetch'
 import { getNextEvent, type EventItem } from '@/services/events'
+import { CmsSections } from '@/components/cms/CmsSections'
 
 export default function Index() {
   const { user, profile } = useAuth()
@@ -227,6 +228,10 @@ export default function Index() {
           </div>
         </section>
       )}
+
+      <section className="py-16">
+        <CmsSections slug="home" />
+      </section>
     </div>
   )
 }
