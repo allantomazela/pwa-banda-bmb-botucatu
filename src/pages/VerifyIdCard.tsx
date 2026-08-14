@@ -1,14 +1,8 @@
 import { useSearchParams } from 'react-router-dom'
 import { useFetch } from '@/hooks/use-fetch'
 import { verifyIdCard } from '@/services/id-card'
+import { formatDateBR } from '@/lib/formatters'
 import { BadgeCheck, ShieldAlert, IdCard } from 'lucide-react'
-
-function formatDate(value: string | null): string {
-  if (!value) return 'Sem data informada'
-  const [year, month, day] = value.split('T')[0].split('-')
-  if (!year || !month || !day) return value
-  return `${day}/${month}/${year}`
-}
 
 export default function VerifyIdCard() {
   const [params] = useSearchParams()
@@ -58,7 +52,8 @@ export default function VerifyIdCard() {
               <span className="text-muted-foreground">Instrumento:</span> {data.instrument || '—'}
             </p>
             <p>
-              <span className="text-muted-foreground">Validade:</span> {formatDate(data.valid_until)}
+              <span className="text-muted-foreground">Validade:</span>{' '}
+              {formatDateBR(data.valid_until, 'Sem data informada')}
             </p>
             <p>
               <span className="text-muted-foreground">Cidade/UF:</span>{' '}

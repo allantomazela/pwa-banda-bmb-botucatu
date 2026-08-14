@@ -29,7 +29,7 @@ interface MemberEditDialogProps {
   profile: Profile | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSaved: () => void
+  onSaved: () => void | Promise<void>
 }
 
 export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: MemberEditDialogProps) {
@@ -103,7 +103,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
       toast({ title: 'Erro', description: error, variant: 'destructive' })
     } else {
       toast({ title: 'Membro atualizado!' })
-      onSaved()
+      await onSaved()
       onOpenChange(false)
     }
   }

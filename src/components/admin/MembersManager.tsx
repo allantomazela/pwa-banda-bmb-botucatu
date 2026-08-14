@@ -57,7 +57,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function MembersManager() {
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   const { toast } = useToast()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,7 +70,11 @@ export function MembersManager() {
   const fetchProfiles = async () => {
     setLoading(true)
     try {
-      setProfiles(await getAllProfiles())
+      const list = await getAllProfiles()
+      setProfiles(list)
+      setCardProfile((current) =>
+        current ? (list.find((item) => item.id === current.id) ?? current) : current,
+      )
     } catch {
       setProfiles([])
     }
@@ -263,7 +267,10 @@ export function MembersManager() {
         profile={editProfile}
         open={editOpen}
         onOpenChange={setEditOpen}
-        onSaved={fetchProfiles}
+        onSaved={async () => {
+          await fetchProfiles()
+          await refreshProfile()
+        }}
       />
 
       <Dialog open={!!cardProfile} onOpenChange={(open) => !open && setCardProfile(null)}>

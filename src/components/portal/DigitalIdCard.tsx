@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { formatDateBR, isDateOnOrAfterToday } from '@/lib/formatters'
 import './digital-id-card.css'
 
 export interface DigitalIdProfile {
@@ -65,13 +66,7 @@ const variantMeta: Record<
 }
 
 function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '--/--/----'
-  const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return '--/--/----'
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const year = d.getFullYear()
-  return `${day}/${month}/${year}`
+  return formatDateBR(dateStr)
 }
 
 function displayOrDash(value: string | null | undefined): string {
@@ -94,9 +89,7 @@ function getStatus(validUntil: string | null): {
       glowClass: 'id-glow-warning',
       borderClass: 'ring-yellow-500/40',
     }
-  const expiry = new Date(validUntil)
-  const now = new Date()
-  if (expiry > now)
+  if (isDateOnOrAfterToday(validUntil))
     return {
       label: 'Ativo',
       active: true,

@@ -26,8 +26,25 @@ export function isValidCPF(cpf: string): boolean {
 export function addYearsToDate(years = 1, from = new Date()): string {
   const date = new Date(from)
   date.setFullYear(date.getFullYear() + years)
+  return toISODateLocal(date)
+}
+
+export function toISODateLocal(date = new Date()): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+export function formatDateBR(dateStr: string | null | undefined, empty = '--/--/----'): string {
+  if (!dateStr) return empty
+  const [year, month, day] = dateStr.split('T')[0].split('-')
+  if (!year || !month || !day) return empty
+  return `${day}/${month}/${year}`
+}
+
+export function isDateOnOrAfterToday(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return false
+  const iso = dateStr.split('T')[0]
+  return iso >= toISODateLocal()
 }

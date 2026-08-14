@@ -1,9 +1,14 @@
 import { useAuth } from '@/hooks/use-auth'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
 import { IdCard } from 'lucide-react'
+import { useEffect } from 'react'
 
 export default function DigitalId() {
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
+
+  useEffect(() => {
+    void refreshProfile()
+  }, [refreshProfile])
 
   if (!profile) {
     return (

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 
@@ -106,13 +106,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user])
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!user) return
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
     if (!error && data) {
       setProfile(data as Profile)
     }
-  }
+  }, [user])
 
   const signUp = async (email: string, password: string, metadata?: Record<string, string>) => {
     const { data, error } = await supabase.auth.signUp({
