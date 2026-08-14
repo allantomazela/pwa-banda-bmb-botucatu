@@ -4,14 +4,17 @@ import { SponsorLogos } from '@/components/sponsors/SponsorLogos'
 
 export default function Sponsors() {
   return (
-    <div className="container py-12 lg:py-20 animate-fade-in space-y-16">
+    <div className="animate-fade-in">
       <SponsorLogos />
 
-      <div id="formulario" className="flex justify-center scroll-mt-24">
-        <SponsorInquiryForm />
+      <div className="container pb-16 lg:pb-24">
+        <div id="formulario" className="flex justify-center scroll-mt-24">
+          <SponsorInquiryForm />
+        </div>
+        <div className="mt-16">
+          <CmsSections slug="patrocinadores" />
+        </div>
       </div>
-
-      <CmsSections slug="patrocinadores" />
     </div>
   )
 }

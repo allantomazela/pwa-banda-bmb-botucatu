@@ -210,11 +210,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="py-20 bg-card/20 border-y border-white/5">
-        <div className="container">
-          <SponsorLogos showCta />
-        </div>
-      </section>
+      <SponsorLogos showCta />
 
       {/* Join Us CTA */}
       {!user && (

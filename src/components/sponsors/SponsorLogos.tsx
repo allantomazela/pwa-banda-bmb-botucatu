@@ -1,71 +1,75 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
+import Autoplay from 'embla-carousel-autoplay'
 import { Handshake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import { useFetch } from '@/hooks/use-fetch'
-import { getVisibleSponsors, toExternalUrl, type Sponsor, type SponsorKind } from '@/services/sponsors'
+import { getVisibleSponsors, toExternalUrl, type Sponsor } from '@/services/sponsors'
 
-const KIND_LABELS: Record<SponsorKind, string> = {
-  patrocinador: 'Patrocinadores',
-  apoiador: 'Apoiadores',
+const KIND_LABELS = {
+  patrocinador: 'Patrocinador',
+  apoiador: 'Apoiador',
+} as const
+
+const MIN_SLIDES = 6
+
+type Slide =
+  | { key: string; kind: 'logo'; sponsor: Sponsor }
+  | { key: string; kind: 'empty' }
+
+function buildSlides(items: Sponsor[]): Slide[] {
+  const logos = items.filter((item) => item.logo_url)
+  const slides: Slide[] = logos.map((sponsor) => ({
+    key: sponsor.id,
+    kind: 'logo',
+    sponsor,
+  }))
+  const missing = Math.max(0, MIN_SLIDES - slides.length)
+  for (let i = 0; i < missing; i += 1) {
+    slides.push({ key: `empty-${i}`, kind: 'empty' })
+  }
+  return slides
 }
 
-const EMPTY_SLOTS = 4
-
-function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
+function LogoSlide({ sponsor }: { sponsor: Sponsor }) {
   const href = toExternalUrl(sponsor.website_url)
-  const image = (
-    <img
-      src={sponsor.logo_url}
-      alt={sponsor.name}
-      className="max-h-16 w-auto max-w-[180px] object-contain"
-      loading="lazy"
-    />
+  const kindLabel = KIND_LABELS[sponsor.kind as keyof typeof KIND_LABELS] ?? 'Parceiro'
+  const content = (
+    <div className="flex h-full min-h-[168px] flex-col items-center justify-center gap-3 rounded-2xl bg-white px-5 py-6 shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-[1.03]">
+      <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+        {kindLabel}
+      </span>
+      <img
+        src={sponsor.logo_url}
+        alt={sponsor.name}
+        className="max-h-16 w-auto max-w-[160px] object-contain"
+        loading="lazy"
+      />
+      <p className="text-center text-sm font-semibold text-slate-700">{sponsor.name}</p>
+    </div>
   )
 
+  if (!href) return content
+
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white px-6 py-8 min-h-[140px]">
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center hover:opacity-80 transition-opacity"
-          title={sponsor.name}
-        >
-          {image}
-        </a>
-      ) : (
-        image
-      )}
-      <p className="text-sm text-muted-foreground text-center">{sponsor.name}</p>
-    </div>
+    <a href={href} target="_blank" rel="noopener noreferrer" className="block h-full" title={sponsor.name}>
+      {content}
+    </a>
   )
 }
 
-function EmptySlot() {
+function EmptySlide() {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/5 px-6 py-8 min-h-[140px]">
-      <span className="text-3xl text-muted-foreground/40 font-display">+</span>
-      <p className="text-xs text-muted-foreground text-center">Espaço para logo</p>
-    </div>
-  )
-}
-
-function LogoGroup({ kind, items }: { kind: SponsorKind; items: Sponsor[] }) {
-  const group = items.filter((item) => item.kind === kind && item.logo_url)
-  const slots = group.length > 0 ? [] : Array.from({ length: EMPTY_SLOTS })
-
-  return (
-    <div className="space-y-5">
-      <h3 className="text-xl font-display font-bold text-center">{KIND_LABELS[kind]}</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {group.map((sponsor) => (
-          <SponsorCard key={sponsor.id} sponsor={sponsor} />
-        ))}
-        {slots.map((_, index) => (
-          <EmptySlot key={`${kind}-slot-${index}`} />
-        ))}
-      </div>
+    <div className="flex h-full min-h-[168px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 bg-white/5 px-5 py-6">
+      <span className="text-3xl font-display text-primary/50">+</span>
+      <p className="text-center text-xs font-medium text-muted-foreground">Sua marca aqui</p>
     </div>
   )
 }
@@ -75,37 +79,63 @@ type Props = {
 }
 
 export function SponsorLogos({ showCta = false }: Props) {
+  const autoplay = useRef(Autoplay({ delay: 3200, stopOnInteraction: true }))
   const { data: sponsors, loading } = useFetch<Sponsor[]>(getVisibleSponsors)
-  const items = sponsors ?? []
+  const slides = buildSlides(sponsors ?? [])
 
   return (
-    <div className="space-y-10">
-      <div className="max-w-2xl mx-auto text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
-          <Handshake className="w-6 h-6" />
+    <section className="relative overflow-hidden py-16 md:py-24">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsla(42,96%,58%,0.16),transparent_65%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+
+      <div className="container relative z-10 space-y-10">
+        <div className="mx-auto max-w-2xl space-y-4 text-center">
+          <p className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <Handshake className="h-4 w-4" />
+            Quem apoia a BMB
+          </p>
+          <h2 className="text-3xl font-display font-bold md:text-5xl">
+            Patrocinadores e Apoiadores
+          </h2>
+          <p className="text-base text-muted-foreground md:text-lg">
+            Marcas que fortalecem a banda com apoio ao caixa. Todas juntas, no mesmo palco.
+          </p>
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold font-display">Patrocinadores e Apoiadores</h2>
-        <p className="text-muted-foreground">
-          As empresas que apoiam a Banda BMB com doações ao caixa terão a marca exibida aqui.
-        </p>
+
+        <div className="rounded-3xl border border-primary/30 bg-card/70 p-4 shadow-[0_0_80px_hsla(42,96%,58%,0.12)] backdrop-blur-sm md:p-8">
+          {loading ? (
+            <p className="py-16 text-center text-muted-foreground">Carregando marcas...</p>
+          ) : (
+            <Carousel
+              opts={{ align: 'start', loop: true }}
+              plugins={[autoplay.current]}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-3 md:-ml-4">
+                {slides.map((slide) => (
+                  <CarouselItem
+                    key={slide.key}
+                    className="group basis-[75%] pl-3 sm:basis-1/2 md:basis-1/3 md:pl-4 lg:basis-1/4"
+                  >
+                    {slide.kind === 'logo' ? <LogoSlide sponsor={slide.sponsor} /> : <EmptySlide />}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-1 border-primary/40 bg-background/90 text-primary hover:bg-primary hover:text-primary-foreground md:left-2" />
+              <CarouselNext className="right-1 border-primary/40 bg-background/90 text-primary hover:bg-primary hover:text-primary-foreground md:right-2" />
+            </Carousel>
+          )}
+        </div>
+
+        {showCta ? (
+          <div className="flex justify-center">
+            <Button asChild size="lg" className="h-12 px-8 shadow-glow">
+              <Link to="/patrocinadores">Quero patrocinar a banda</Link>
+            </Button>
+          </div>
+        ) : null}
       </div>
-
-      {loading ? (
-        <p className="text-center text-muted-foreground">Carregando marcas...</p>
-      ) : (
-        <div className="space-y-12">
-          <LogoGroup kind="patrocinador" items={items} />
-          <LogoGroup kind="apoiador" items={items} />
-        </div>
-      )}
-
-      {showCta ? (
-        <div className="flex justify-center">
-          <Button asChild size="lg" className="h-12 px-8">
-            <Link to="/patrocinadores">Quero patrocinar a banda</Link>
-          </Button>
-        </div>
-      ) : null}
-    </div>
+    </section>
   )
 }
