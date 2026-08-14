@@ -93,7 +93,6 @@ export default function ProfileSettings() {
     const { error } = await updateProfile(user.id, {
       full_name: form.full_name,
       instrument: form.instrument,
-      registration_number: form.registration_number,
       city: form.city,
       state: form.state,
       cpf: form.cpf,
@@ -202,21 +201,14 @@ export default function ProfileSettings() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="registration_number">
-                Matrícula
-                {profile?.role !== 'admin' && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    (gerenciado pelo admin)
-                  </span>
-                )}
-              </Label>
+              <Label htmlFor="registration_number">Matrícula</Label>
               <Input
                 id="registration_number"
                 value={form.registration_number}
-                onChange={(e) => handleChange('registration_number', e.target.value)}
-                disabled={profile?.role !== 'admin'}
-                className={profile?.role !== 'admin' ? 'cursor-not-allowed opacity-60' : ''}
+                disabled
+                className="cursor-not-allowed opacity-60"
               />
+              <p className="text-xs text-muted-foreground">Gerada automaticamente pelo sistema.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -271,14 +263,27 @@ export default function ProfileSettings() {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="birth_date">Data de Nascimento</Label>
-            <Input
-              id="birth_date"
-              type="date"
-              value={form.birth_date}
-              onChange={(e) => handleChange('birth_date', e.target.value)}
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="birth_date">Data de Nascimento</Label>
+              <Input
+                id="birth_date"
+                type="date"
+                value={form.birth_date}
+                onChange={(e) => handleChange('birth_date', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="valid_until">Validade da carteirinha</Label>
+              <Input
+                id="valid_until"
+                type="date"
+                value={profile.valid_until ? profile.valid_until.split('T')[0] : ''}
+                disabled
+                className="cursor-not-allowed opacity-60"
+              />
+              <p className="text-xs text-muted-foreground">Definida pelo administrador.</p>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="disability_info">

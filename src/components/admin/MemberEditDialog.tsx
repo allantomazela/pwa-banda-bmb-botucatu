@@ -23,7 +23,7 @@ import { AvatarUpload } from '@/components/AvatarUpload'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { formatCPF } from '@/lib/formatters'
+import { addYearsToDate, formatCPF } from '@/lib/formatters'
 
 interface MemberEditDialogProps {
   profile: Profile | null
@@ -141,12 +141,9 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="me-reg">Matrícula</Label>
-              <Input
-                id="me-reg"
-                value={form.registration_number}
-                onChange={(e) => set('registration_number', e.target.value)}
-              />
+              <Label htmlFor="me-reg">Matrícula (automática)</Label>
+              <Input id="me-reg" value={form.registration_number} readOnly className="opacity-80" />
+              <p className="text-xs text-muted-foreground">Gerada pelo sistema no cadastro. Não editar.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="me-city">Cidade</Label>
@@ -190,12 +187,26 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
             </div>
             <div className="space-y-2">
               <Label htmlFor="me-valid">Validade da Carteirinha</Label>
-              <Input
-                id="me-valid"
-                type="date"
-                value={form.valid_until}
-                onChange={(e) => set('valid_until', e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="me-valid"
+                  type="date"
+                  value={form.valid_until}
+                  onChange={(e) => set('valid_until', e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() => set('valid_until', addYearsToDate(1))}
+                >
+                  +1 ano
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Identificação institucional válida em todo o território brasileiro junto à Banda BMB,
+                até esta data. Não substitui documento oficial.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Função</Label>

@@ -19,6 +19,7 @@ import Contact from '@/pages/Contact'
 import Login from '@/pages/Login'
 import ResetPassword from '@/pages/ResetPassword'
 import CmsPage from '@/pages/CmsPage'
+import VerifyIdCard from '@/pages/VerifyIdCard'
 
 // Restricted Pages
 import Dashboard from '@/pages/portal/Dashboard'
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/pagina/:slug" element={<CmsPage />} />
+              <Route path="/verify" element={<VerifyIdCard />} />
             </Route>
 
             {/* Restricted Routes with Portal Layout */}

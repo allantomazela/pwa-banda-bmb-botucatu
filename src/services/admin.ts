@@ -3,6 +3,7 @@ import type { Profile } from '@/services/profiles'
 import type { EventItem } from '@/services/events'
 import type { Material } from '@/services/materials'
 import type { VideoItem } from '@/services/videos'
+import { addYearsToDate } from '@/lib/formatters'
 
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
@@ -36,14 +37,29 @@ export async function setMemberApproval(
   status: 'approved' | 'rejected',
   adminId: string,
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      approval_status: status,
-      approved_at: status === 'approved' ? new Date().toISOString() : null,
-      approved_by: status === 'approved' ? adminId : null,
-    })
-    .eq('id', userId)
+  const patch: {
+    approval_status: 'approved' | 'rejected'
+    approved_at: string | null
+    approved_by: string | null
+    valid_until?: string
+  } = {
+    approval_status: status,
+    approved_at: status === 'approved' ? new Date().toISOString() : null,
+    approved_by: status === 'approved' ? adminId : null,
+  }
+
+  if (status === 'approved') {
+    const { data } = await supabase
+      .from('profiles')
+      .select('valid_until')
+      .eq('id', userId)
+      .maybeSingle()
+    if (!data?.valid_until) {
+      patch.valid_until = addYearsToDate(1)
+    }
+  }
+
+  const { error } = await supabase.from('profiles').update(patch).eq('id', userId)
   if (error) return { error: error.message }
   return { error: null }
 }

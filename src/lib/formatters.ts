@@ -22,3 +22,12 @@ export function isValidCPF(cpf: string): boolean {
   if (rev >= 10) rev = 0
   return rev === parseInt(digits[10])
 }
+
+export function addYearsToDate(years = 1, from = new Date()): string {
+  const date = new Date(from)
+  date.setFullYear(date.getFullYear() + years)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}

@@ -18,7 +18,6 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [instrument, setInstrument] = useState('')
-  const [regNumber, setRegNumber] = useState('')
   const { signIn, signUp, resetPassword, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -124,7 +123,6 @@ export default function Login() {
       const { error } = await signUp(email, password, {
         full_name: fullName,
         instrument,
-        registration_number: regNumber,
       })
       if (error) {
         const msg = getErrorMessage(error)
@@ -198,28 +196,16 @@ export default function Login() {
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="instrument">Instrumento</Label>
-                    <Input
-                      id="instrument"
-                      placeholder="Ex: Trompete"
-                      className="h-12 bg-background/50"
-                      value={instrument}
-                      onChange={(e) => setInstrument(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="regNumber">Matrícula</Label>
-                    <Input
-                      id="regNumber"
-                      placeholder="BMB-XXXX"
-                      className="h-12 bg-background/50"
-                      value={regNumber}
-                      onChange={(e) => setRegNumber(e.target.value)}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instrument">Instrumento</Label>
+                  <Input
+                    id="instrument"
+                    placeholder="Ex: Trompete"
+                    className="h-12 bg-background/50"
+                    value={instrument}
+                    onChange={(e) => setInstrument(e.target.value)}
+                    required
+                  />
                 </div>
               </>
             )}

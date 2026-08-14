@@ -314,6 +314,20 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      next_registration_number: { Args: never; Returns: string }
+      verify_id_card: {
+        Args: { member_id: string }
+        Returns: {
+          city: string
+          full_name: string
+          instrument: string
+          is_valid: boolean
+          registration_number: string
+          role: string
+          state: string
+          valid_until: string | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

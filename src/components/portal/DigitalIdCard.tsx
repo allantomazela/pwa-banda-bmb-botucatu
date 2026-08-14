@@ -387,7 +387,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                 <div className="mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10 pt-3">
                   <div className="min-w-0">
                     <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
-                      Validade
+                      Validade — território brasileiro
                     </p>
                     <p className={cn('font-mono text-sm font-bold', accentSoft)}>
                       {formatDate(profile.valid_until)}
@@ -469,9 +469,13 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                 </p>
                 <div className="border-t border-white/10 pt-3 text-center">
                   <p className="text-[9px] leading-relaxed text-white/45">
-                    Documento estritamente pessoal e intransferível.
+                    Identificação institucional da Banda BMB — Botucatu/SP.
                     <br />
-                    Uso restrito a membros ativos da Banda BMB — Botucatu/SP.
+                    Válida em todo o território brasileiro para reconhecimento do integrante junto à
+                    associação, até a data de validade.
+                    <br />
+                    Documento pessoal e intransferível. Não substitui RG, CIN ou outro documento
+                    oficial de identidade.
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2 pt-1 text-white/35">
