@@ -27,7 +27,10 @@ export async function getSponsors(): Promise<Sponsor[]> {
 }
 
 export async function createSponsor(
-  data: Pick<TablesInsert<'sponsors'>, 'name' | 'logo_url' | 'website_url' | 'kind' | 'is_visible' | 'sort_order'>,
+  data: Pick<
+    TablesInsert<'sponsors'>,
+    'name' | 'logo_url' | 'website_url' | 'kind' | 'is_visible' | 'sort_order' | 'bg_type' | 'bg_color' | 'bg_color_end'
+  >,
 ): Promise<{ error: string | null }> {
   const { error } = await supabase.from('sponsors').insert({
     name: data.name.trim(),
@@ -36,6 +39,9 @@ export async function createSponsor(
     kind: data.kind,
     is_visible: data.is_visible ?? true,
     sort_order: data.sort_order ?? 0,
+    bg_type: data.bg_type || 'solid',
+    bg_color: data.bg_color || '#ffffff',
+    bg_color_end: data.bg_color_end || data.bg_color || '#ffffff',
   })
   if (error) return { error: error.message }
   return { error: null }

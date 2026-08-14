@@ -12,6 +12,11 @@ import {
 } from '@/components/ui/carousel'
 import { useFetch } from '@/hooks/use-fetch'
 import { getVisibleSponsors, toExternalUrl, type Sponsor } from '@/services/sponsors'
+import {
+  isLightColor,
+  sponsorCardBackground,
+  type SponsorBgType,
+} from '@/lib/sponsor-style'
 
 const KIND_LABELS = {
   patrocinador: 'Patrocinador',
@@ -41,18 +46,35 @@ function buildSlides(items: Sponsor[]): Slide[] {
 function LogoSlide({ sponsor }: { sponsor: Sponsor }) {
   const href = toExternalUrl(sponsor.website_url)
   const kindLabel = KIND_LABELS[sponsor.kind as keyof typeof KIND_LABELS] ?? 'Parceiro'
+  const style = {
+    bg_type: (sponsor.bg_type as SponsorBgType) || 'solid',
+    bg_color: sponsor.bg_color || '#ffffff',
+    bg_color_end: sponsor.bg_color_end || sponsor.bg_color || '#ffffff',
+  }
+  const light = isLightColor(style.bg_color)
   const content = (
-    <div className="flex h-full min-h-[168px] flex-col items-center justify-center gap-3 rounded-2xl bg-white px-5 py-6 shadow-[0_8px_30px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-[1.03]">
-      <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+    <div
+      className="relative flex h-full min-h-[240px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl px-6 py-8 ring-2 ring-primary/50 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-transform duration-300 group-hover:scale-[1.03]"
+      style={{ background: sponsorCardBackground(style) }}
+    >
+      <span
+        className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+          light ? 'bg-slate-900/80 text-white' : 'bg-primary text-primary-foreground'
+        }`}
+      >
         {kindLabel}
       </span>
       <img
         src={sponsor.logo_url}
         alt={sponsor.name}
-        className="max-h-16 w-auto max-w-[160px] object-contain"
+        className="max-h-32 w-auto max-w-[240px] object-contain drop-shadow-lg md:max-h-36 md:max-w-[280px]"
         loading="lazy"
       />
-      <p className="text-center text-sm font-semibold text-slate-700">{sponsor.name}</p>
+      <p
+        className={`text-center text-sm font-semibold ${light ? 'text-slate-800' : 'text-white'}`}
+      >
+        {sponsor.name}
+      </p>
     </div>
   )
 
@@ -67,7 +89,7 @@ function LogoSlide({ sponsor }: { sponsor: Sponsor }) {
 
 function EmptySlide() {
   return (
-    <div className="flex h-full min-h-[168px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 bg-white/5 px-5 py-6">
+    <div className="flex h-full min-h-[240px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 bg-white/5 px-5 py-6">
       <span className="text-3xl font-display text-primary/50">+</span>
       <p className="text-center text-xs font-medium text-muted-foreground">Sua marca aqui</p>
     </div>
@@ -116,7 +138,7 @@ export function SponsorLogos({ showCta = false }: Props) {
                 {slides.map((slide) => (
                   <CarouselItem
                     key={slide.key}
-                    className="group basis-[75%] pl-3 sm:basis-1/2 md:basis-1/3 md:pl-4 lg:basis-1/4"
+                    className="group basis-[88%] pl-3 sm:basis-1/2 md:pl-4 lg:basis-[38%]"
                   >
                     {slide.kind === 'logo' ? <LogoSlide sponsor={slide.sponsor} /> : <EmptySlide />}
                   </CarouselItem>

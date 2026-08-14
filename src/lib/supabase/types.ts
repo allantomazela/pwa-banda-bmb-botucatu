@@ -322,6 +322,9 @@ export type Database = {
           kind: string
           logo_url: string
           name: string
+          bg_type: string
+          bg_color: string
+          bg_color_end: string
           sort_order: number
           website_url: string
         }
@@ -332,6 +335,9 @@ export type Database = {
           kind?: string
           logo_url?: string
           name: string
+          bg_type?: string
+          bg_color?: string
+          bg_color_end?: string
           sort_order?: number
           website_url?: string
         }
@@ -342,6 +348,9 @@ export type Database = {
           kind?: string
           logo_url?: string
           name?: string
+          bg_type?: string
+          bg_color?: string
+          bg_color_end?: string
           sort_order?: number
           website_url?: string
         }

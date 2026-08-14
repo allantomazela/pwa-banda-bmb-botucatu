@@ -26,8 +26,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ImageUrlField } from '@/components/admin/ImageUrlField'
+import { SponsorBgFields } from '@/components/admin/SponsorBgFields'
 import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { sponsorCardBackground, safeHex, type SponsorBgType } from '@/lib/sponsor-style'
 
 const EMPTY_FORM = {
   name: '',
@@ -36,6 +38,9 @@ const EMPTY_FORM = {
   kind: 'patrocinador' as SponsorKind,
   is_visible: true,
   sort_order: 0,
+  bg_type: 'solid' as SponsorBgType,
+  bg_color: '#ffffff',
+  bg_color_end: '#ffffff',
 }
 
 export function SponsorsManager() {
@@ -76,6 +81,9 @@ export function SponsorsManager() {
       kind: item.kind as SponsorKind,
       is_visible: item.is_visible,
       sort_order: item.sort_order,
+      bg_type: (item.bg_type as SponsorBgType) || 'solid',
+      bg_color: safeHex(item.bg_color),
+      bg_color_end: safeHex(item.bg_color_end || item.bg_color),
     })
     setOpen(true)
   }
@@ -97,6 +105,9 @@ export function SponsorsManager() {
       kind: form.kind,
       is_visible: form.is_visible,
       sort_order: Number(form.sort_order) || 0,
+      bg_type: form.bg_type,
+      bg_color: form.bg_color,
+      bg_color_end: form.bg_type === 'gradient' ? form.bg_color_end : form.bg_color,
     }
     const { error } = editing
       ? await updateSponsor(editing.id, payload)
@@ -152,7 +163,14 @@ export function SponsorsManager() {
               <img
                 src={item.logo_url}
                 alt={item.name}
-                className="h-12 w-24 object-contain bg-white/5 rounded"
+                className="h-14 w-28 object-contain rounded border border-white/10"
+                style={{
+                  background: sponsorCardBackground({
+                    bg_type: (item.bg_type as SponsorBgType) || 'solid',
+                    bg_color: item.bg_color || '#ffffff',
+                    bg_color_end: item.bg_color_end || '#ffffff',
+                  }),
+                }}
               />
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate">{item.name}</p>
@@ -205,6 +223,14 @@ export function SponsorsManager() {
                 placeholder="https://empresa.com.br"
               />
             </div>
+            <SponsorBgFields
+              value={{
+                bg_type: form.bg_type,
+                bg_color: form.bg_color,
+                bg_color_end: form.bg_color_end,
+              }}
+              onChange={(bg) => setForm({ ...form, ...bg })}
+            />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Tipo</Label>
