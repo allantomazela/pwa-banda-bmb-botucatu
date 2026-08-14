@@ -15,6 +15,7 @@ export const SYSTEM_PAGE_PATHS: Record<string, string> = {
   agenda: '/agenda',
   media: '/media',
   contato: '/contato',
+  patrocinadores: '/patrocinadores',
 }
 
 export const RESERVED_SLUGS = [
@@ -23,6 +24,7 @@ export const RESERVED_SLUGS = [
   'agenda',
   'media',
   'contato',
+  'patrocinadores',
   'login',
   'portal',
   'admin',

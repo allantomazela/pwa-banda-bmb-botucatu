@@ -281,6 +281,72 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsor_inquiries: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      sponsors: {
+        Row: {
+          created_at: string
+          id: string
+          is_visible: boolean
+          kind: string
+          logo_url: string
+          name: string
+          sort_order: number
+          website_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          kind?: string
+          logo_url?: string
+          name: string
+          sort_order?: number
+          website_url?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          kind?: string
+          logo_url?: string
+          name?: string
+          sort_order?: number
+          website_url?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           category: string

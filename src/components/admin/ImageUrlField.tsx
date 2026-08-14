@@ -11,12 +11,22 @@ type Props = {
   label: string
   hint: string
   value: string
-  kind: 'logo' | 'hero'
+  kind: 'logo' | 'hero' | 'sponsor'
   accept: string
+  successDescription?: string
   onChange: (url: string) => void
 }
 
-export function ImageUrlField({ id, label, hint, value, kind, accept, onChange }: Props) {
+export function ImageUrlField({
+  id,
+  label,
+  hint,
+  value,
+  kind,
+  accept,
+  successDescription = 'Clique em Salvar Configurações para aplicar.',
+  onChange,
+}: Props) {
   const { toast } = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -31,7 +41,7 @@ export function ImageUrlField({ id, label, hint, value, kind, accept, onChange }
       toast({ title: 'Erro', description: error || 'Falha no envio.', variant: 'destructive' })
     } else {
       onChange(url)
-      toast({ title: 'Imagem enviada!', description: 'Clique em Salvar Configurações para aplicar.' })
+      toast({ title: 'Imagem enviada!', description: successDescription })
     }
     if (fileRef.current) fileRef.current.value = ''
   }
@@ -57,7 +67,11 @@ export function ImageUrlField({ id, label, hint, value, kind, accept, onChange }
         <img
           src={value}
           alt=""
-          className={kind === 'logo' ? 'h-16 w-16 rounded-lg object-cover border border-white/10' : 'h-28 w-full max-w-md rounded-lg object-cover border border-white/10'}
+          className={
+            kind === 'hero'
+              ? 'h-28 w-full max-w-md rounded-lg object-cover border border-white/10'
+              : 'h-16 w-auto max-w-[160px] rounded-lg object-contain bg-white/5 p-2 border border-white/10'
+          }
         />
       ) : null}
     </div>

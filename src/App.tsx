@@ -16,6 +16,7 @@ import About from '@/pages/About'
 import Agenda from '@/pages/Agenda'
 import Media from '@/pages/Media'
 import Contact from '@/pages/Contact'
+import Sponsors from '@/pages/Sponsors'
 import Login from '@/pages/Login'
 import ResetPassword from '@/pages/ResetPassword'
 import CmsPage from '@/pages/CmsPage'
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/media" element={<Media />} />
               <Route path="/contato" element={<Contact />} />
+              <Route path="/patrocinadores" element={<Sponsors />} />
               <Route path="/login" element={<Login />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/pagina/:slug" element={<CmsPage />} />

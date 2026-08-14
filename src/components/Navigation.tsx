@@ -65,6 +65,18 @@ export function Header() {
         >
           Contato
         </Link>
+        <Link
+          to="/patrocinadores"
+          className={cn(
+            'text-sm font-medium transition-colors hover:text-primary relative py-1',
+            location.pathname === '/patrocinadores' ? 'text-primary' : 'text-muted-foreground',
+          )}
+        >
+          Patrocínio
+          {location.pathname === '/patrocinadores' && (
+            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full animate-fade-in" />
+          )}
+        </Link>
         {navPages.map((page) => (
           <Link
             key={page.id}

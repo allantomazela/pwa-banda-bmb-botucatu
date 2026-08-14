@@ -1,5 +1,7 @@
 import { SiteSettingsManager } from '@/components/admin/SiteSettingsManager'
 import { PagesManager } from '@/components/admin/PagesManager'
+import { SponsorsManager } from '@/components/admin/SponsorsManager'
+import { SponsorInquiriesManager } from '@/components/admin/SponsorInquiriesManager'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function AdminSiteSettings() {
@@ -15,12 +17,17 @@ export default function AdminSiteSettings() {
         <TabsList>
           <TabsTrigger value="textos">Textos e identidade</TabsTrigger>
           <TabsTrigger value="paginas">Páginas e seções</TabsTrigger>
+          <TabsTrigger value="patrocinio">Patrocinadores</TabsTrigger>
         </TabsList>
         <TabsContent value="textos" className="mt-6 max-w-3xl">
           <SiteSettingsManager />
         </TabsContent>
         <TabsContent value="paginas" className="mt-6">
           <PagesManager />
+        </TabsContent>
+        <TabsContent value="patrocinio" className="mt-6 space-y-10">
+          <SponsorsManager />
+          <SponsorInquiriesManager />
         </TabsContent>
       </Tabs>
     </div>

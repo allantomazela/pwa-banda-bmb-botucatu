@@ -58,6 +58,11 @@ export function Footer() {
                 Seja um Membro
               </Link>
             </li>
+            <li>
+              <Link to="/patrocinadores" className="hover:text-primary transition-colors">
+                Patrocinadores
+              </Link>
+            </li>
             {navPages.map((page) => (
               <li key={page.id}>
                 <Link to={publicPagePath(page.slug)} className="hover:text-primary transition-colors">

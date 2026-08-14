@@ -35,9 +35,10 @@ export async function uploadGalleryImage(file: File): Promise<string | null> {
   return data.publicUrl
 }
 
-const SITE_IMAGE_TYPES: Record<'logo' | 'hero', string[]> = {
+const SITE_IMAGE_TYPES: Record<'logo' | 'hero' | 'sponsor', string[]> = {
   logo: ['image/webp', 'image/png', 'image/svg+xml', 'image/jpeg'],
   hero: ['image/webp', 'image/jpeg', 'image/png'],
+  sponsor: ['image/webp', 'image/png', 'image/svg+xml', 'image/jpeg'],
 }
 
 const SITE_IMAGE_EXT: Record<string, string> = {
@@ -49,19 +50,23 @@ const SITE_IMAGE_EXT: Record<string, string> = {
 
 export async function uploadSiteImage(
   file: File,
-  kind: 'logo' | 'hero',
+  kind: 'logo' | 'hero' | 'sponsor',
 ): Promise<{ url: string | null; error: string | null }> {
   const allowed = SITE_IMAGE_TYPES[kind]
   if (!allowed.includes(file.type)) {
-    const formats = kind === 'logo' ? 'WebP, PNG, SVG ou JPEG' : 'WebP, JPEG ou PNG'
+    const formats = kind === 'hero' ? 'WebP, JPEG ou PNG' : 'WebP, PNG, SVG ou JPEG'
     return { url: null, error: `Formato inválido. Use ${formats}.` }
   }
-  const maxBytes = kind === 'logo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024
+  const maxBytes = kind === 'hero' ? 5 * 1024 * 1024 : 2 * 1024 * 1024
   if (file.size > maxBytes) {
-    return { url: null, error: kind === 'logo' ? 'Arquivo muito grande (máx 2MB).' : 'Arquivo muito grande (máx 5MB).' }
+    return {
+      url: null,
+      error: kind === 'hero' ? 'Arquivo muito grande (máx 5MB).' : 'Arquivo muito grande (máx 2MB).',
+    }
   }
   const ext = SITE_IMAGE_EXT[file.type] || 'webp'
-  const fileName = `site/${kind}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const folder = kind === 'sponsor' ? 'sponsors' : kind
+  const fileName = `site/${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
   const { error } = await supabase.storage.from('gallery').upload(fileName, file)
   if (error) return { url: null, error: 'Falha no envio da imagem.' }
   const { data } = supabase.storage.from('gallery').getPublicUrl(fileName)
