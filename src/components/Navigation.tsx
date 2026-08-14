@@ -72,7 +72,7 @@ export function Header() {
             location.pathname === '/patrocinadores' ? 'text-primary' : 'text-muted-foreground',
           )}
         >
-          Patrocínio
+          Patrocinadores
           {location.pathname === '/patrocinadores' && (
             <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full animate-fade-in" />
           )}

@@ -7,6 +7,7 @@ import { useSiteSettings } from '@/hooks/use-site-settings'
 import { useFetch } from '@/hooks/use-fetch'
 import { getNextEvent, type EventItem } from '@/services/events'
 import { CmsSections } from '@/components/cms/CmsSections'
+import { SponsorLogos } from '@/components/sponsors/SponsorLogos'
 
 export default function Index() {
   const { user, profile } = useAuth()
@@ -206,6 +207,12 @@ export default function Index() {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-card/20 border-y border-white/5">
+        <div className="container">
+          <SponsorLogos showCta />
         </div>
       </section>
 
