@@ -9,6 +9,11 @@ export type IdCardVerification = {
   state: string
   role: string
   is_valid: boolean
+  avatar_url: string | null
+  birth_date: string | null
+  cpf: string
+  rg: string
+  disability_info: string | null
 }
 
 export async function verifyIdCard(memberId: string): Promise<IdCardVerification | null> {

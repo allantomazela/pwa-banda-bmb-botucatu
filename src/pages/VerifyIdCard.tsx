@@ -1,8 +1,8 @@
 import { useSearchParams } from 'react-router-dom'
 import { useFetch } from '@/hooks/use-fetch'
 import { verifyIdCard } from '@/services/id-card'
-import { formatDateBR } from '@/lib/formatters'
-import { BadgeCheck, ShieldAlert, IdCard } from 'lucide-react'
+import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
+import { Loader2, ShieldAlert } from 'lucide-react'
 
 export default function VerifyIdCard() {
   const [params] = useSearchParams()
@@ -13,55 +13,41 @@ export default function VerifyIdCard() {
   )
 
   return (
-    <div className="container max-w-lg py-16 animate-fade-in">
-      <div className="rounded-2xl border border-white/10 bg-card/50 p-8 text-center space-y-4">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
-          <IdCard className="h-7 w-7" />
-        </div>
-        <h1 className="font-display text-2xl font-bold">Verificação da Carteirinha</h1>
-        <p className="text-sm text-muted-foreground">
-          Identificação institucional da Banda BMB — Botucatu/SP. Válida em todo o território
-          brasileiro para reconhecimento do integrante junto à associação. Não substitui RG, CIN ou
-          outro documento oficial.
-        </p>
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-3 py-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12),transparent_55%)]" />
 
-        {!id ? (
-          <p className="text-muted-foreground">QR Code inválido.</p>
-        ) : loading ? (
-          <p className="text-muted-foreground">Consultando...</p>
-        ) : error || !data ? (
-          <div className="space-y-2 text-destructive">
-            <ShieldAlert className="mx-auto h-8 w-8" />
-            <p>Carteirinha não encontrada ou cadastro não aprovado.</p>
-          </div>
-        ) : (
-          <div className="space-y-3 text-left">
-            <div className="flex items-center justify-center gap-2">
-              <BadgeCheck className={data.is_valid ? 'text-emerald-400' : 'text-amber-400'} />
-              <span className="font-semibold">
-                {data.is_valid ? 'Carteirinha válida' : 'Carteirinha vencida'}
-              </span>
-            </div>
-            <p>
-              <span className="text-muted-foreground">Nome:</span> {data.full_name}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Matrícula:</span> {data.registration_number}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Instrumento:</span> {data.instrument || '—'}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Validade:</span>{' '}
-              {formatDateBR(data.valid_until, 'Sem data informada')}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Cidade/UF:</span>{' '}
-              {[data.city, data.state].filter(Boolean).join('/') || '—'}
-            </p>
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <Loader2 className="relative h-10 w-10 animate-spin text-primary" />
+      ) : error || !id || !data ? (
+        <div className="relative max-w-sm space-y-3 text-center text-destructive">
+          <ShieldAlert className="mx-auto h-10 w-10" />
+          <p>Carteirinha não encontrada ou cadastro não aprovado.</p>
+        </div>
+      ) : (
+        <div className="relative w-full max-w-[360px]">
+          <DigitalIdCard
+            showActions={false}
+            profile={{
+              id,
+              full_name: data.full_name,
+              instrument: data.instrument,
+              registration_number: data.registration_number,
+              avatar_url: data.avatar_url,
+              birth_date: data.birth_date,
+              valid_until: data.valid_until,
+              city: data.city,
+              state: data.state,
+              cpf: data.cpf,
+              rg: data.rg,
+              disability_info: data.disability_info,
+              role: data.role,
+            }}
+          />
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Toque na carteirinha para ver o verso
+          </p>
+        </div>
+      )}
     </div>
   )
 }

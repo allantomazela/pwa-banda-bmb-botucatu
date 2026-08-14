@@ -59,8 +59,8 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/pagina/:slug" element={<CmsPage />} />
-              <Route path="/verify" element={<VerifyIdCard />} />
             </Route>
+            <Route path="/verify" element={<VerifyIdCard />} />
 
             {/* Restricted Routes with Portal Layout */}
             <Route path="/portal" element={<PortalLayout />}>

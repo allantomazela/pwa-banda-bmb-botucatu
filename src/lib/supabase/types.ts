@@ -318,11 +318,16 @@ export type Database = {
       verify_id_card: {
         Args: { member_id: string }
         Returns: {
+          avatar_url: string | null
+          birth_date: string | null
           city: string
+          cpf: string
+          disability_info: string | null
           full_name: string
           instrument: string
           is_valid: boolean
           registration_number: string
+          rg: string
           role: string
           state: string
           valid_until: string | null
