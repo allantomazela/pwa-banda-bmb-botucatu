@@ -10,6 +10,7 @@ import {
   Settings,
   Image as ImageIcon,
   Inbox,
+  Home,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -60,7 +61,13 @@ export default function AdminLayout() {
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-1">
+          <Button asChild variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary">
+            <Link to="/">
+              <Home className="w-5 h-5 mr-3" />
+              Voltar ao site
+            </Link>
+          </Button>
           <Button asChild variant="ghost" className="w-full justify-start text-muted-foreground">
             <Link to="/portal">
               <ArrowLeft className="w-5 h-5 mr-3" />
@@ -71,6 +78,12 @@ export default function AdminLayout() {
       </aside>
 
       <main className="flex-1 md:ml-64 pb-20 md:pb-0">
+        <div className="md:hidden sticky top-0 z-40 glass border-b border-white/10 px-4 h-12 flex items-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+            <Home className="w-4 h-4" />
+            Voltar ao site
+          </Link>
+        </div>
         <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
           <div className="flex items-center justify-around h-16 px-1">
             {ADMIN_NAV.map((item) => (

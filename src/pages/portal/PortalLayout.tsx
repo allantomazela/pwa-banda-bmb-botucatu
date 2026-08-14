@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog, ShieldCheck } from 'lucide-react'
+import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog, ShieldCheck, Home } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -75,7 +75,13 @@ export default function PortalLayout() {
             </Link>
           )}
         </nav>
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-1">
+          <Button asChild variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary">
+            <Link to="/">
+              <Home className="w-5 h-5 mr-3" />
+              Voltar ao site
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
@@ -88,6 +94,12 @@ export default function PortalLayout() {
       </aside>
 
       <main className="flex-1 md:ml-64 pb-20 md:pb-0 relative min-h-full">
+        <div className="md:hidden sticky top-0 z-40 glass border-b border-white/10 px-4 h-12 flex items-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+            <Home className="w-4 h-4" />
+            Voltar ao site
+          </Link>
+        </div>
         {profileLoading && !profile ? (
           <div className="p-10 text-muted-foreground">Carregando perfil...</div>
         ) : (
