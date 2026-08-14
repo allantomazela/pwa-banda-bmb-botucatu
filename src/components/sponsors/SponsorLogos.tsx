@@ -27,7 +27,24 @@ const MIN_SLIDES = 6
 
 type Slide =
   | { key: string; kind: 'logo'; sponsor: Sponsor }
-  | { key: string; kind: 'empty' }
+  | { key: string; kind: 'empty'; message: EmptyMessage }
+
+const EMPTY_MESSAGES = [
+  {
+    title: 'Seja um patrocinador',
+    subtitle: 'Sua marca no palco da BMB',
+  },
+  {
+    title: 'Seja um apoiador',
+    subtitle: 'Ajude a banda a crescer',
+  },
+  {
+    title: 'Sua marca neste palco',
+    subtitle: 'Apoie ensaios e apresentações',
+  },
+] as const
+
+type EmptyMessage = (typeof EMPTY_MESSAGES)[number]
 
 function buildSlides(items: Sponsor[]): Slide[] {
   const logos = items.filter((item) => item.logo_url)
@@ -38,7 +55,11 @@ function buildSlides(items: Sponsor[]): Slide[] {
   }))
   const missing = Math.max(0, MIN_SLIDES - slides.length)
   for (let i = 0; i < missing; i += 1) {
-    slides.push({ key: `empty-${i}`, kind: 'empty' })
+    slides.push({
+      key: `empty-${i}`,
+      kind: 'empty',
+      message: EMPTY_MESSAGES[i % EMPTY_MESSAGES.length],
+    })
   }
   return slides
 }
@@ -87,12 +108,22 @@ function LogoSlide({ sponsor }: { sponsor: Sponsor }) {
   )
 }
 
-function EmptySlide() {
+function EmptySlide({ message }: { message: EmptyMessage }) {
   return (
-    <div className="flex h-full min-h-[240px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/40 bg-white/5 px-5 py-6">
-      <span className="text-3xl font-display text-primary/50">+</span>
-      <p className="text-center text-xs font-medium text-muted-foreground">Sua marca aqui</p>
-    </div>
+    <Link to="/patrocinadores#formulario" className="block h-full">
+      <div className="relative flex h-full min-h-[240px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card px-6 py-8 ring-1 ring-primary/30 shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-[1.03]">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow">
+          <Handshake className="h-6 w-6" />
+        </span>
+        <p className="text-center font-display text-lg font-bold leading-tight text-primary">
+          {message.title}
+        </p>
+        <p className="text-center text-sm text-muted-foreground">{message.subtitle}</p>
+        <span className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+          Fale conosco
+        </span>
+      </div>
+    </Link>
   )
 }
 
@@ -140,7 +171,11 @@ export function SponsorLogos({ showCta = false }: Props) {
                     key={slide.key}
                     className="group basis-[88%] pl-3 sm:basis-1/2 md:pl-4 lg:basis-[38%]"
                   >
-                    {slide.kind === 'logo' ? <LogoSlide sponsor={slide.sponsor} /> : <EmptySlide />}
+                    {slide.kind === 'logo' ? (
+                      <LogoSlide sponsor={slide.sponsor} />
+                    ) : (
+                      <EmptySlide message={slide.message} />
+                    )}
                   </CarouselItem>
                 ))}
               </CarouselContent>
