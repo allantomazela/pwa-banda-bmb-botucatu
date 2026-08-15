@@ -4,7 +4,6 @@ import {
   IdCard,
   LayoutDashboard,
   Library,
-  Video,
   LogOut,
   UserCog,
   ShieldCheck,
@@ -21,7 +20,6 @@ const PORTAL_NAV = [
   { name: 'Identidade', path: '/portal/id', icon: IdCard },
   { name: 'Perfil', path: '/portal/perfil', icon: UserCog },
   { name: 'Biblioteca', path: '/portal/biblioteca', icon: Library },
-  { name: 'Videos', path: '/portal/videos', icon: Video },
 ]
 
 export default function PortalLayout() {
@@ -60,7 +58,8 @@ export default function PortalLayout() {
               to={item.path}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                location.pathname === item.path
+                location.pathname === item.path ||
+                (item.path === '/portal/biblioteca' && location.pathname.startsWith('/portal/videos'))
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
               )}
@@ -136,7 +135,10 @@ export default function PortalLayout() {
             to={item.path}
             icon={item.icon}
             label={item.name}
-            active={location.pathname === item.path}
+            active={
+              location.pathname === item.path ||
+              (item.path === '/portal/biblioteca' && location.pathname.startsWith('/portal/videos'))
+            }
           />
         ))}
       </AppBottomBar>

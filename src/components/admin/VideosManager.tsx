@@ -31,17 +31,8 @@ import { Pencil, Plus, Trash2, Search, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
+import { VIDEO_CATEGORIES } from '@/lib/library'
 
-const CATEGORIES = [
-  'Apresentação',
-  'Ensaio',
-  'Método I',
-  'Método II',
-  'Marcha',
-  'Coreografia',
-  'Instrumento',
-  'Geral',
-]
 const EMPTY_FORM = {
   title: '',
   video_url: '',
@@ -223,7 +214,7 @@ export function VideosManager() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
+                  {VIDEO_CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>

@@ -3,8 +3,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  FileText,
-  Video,
+  Library,
   ArrowLeft,
   Settings,
   Image as ImageIcon,
@@ -21,8 +20,7 @@ const ADMIN_NAV = [
   { name: 'Membros', path: '/admin/members', icon: Users },
   { name: 'Interesses', path: '/admin/inquiries', icon: Inbox },
   { name: 'Eventos', path: '/admin/events', icon: Calendar },
-  { name: 'Materiais', path: '/admin/materials', icon: FileText },
-  { name: 'Vídeos', path: '/admin/videos', icon: Video },
+  { name: 'Biblioteca', path: '/admin/biblioteca', icon: Library },
   { name: 'Site', path: '/admin/site', icon: Settings },
   { name: 'Galeria', path: '/admin/gallery', icon: ImageIcon },
 ]
@@ -30,8 +28,17 @@ const ADMIN_NAV = [
 export default function AdminLayout() {
   const location = useLocation()
 
-  const isActive = (path: string) =>
-    path === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(path)
+  const isActive = (path: string) => {
+    if (path === '/admin') return location.pathname === '/admin'
+    if (path === '/admin/biblioteca') {
+      return (
+        location.pathname.startsWith('/admin/biblioteca') ||
+        location.pathname.startsWith('/admin/materials') ||
+        location.pathname.startsWith('/admin/videos')
+      )
+    }
+    return location.pathname.startsWith(path)
+  }
 
   return (
     <div className="flex min-h-dvh bg-background">

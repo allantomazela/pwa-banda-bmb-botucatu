@@ -18,7 +18,7 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
     return (
       <div className="text-center py-16 px-4 text-muted-foreground bg-card/20 rounded-xl border border-white/5">
         <Video className="w-12 h-12 mx-auto mb-4 opacity-20" />
-        <p className="text-lg">Nenhuma videoaula encontrada.</p>
+        <p className="text-lg">Nenhuma videoaula encontrada nesta categoria.</p>
       </div>
     )
   }

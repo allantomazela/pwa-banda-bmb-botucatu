@@ -28,8 +28,8 @@ import {
 } from '@/components/ui/select'
 import { Pencil, Plus, Trash2, Search, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { MATERIAL_CATEGORIES } from '@/lib/library'
 
-const CATEGORIES = ['Método I', 'Método II', 'Partituras', 'Métodos', 'Avisos', 'Geral']
 const EMPTY_FORM = { title: '', file_path: '', category: 'Geral' }
 
 export function MaterialsManager() {
@@ -115,8 +115,8 @@ export function MaterialsManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar materiais..."
@@ -125,7 +125,7 @@ export function MaterialsManager() {
             className="pl-9"
           />
         </div>
-        <Button onClick={handleNew}>
+        <Button onClick={handleNew} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" /> Novo Material
         </Button>
       </div>
@@ -191,7 +191,7 @@ export function MaterialsManager() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
+                  {MATERIAL_CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>

@@ -181,19 +181,20 @@ export async function getAllVideos(): Promise<VideoItem[]> {
 
 export async function getAdminStats(): Promise<{
   totalMembers: number
-  totalMaterials: number
+  totalLibrary: number
   pendingEvents: number
   totalPhotos: number
 }> {
-  const [profiles, materials, eventsRes, photosRes] = await Promise.all([
+  const [profiles, materials, videos, eventsRes, photosRes] = await Promise.all([
     getAllProfiles(),
     getAllMaterials(),
+    getAllVideos(),
     supabase.from('events').select('id').gte('event_date', new Date().toISOString()),
     supabase.from('gallery_photos').select('id'),
   ])
   return {
     totalMembers: profiles.length,
-    totalMaterials: materials.length,
+    totalLibrary: materials.length + videos.length,
     pendingEvents: eventsRes.data?.length ?? 0,
     totalPhotos: photosRes.data?.length ?? 0,
   }

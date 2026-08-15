@@ -33,6 +33,7 @@ import Videos from '@/pages/portal/Videos'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminMembers from '@/pages/admin/AdminMembers'
 import AdminEvents from '@/pages/admin/AdminEvents'
+import AdminLibrary from '@/pages/admin/AdminLibrary'
 import AdminMaterials from '@/pages/admin/AdminMaterials'
 import AdminVideos from '@/pages/admin/AdminVideos'
 import AdminSiteSettings from '@/pages/admin/AdminSiteSettings'
@@ -46,50 +47,51 @@ const App = () => (
     <AuthProvider>
       <SiteSettingsProvider>
         <SitePagesProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            {/* Public Routes with standard Layout */}
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/sobre" element={<About />} />
-              <Route path="/agenda" element={<Agenda />} />
-              <Route path="/media" element={<Media />} />
-              <Route path="/contato" element={<Contact />} />
-              <Route path="/patrocinadores" element={<Sponsors />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/redefinir-senha" element={<ResetPassword />} />
-              <Route path="/pagina/:slug" element={<CmsPage />} />
-            </Route>
-            <Route path="/verify" element={<VerifyIdCard />} />
-
-            {/* Restricted Routes with Portal Layout */}
-            <Route path="/portal" element={<PortalLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="id" element={<DigitalId />} />
-              <Route path="perfil" element={<ProfileSettings />} />
-              <Route path="biblioteca" element={<Library />} />
-              <Route path="videos" element={<Videos />} />
-            </Route>
-
-            {/* Admin Routes */}
-            <Route element={<AdminGuard />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="members" element={<AdminMembers />} />
-                <Route path="events" element={<AdminEvents />} />
-                <Route path="materials" element={<AdminMaterials />} />
-                <Route path="videos" element={<AdminVideos />} />
-                <Route path="site" element={<AdminSiteSettings />} />
-                <Route path="gallery" element={<AdminGallery />} />
-                <Route path="inquiries" element={<AdminInquiries />} />
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              {/* Public Routes with standard Layout */}
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/sobre" element={<About />} />
+                <Route path="/agenda" element={<Agenda />} />
+                <Route path="/media" element={<Media />} />
+                <Route path="/contato" element={<Contact />} />
+                <Route path="/patrocinadores" element={<Sponsors />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/redefinir-senha" element={<ResetPassword />} />
+                <Route path="/pagina/:slug" element={<CmsPage />} />
               </Route>
-            </Route>
+              <Route path="/verify" element={<VerifyIdCard />} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
+              {/* Restricted Routes with Portal Layout */}
+              <Route path="/portal" element={<PortalLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="id" element={<DigitalId />} />
+                <Route path="perfil" element={<ProfileSettings />} />
+                <Route path="biblioteca" element={<Library />} />
+                <Route path="videos" element={<Videos />} />
+              </Route>
+
+              {/* Admin Routes */}
+              <Route element={<AdminGuard />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="members" element={<AdminMembers />} />
+                  <Route path="events" element={<AdminEvents />} />
+                  <Route path="biblioteca" element={<AdminLibrary />} />
+                  <Route path="materials" element={<AdminMaterials />} />
+                  <Route path="videos" element={<AdminVideos />} />
+                  <Route path="site" element={<AdminSiteSettings />} />
+                  <Route path="gallery" element={<AdminGallery />} />
+                  <Route path="inquiries" element={<AdminInquiries />} />
+                </Route>
+              </Route>
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
         </SitePagesProvider>
       </SiteSettingsProvider>
     </AuthProvider>

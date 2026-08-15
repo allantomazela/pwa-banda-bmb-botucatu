@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/use-fetch'
 import { getAdminStats } from '@/services/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, Calendar, ShieldCheck, Image as ImageIcon, Settings } from 'lucide-react'
+import { Users, Library, Calendar, ShieldCheck, Image as ImageIcon, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -18,11 +18,11 @@ export default function AdminDashboard() {
       path: '/admin/members',
     },
     {
-      label: 'Materiais',
-      value: stats?.totalMaterials,
-      icon: FileText,
+      label: 'Biblioteca Digital',
+      value: stats?.totalLibrary,
+      icon: Library,
       color: 'text-yellow-400',
-      path: '/admin/materials',
+      path: '/admin/biblioteca',
     },
     {
       label: 'Eventos Pendentes',
@@ -93,10 +93,7 @@ export default function AdminDashboard() {
               <Link to="/admin/members">Membros</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link to="/admin/materials">Materiais</Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/admin/videos">Vídeos</Link>
+              <Link to="/admin/biblioteca">Biblioteca</Link>
             </Button>
           </div>
         </CardContent>

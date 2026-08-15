@@ -40,7 +40,7 @@ export function MaterialList({ materials }: { materials: Material[] }) {
     return (
       <div className="text-center py-10 text-muted-foreground">
         <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
-        <p>Nenhum material encontrado para este método.</p>
+        <p>Nenhum material encontrado nesta categoria.</p>
       </div>
     )
   }
