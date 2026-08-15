@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useFetch } from '@/hooks/use-fetch'
 import { getMaterials, type Material } from '@/services/materials'
-import { getVideos, type VideoItem } from '@/services/videos'
+import { getMemberVideos, type VideoItem } from '@/services/videos'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Search, Loader2, FileText, Video } from 'lucide-react'
@@ -13,7 +13,7 @@ const METHODS = ['Método I', 'Método II'] as const
 export default function Library() {
   const [search, setSearch] = useState('')
   const { data: materials, loading: materialsLoading } = useFetch<Material[]>(getMaterials)
-  const { data: videos, loading: videosLoading } = useFetch<VideoItem[]>(getVideos)
+  const { data: videos, loading: videosLoading } = useFetch<VideoItem[]>(getMemberVideos)
 
   const loading = materialsLoading || videosLoading
 
@@ -33,7 +33,7 @@ export default function Library() {
   }, [materials, videos, search])
 
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
       <header>
         <h1 className="text-3xl font-bold font-display mb-2">Biblioteca Didática</h1>
         <p className="text-muted-foreground">

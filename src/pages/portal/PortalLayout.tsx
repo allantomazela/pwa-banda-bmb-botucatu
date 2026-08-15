@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { isSystemAdmin, roleLabel } from '@/lib/roles'
+import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
 const PORTAL_NAV = [
   { name: 'Dashboard', path: '/portal', icon: LayoutDashboard },
@@ -28,7 +29,7 @@ export default function PortalLayout() {
   const location = useLocation()
 
   if (loading)
-    return <div className="flex-1 flex items-center justify-center min-h-screen">Carregando...</div>
+    return <div className="flex min-h-dvh flex-1 items-center justify-center">Carregando...</div>
   if (!user) return <Navigate to="/login" replace />
 
   const displayName = profile?.full_name || 'Usuario'
@@ -38,8 +39,8 @@ export default function PortalLayout() {
     `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] md:min-h-screen bg-background">
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-gradient-to-b from-card/50 to-card/20 fixed h-[calc(100vh-4rem)]">
+    <div className="flex min-h-dvh bg-background">
+      <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-gradient-to-b from-card/50 to-card/20 lg:flex">
         <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
           <Avatar className="h-12 w-12 border-2 border-primary shadow-glow/30">
             <AvatarImage src={displayAvatar} />
@@ -105,8 +106,8 @@ export default function PortalLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0 relative min-h-full">
-        <div className="md:hidden sticky top-0 z-40 glass border-b border-white/10 px-4 h-12 flex items-center">
+      <main className="relative min-h-full flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site
@@ -119,40 +120,26 @@ export default function PortalLayout() {
         )}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
-        <div className="flex items-center justify-around h-16 px-2">
-          {isSystemAdmin(profile?.role) && (
-            <Link
-              to="/admin"
-              className={cn(
-                'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors',
-                location.pathname.startsWith('/admin')
-                  ? 'text-destructive'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <ShieldCheck className="w-5 h-5" />
-              <span className="text-[10px] font-medium">Admin</span>
-            </Link>
-          )}
-          {PORTAL_NAV.map((item) => {
-            const isActive = location.pathname === item.path
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative',
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
-                )}
-              >
-                <item.icon className={cn('w-5 h-5', isActive && 'fill-primary/20')} />
-                <span className="text-[10px] font-medium">{item.name}</span>
-              </Link>
-            )
-          })}
-        </div>
-      </nav>
+      <AppBottomBar>
+        {isSystemAdmin(profile?.role) ? (
+          <BottomBarItem
+            to="/admin"
+            icon={ShieldCheck}
+            label="Admin"
+            active={location.pathname.startsWith('/admin')}
+            tone="danger"
+          />
+        ) : null}
+        {PORTAL_NAV.map((item) => (
+          <BottomBarItem
+            key={item.path}
+            to={item.path}
+            icon={item.icon}
+            label={item.name}
+            active={location.pathname === item.path}
+          />
+        ))}
+      </AppBottomBar>
     </div>
   )
 }

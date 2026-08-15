@@ -100,6 +100,7 @@ export async function createVideo(data: {
   description: string
   video_url: string
   category: string
+  is_public: boolean
 }): Promise<{ error: string | null }> {
   const { error } = await supabase.from('videos').insert(data)
   if (error) return { error: error.message }
@@ -108,7 +109,13 @@ export async function createVideo(data: {
 
 export async function updateVideo(
   id: string,
-  data: Partial<{ title: string; description: string; video_url: string; category: string }>,
+  data: Partial<{
+    title: string
+    description: string
+    video_url: string
+    category: string
+    is_public: boolean
+  }>,
 ): Promise<{ error: string | null }> {
   const { error } = await supabase.from('videos').update(data).eq('id', id)
   if (error) return { error: error.message }

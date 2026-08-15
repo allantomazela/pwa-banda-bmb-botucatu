@@ -16,7 +16,7 @@ export default function Dashboard() {
   const firstName = profile?.full_name?.split(' ')[0] || 'membro'
 
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
       <header>
         <h1 className="text-3xl font-bold font-display">Ola, {firstName}!</h1>
         <p className="text-muted-foreground">Bem-vindo de volta ao Portal do Aluno BMB.</p>

@@ -9,9 +9,9 @@ export default function Agenda() {
   const { data: events, loading, error } = useFetch<EventItem[]>(getUpcomingEvents)
 
   return (
-    <div className="container py-12 lg:py-20 animate-fade-in">
+    <div className="container animate-fade-in px-4 py-8 sm:py-12 lg:py-20">
       <div className="max-w-3xl mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
           Agenda de <span className="text-primary">Eventos</span>
         </h1>
         <p className="text-muted-foreground text-lg">

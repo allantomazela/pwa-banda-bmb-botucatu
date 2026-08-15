@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function AdminSiteSettings() {
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-6 animate-fade-in">
       <header>
         <h1 className="text-3xl font-bold font-display mb-2">Administração do Site</h1>
         <p className="text-muted-foreground">

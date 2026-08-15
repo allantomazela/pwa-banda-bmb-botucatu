@@ -22,7 +22,7 @@ export default function About() {
   ]
 
   return (
-    <div className="container py-12 lg:py-20 animate-fade-in-up">
+    <div className="container animate-fade-in-up px-4 py-8 sm:py-12 lg:py-20">
       <div className="mx-auto mb-16 max-w-3xl text-center">
         <div className="mx-auto mb-6 h-24 w-24">
           <BrandCrest className="crest-glow" />

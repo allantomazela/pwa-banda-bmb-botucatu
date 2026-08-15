@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { BrandMark } from '@/components/BrandMark'
 import { isSystemAdmin } from '@/lib/roles'
+import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
 const PUBLIC_NAV = [
   { name: 'Início', path: '/', icon: Home },
@@ -25,12 +26,12 @@ export function Header() {
   const portalLabel = isSystemAdmin(profile?.role) ? 'Painel Admin' : 'Portal'
 
   return (
-    <header className="hidden md:flex glass sticky top-0 z-50 w-full h-16 items-center px-6 lg:px-12 justify-between">
+    <header className="sticky top-0 z-50 hidden h-16 w-full items-center justify-between px-6 glass lg:flex lg:px-12">
       <Link to="/" className="group">
         <BrandMark variant="header" />
       </Link>
 
-      <nav className="flex items-center gap-8">
+      <nav className="flex flex-wrap items-center justify-end gap-x-6 gap-y-1">
         {PUBLIC_NAV.map((item) => (
           <Link
             key={item.path}
@@ -114,7 +115,7 @@ export function MobileHeader() {
   const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
   return (
-    <header className="md:hidden glass sticky top-0 z-50 w-full h-14 flex items-center justify-between px-4">
+    <header className="sticky top-0 z-50 flex h-14 w-full items-center justify-between px-4 glass lg:hidden">
       <Link to="/" className="group">
         <BrandMark variant="header" />
       </Link>
@@ -137,52 +138,38 @@ export function MobileHeader() {
 }
 
 export function BottomNav() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const location = useLocation()
 
   if (location.pathname.startsWith('/portal') || location.pathname.startsWith('/admin')) return null
 
-  const navItems = [
-    { name: 'Início', path: '/', icon: Home },
-    { name: 'Agenda', path: '/agenda', icon: Calendar },
-    { name: 'Mídia', path: '/media', icon: ImageIcon },
-  ]
+  const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
-      <div className="flex items-center justify-around h-16 px-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors',
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <Icon className={cn('w-5 h-5', isActive && 'fill-primary/20')} />
-              <span className="text-[10px] font-medium">{item.name}</span>
-            </Link>
-          )
-        })}
-        <Link
-          to={user ? '/portal' : '/login'}
-          className={cn(
-            'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors',
-            location.pathname.includes('/login')
-              ? 'text-primary'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {user ? <User className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
-          <span className="text-[10px] font-medium text-center leading-tight">
-            {user ? 'Perfil' : 'Área Restrita'}
-          </span>
-        </Link>
-      </div>
-    </nav>
+    <AppBottomBar>
+      <BottomBarItem to="/" icon={Home} label="Início" active={location.pathname === '/'} />
+      <BottomBarItem
+        to="/agenda"
+        icon={Calendar}
+        label="Agenda"
+        active={location.pathname === '/agenda'}
+      />
+      <BottomBarItem
+        to="/media"
+        icon={ImageIcon}
+        label="Mídia"
+        active={location.pathname === '/media'}
+      />
+      <BottomBarItem
+        to={user ? portalPath : '/login'}
+        icon={user ? User : LogIn}
+        label={user ? (isSystemAdmin(profile?.role) ? 'Admin' : 'Portal') : 'Entrar'}
+        active={
+          location.pathname.includes('/login') ||
+          location.pathname.startsWith('/portal') ||
+          location.pathname.startsWith('/admin')
+        }
+      />
+    </AppBottomBar>
   )
 }

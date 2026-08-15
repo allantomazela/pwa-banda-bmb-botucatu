@@ -1,6 +1,6 @@
 import { GraduationCap, Award, Footprints, Wind, Music, Video, type LucideIcon } from 'lucide-react'
-import type { ComponentType } from 'react'
 import type { VideoItem } from '@/services/videos'
+import { getVideoThumbnail } from '@/lib/video-embed'
 
 export function getCategoryIcon(category: string): LucideIcon {
   switch (category) {
@@ -26,9 +26,14 @@ export function getCategoryThumbnail(video: VideoItem): string {
     Marcha: 'marching%20band',
     Coreografia: 'dance%20performance',
     Instrumento: 'musical%20instrument',
+    Apresentação: 'marching%20band%20parade',
+    Ensaio: 'band%20rehearsal',
   }
   const query = queryMap[video.category] ?? 'music%20lesson'
-  return `https://img.usecurling.com/p/800/450?q=${query}&color=blue&dpr=2`
+  return getVideoThumbnail(
+    video.video_url,
+    `https://img.usecurling.com/p/800/450?q=${query}&color=blue&dpr=2`,
+  )
 }
 
 export function getCategoryColor(category: string): string {

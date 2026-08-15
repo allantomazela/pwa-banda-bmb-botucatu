@@ -17,12 +17,12 @@ export default function Index() {
       <HomeHero />
 
       {/* Quick Access Tiles */}
-      <section className="py-20 bg-background relative z-20 -mt-10">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="relative z-20 -mt-6 bg-background py-10 lg:-mt-10 lg:py-20">
+        <div className="container px-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             <Link to="/sobre" className="block group">
               <Card className="h-full bg-card/50 border-white/5 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-subtle">
-                <CardContent className="p-8 flex flex-col items-center text-center gap-4">
+                <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:p-8">
                   <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <BookOpen className="w-8 h-8" />
                   </div>
@@ -39,7 +39,7 @@ export default function Index() {
 
             <Link to="/agenda" className="block group">
               <Card className="h-full bg-card/50 border-white/5 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-subtle">
-                <CardContent className="p-8 flex flex-col items-center text-center gap-4">
+                <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:p-8">
                   <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <Calendar className="w-8 h-8" />
                   </div>
@@ -57,7 +57,7 @@ export default function Index() {
             {user ? (
               <Link to="/portal/id" className="block group">
                 <Card className="h-full bg-card/50 border-white/5 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-subtle">
-                  <CardContent className="p-8 flex flex-col items-center text-center gap-4">
+                  <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:p-8">
                     <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       <IdCard className="w-8 h-8" />
                     </div>
@@ -71,7 +71,7 @@ export default function Index() {
             ) : (
               <div className="block group">
                 <Card className="h-full bg-card/50 border-white/5 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-subtle">
-                  <CardContent className="p-8 flex flex-col items-center text-center gap-4">
+                  <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:p-8">
                     <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       <Music className="w-8 h-8" />
                     </div>
@@ -94,12 +94,12 @@ export default function Index() {
 
       {/* Join Us CTA */}
       {!user && (
-        <section className="py-24 bg-card/30 border-y border-white/5">
-          <div className="container max-w-4xl text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        <section className="border-y border-white/5 bg-card/30 py-14 lg:py-24">
+          <div className="container max-w-4xl px-4 text-center">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:mb-6 md:text-5xl">
               {settings.join_cta_title || 'Quer fazer parte da banda?'}
             </h2>
-            <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
+            <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground lg:mb-10 lg:text-lg">
               {settings.join_cta_text ||
                 'Não é necessário ter experiência prévia. Nós oferecemos aulas práticas e teóricas para que você aprenda do zero. Venha construir essa história com a gente.'}
             </p>
@@ -112,7 +112,7 @@ export default function Index() {
         </section>
       )}
 
-      <section className="py-16">
+      <section className="px-4 py-10 lg:py-16">
         <CmsSections slug="home" />
       </section>
     </div>

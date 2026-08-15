@@ -107,7 +107,7 @@ export function GalleryManager() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setOpen(true)}>
+        <Button onClick={() => setOpen(true)} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" /> Nova Foto
         </Button>
       </div>
@@ -121,17 +121,17 @@ export function GalleryManager() {
               className="relative group rounded-lg overflow-hidden border border-white/5 aspect-square"
             >
               <img src={photo.image_url} alt={photo.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
-                <span className="text-xs text-white font-medium truncate">{photo.title}</span>
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  className="h-7 w-7 self-end"
-                  onClick={() => handleDelete(photo.id)}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                <span className="line-clamp-1 text-xs font-medium text-white">{photo.title}</span>
               </div>
+              <Button
+                size="icon"
+                variant="destructive"
+                className="absolute right-2 top-2 h-7 w-7"
+                onClick={() => handleDelete(photo.id)}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
             </div>
           ))}
         </div>
@@ -152,7 +152,7 @@ export function GalleryManager() {
             </div>
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map((c) => (
                   <Button
                     key={c}

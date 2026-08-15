@@ -20,7 +20,7 @@ export default function CmsPage() {
   if (!page || page.is_system) return <NotFound />
 
   return (
-    <div className="container py-12 lg:py-20 animate-fade-in space-y-10">
+    <div className="container animate-fade-in space-y-10 px-4 py-8 sm:py-12 lg:py-20">
       <header className="max-w-3xl mx-auto text-center">
         <h1 className="text-4xl md:text-5xl font-bold font-display">{page.title}</h1>
       </header>

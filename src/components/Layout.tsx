@@ -4,10 +4,10 @@ import { Footer } from './Footer'
 
 export default function Layout() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <Header />
       <MobileHeader />
-      <main className="flex-1 pb-16 md:pb-0 flex flex-col">
+      <main className="flex flex-1 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <Outlet />
       </main>
       <Footer />

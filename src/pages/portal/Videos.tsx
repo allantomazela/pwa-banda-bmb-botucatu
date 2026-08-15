@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getVideos, type VideoItem } from '@/services/videos'
+import { getMemberVideos, type VideoItem } from '@/services/videos'
 import { VideoGrid } from '@/components/library/VideoGrid'
 import { Video, Loader2 } from 'lucide-react'
 
@@ -10,7 +10,7 @@ export default function Videos() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getVideos()
+        const data = await getMemberVideos()
         setVideos(data)
       } catch (err) {
         console.error(err)
@@ -22,7 +22,7 @@ export default function Videos() {
   }, [])
 
   return (
-    <div className="container max-w-6xl py-8 md:py-12 animate-fade-in">
+    <div className="container max-w-6xl animate-fade-in px-4 py-6 sm:py-8 lg:py-12">
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-bold font-display text-white flex items-center gap-4 mb-3">
           <div className="p-2.5 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-sm">
@@ -31,8 +31,7 @@ export default function Videos() {
           Videoaulas
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl">
-          Tutoriais, coreografias e fundamentos práticos para o seu desenvolvimento musical na Banda
-          BMB.
+          Videoaulas exclusivas para membros: tutoriais, coreografias e fundamentos práticos.
         </p>
       </div>
 

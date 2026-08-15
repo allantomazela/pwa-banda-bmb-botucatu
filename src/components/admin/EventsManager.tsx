@@ -133,7 +133,7 @@ export function EventsManager() {
           <Plus className="w-4 h-4 mr-2" /> Novo Evento
         </Button>
       </div>
-      <div className="rounded-lg border border-white/5 overflow-hidden">
+      <div className="overflow-x-auto rounded-lg border border-white/5">
         <Table>
           <TableHeader>
             <TableRow>

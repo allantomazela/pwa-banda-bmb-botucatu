@@ -207,7 +207,7 @@ export function MembersManager() {
         />
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-white/5">
+      <div className="overflow-x-auto rounded-lg border border-white/5">
         <Table>
           <TableHeader>
             <TableRow>

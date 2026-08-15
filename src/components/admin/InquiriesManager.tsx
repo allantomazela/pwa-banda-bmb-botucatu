@@ -116,7 +116,7 @@ export function InquiriesManager() {
           Nenhum interesse registrado ainda.
         </p>
       ) : (
-        <div className="rounded-lg border border-white/5 overflow-hidden">
+        <div className="overflow-x-auto rounded-lg border border-white/5">
           <Table>
             <TableHeader>
               <TableRow>
@@ -143,9 +143,7 @@ export function InquiriesManager() {
                       {item.phone}
                     </a>
                   </TableCell>
-                  <TableCell>
-                    {INSTRUMENT_LABELS[item.instrument] || item.instrument}
-                  </TableCell>
+                  <TableCell>{INSTRUMENT_LABELS[item.instrument] || item.instrument}</TableCell>
                   <TableCell className="max-w-[220px] truncate text-muted-foreground">
                     {item.message || '—'}
                   </TableCell>

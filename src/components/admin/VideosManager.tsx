@@ -29,9 +29,26 @@ import {
 } from '@/components/ui/select'
 import { Pencil, Plus, Trash2, Search, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
 
-const CATEGORIES = ['Método I', 'Método II', 'Marcha', 'Coreografia', 'Instrumento', 'Geral']
-const EMPTY_FORM = { title: '', video_url: '', description: '', category: 'Geral' }
+const CATEGORIES = [
+  'Apresentação',
+  'Ensaio',
+  'Método I',
+  'Método II',
+  'Marcha',
+  'Coreografia',
+  'Instrumento',
+  'Geral',
+]
+const EMPTY_FORM = {
+  title: '',
+  video_url: '',
+  description: '',
+  category: 'Geral',
+  is_public: false,
+}
 
 export function VideosManager() {
   const { toast } = useToast()
@@ -75,6 +92,7 @@ export function VideosManager() {
       video_url: v.video_url,
       description: v.description,
       category: v.category,
+      is_public: Boolean(v.is_public),
     })
     setOpen(true)
   }
@@ -123,8 +141,8 @@ export function VideosManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar vídeos..."
@@ -133,17 +151,18 @@ export function VideosManager() {
             className="pl-9"
           />
         </div>
-        <Button onClick={handleNew}>
+        <Button onClick={handleNew} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" /> Novo Vídeo
         </Button>
       </div>
-      <div className="rounded-lg border border-white/5 overflow-hidden">
+      <div className="overflow-x-auto rounded-lg border border-white/5">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Título</TableHead>
               <TableHead>Categoria</TableHead>
-              <TableHead>URL</TableHead>
+              <TableHead>Visibilidade</TableHead>
+              <TableHead className="hidden md:table-cell">URL</TableHead>
               <TableHead className="w-24" />
             </TableRow>
           </TableHeader>
@@ -152,7 +171,12 @@ export function VideosManager() {
               <TableRow key={v.id}>
                 <TableCell className="font-medium">{v.title}</TableCell>
                 <TableCell>{v.category}</TableCell>
-                <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                <TableCell>
+                  <Badge variant={v.is_public ? 'default' : 'secondary'}>
+                    {v.is_public ? 'Público' : 'Exclusivo'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden max-w-[200px] truncate text-muted-foreground md:table-cell">
                   {v.video_url}
                 </TableCell>
                 <TableCell>
@@ -176,7 +200,7 @@ export function VideosManager() {
         </Table>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100%-1.25rem)] max-h-[90dvh] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? 'Editar Vídeo' : 'Novo Vídeo'}</DialogTitle>
           </DialogHeader>
@@ -211,9 +235,23 @@ export function VideosManager() {
               <Label htmlFor="v-url">URL do Vídeo</Label>
               <Input
                 id="v-url"
-                placeholder="https://www.youtube.com/embed/..."
+                placeholder="https://www.youtube.com/watch?v=..."
                 value={form.video_url}
                 onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+              />
+            </div>
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-white/10 p-3">
+              <div className="space-y-1">
+                <Label htmlFor="v-public">Vídeo público</Label>
+                <p className="text-xs text-muted-foreground">
+                  Ligado: aparece na galeria de mídia do site. Desligado: exclusivo do portal dos
+                  membros.
+                </p>
+              </div>
+              <Switch
+                id="v-public"
+                checked={form.is_public}
+                onCheckedChange={(checked) => setForm({ ...form, is_public: checked })}
               />
             </div>
             <div className="space-y-2">

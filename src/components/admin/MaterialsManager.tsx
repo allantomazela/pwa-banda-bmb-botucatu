@@ -129,7 +129,7 @@ export function MaterialsManager() {
           <Plus className="w-4 h-4 mr-2" /> Novo Material
         </Button>
       </div>
-      <div className="rounded-lg border border-white/5 overflow-hidden">
+      <div className="overflow-x-auto rounded-lg border border-white/5">
         <Table>
           <TableHeader>
             <TableRow>

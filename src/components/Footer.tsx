@@ -3,6 +3,7 @@ import { useSiteSettings } from '@/hooks/use-site-settings'
 import { useSitePages } from '@/hooks/use-site-pages'
 import { BrandMark } from '@/components/BrandMark'
 import { BRAND_NAME_TITLE } from '@/lib/brand'
+import { publicPagePath } from '@/lib/cms'
 
 export function Footer() {
   const location = useLocation()
@@ -19,7 +20,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-background border-t border-white/5 py-12 px-6 lg:px-12 mt-auto">
+    <footer className="mt-auto border-t border-white/5 bg-background px-4 py-8 sm:px-6 lg:px-12 lg:py-12">
       <div className="container max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="mb-4">

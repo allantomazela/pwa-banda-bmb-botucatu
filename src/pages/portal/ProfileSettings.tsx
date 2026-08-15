@@ -157,7 +157,7 @@ export default function ProfileSettings() {
   const completion = Math.round((filledCount / (MANDATORY_FIELDS.length + (minor ? 1 : 0))) * 100)
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-6 lg:p-10">
+    <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-4 sm:p-6 lg:p-10">
       <header className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-primary/10 via-card/60 to-transparent p-6">
         <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
         <div className="relative flex items-start gap-4">

@@ -16,7 +16,7 @@ export function HomeHero() {
   const firstName = profile?.full_name?.split(' ')[0]
 
   return (
-    <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden">
+    <section className="relative flex min-h-0 items-center justify-center overflow-hidden py-10 lg:min-h-[85vh] lg:py-0">
       <div className="absolute inset-0 z-0">
         <img
           src={
@@ -33,7 +33,7 @@ export function HomeHero() {
       <div className="pointer-events-none absolute left-[-8%] top-16 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-10 right-[-6%] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
 
-      <div className="container relative z-10 px-4 py-16 text-center animate-slide-up-fade">
+      <div className="container relative z-10 px-4 py-8 text-center animate-slide-up-fade lg:py-16">
         {user && firstName ? (
           <div className="mb-6 inline-flex animate-fade-in items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
@@ -53,7 +53,7 @@ export function HomeHero() {
         {nextEvent && (
           <div className="mx-auto mb-8 mt-8 max-w-md animate-fade-in-up">
             <Card className="overflow-hidden border-primary/20 bg-card/60 backdrop-blur-md">
-              <CardContent className="flex items-center gap-4 p-5 text-left">
+              <CardContent className="flex items-center gap-3 p-3 text-left sm:gap-4 sm:p-5">
                 <div className="min-w-[64px] rounded-xl border border-primary/30 bg-primary/15 p-3 text-center">
                   <span className="block text-xs font-bold uppercase text-primary">
                     {new Date(nextEvent.event_date).toLocaleString('pt-BR', { month: 'short' })}
@@ -105,7 +105,7 @@ export function HomeHero() {
             <>
               <Button
                 size="lg"
-                className="h-14 w-full px-8 text-base shadow-glow sm:w-auto"
+                className="h-14 w-full px-8 text-base shadow-glow sm:h-14 sm:w-auto"
                 asChild
               >
                 <Link to="/portal">Ir ao Portal</Link>

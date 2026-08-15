@@ -42,7 +42,7 @@ export function BrandMark({ variant = 'header', className }: BrandMarkProps) {
         <div className="relative mb-6">
           <div className="crest-halo absolute inset-0" />
           <div className="crest-ring absolute -inset-3 rounded-full" />
-          <div className="relative h-36 w-36 sm:h-44 sm:w-44 md:h-52 md:w-52">
+          <div className="relative h-28 w-28 sm:h-44 sm:w-44 lg:h-52 lg:w-52">
             <BrandCrest className="crest-glow drop-shadow-2xl" />
           </div>
         </div>
@@ -51,7 +51,7 @@ export function BrandMark({ variant = 'header', className }: BrandMarkProps) {
           {BRAND_CITY}
         </p>
 
-        <h1 className="font-crest text-3xl font-bold leading-[1.15] tracking-[0.18em] text-white sm:text-4xl md:text-5xl lg:text-6xl">
+        <h1 className="px-2 font-crest text-[1.65rem] font-bold leading-[1.15] tracking-[0.12em] text-white sm:text-4xl sm:tracking-[0.18em] md:text-5xl lg:text-6xl">
           <span className="block">BANDA MARCIAL</span>
           <span className="mt-1 block bg-gradient-to-b from-amber-200 via-primary to-amber-600 bg-clip-text text-transparent">
             DE BOTUCATU

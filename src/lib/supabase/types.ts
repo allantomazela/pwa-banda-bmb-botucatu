@@ -368,6 +368,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_public: boolean
           title: string
           video_url: string
         }
@@ -376,6 +377,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_public?: boolean
           title: string
           video_url: string
         }
@@ -384,6 +386,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_public?: boolean
           title?: string
           video_url?: string
         }

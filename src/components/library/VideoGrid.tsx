@@ -9,6 +9,7 @@ import {
   getCategoryColor,
 } from '@/components/library/video-utils'
 import { cn } from '@/lib/utils'
+import { toEmbedUrl } from '@/lib/video-embed'
 
 export function VideoGrid({ videos }: { videos: VideoItem[] }) {
   const [playingId, setPlayingId] = useState<string | null>(null)
@@ -23,7 +24,7 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {videos.map((video) => {
         const CategoryIcon = getCategoryIcon(video.category)
         const isPlaying = playingId === video.id
@@ -119,9 +120,11 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
                 {isPlaying && (
                   <div className="aspect-video relative w-full">
                     <iframe
-                      src={video.video_url}
+                      src={toEmbedUrl(video.video_url)}
                       className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
                       title={video.title}
                     />
                     <div className="absolute top-4 left-4 z-10 pointer-events-none">

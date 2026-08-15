@@ -48,7 +48,7 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
       <header>
         <h1 className="text-3xl font-bold font-display flex items-center gap-3">
           <ShieldCheck className="w-8 h-8 text-destructive" />

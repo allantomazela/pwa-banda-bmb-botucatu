@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { BrandCrest } from '@/components/BrandMark'
+import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
 const ADMIN_NAV = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
@@ -33,8 +34,8 @@ export default function AdminLayout() {
     path === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(path)
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/5 bg-card/30 fixed h-screen">
+    <div className="flex min-h-dvh bg-background">
+      <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-card/30 lg:flex">
         <div className="flex items-center gap-3 border-b border-white/5 p-6">
           <div className="h-10 w-10">
             <BrandCrest />
@@ -83,30 +84,24 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0">
-        <div className="md:hidden sticky top-0 z-40 glass border-b border-white/10 px-4 h-12 flex items-center">
+      <main className="flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site
           </Link>
         </div>
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
-          <div className="flex items-center justify-around h-16 px-1">
-            {ADMIN_NAV.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex flex-col items-center justify-center w-full h-full gap-1 transition-colors',
-                  isActive(item.path) ? 'text-primary' : 'text-muted-foreground',
-                )}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[9px] font-medium">{item.name}</span>
-              </Link>
-            ))}
-          </div>
-        </nav>
+        <AppBottomBar>
+          {ADMIN_NAV.map((item) => (
+            <BottomBarItem
+              key={item.path}
+              to={item.path}
+              icon={item.icon}
+              label={item.name}
+              active={isActive(item.path)}
+            />
+          ))}
+        </AppBottomBar>
         <Outlet />
       </main>
     </div>

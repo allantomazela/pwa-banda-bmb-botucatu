@@ -7,7 +7,7 @@ export default function Sponsors() {
     <div className="animate-fade-in">
       <SponsorLogos />
 
-      <div className="container pb-16 lg:pb-24">
+      <div className="container px-4 pb-16 lg:pb-24">
         <div id="formulario" className="flex justify-center scroll-mt-24">
           <SponsorInquiryForm />
         </div>
