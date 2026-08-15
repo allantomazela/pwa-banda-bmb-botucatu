@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
+import { ROLE_CARD_COPY, resolveCardVariant, type CardVariant } from '@/lib/roles'
 import './digital-id-card.css'
 
 export interface DigitalIdProfile {
@@ -40,32 +41,67 @@ export interface DigitalIdProfile {
   guardian_phone: string | null
 }
 
-type CardVariant = 'aluno' | 'professor'
-
-function resolveVariant(role: string): CardVariant {
-  return role === 'admin' ? 'professor' : 'aluno'
+type CardTheme = {
+  variantClass: string
+  mesh: string
+  accentText: string
+  accentSoft: string
+  faceBg: string
+  backBg: string
+  header: string
+  glowA: string
+  glowB: string
+  photoRing: string
+  chip: string
+  infoBox: string
+  BadgeIcon: LucideIcon
 }
 
-const variantMeta: Record<
-  CardVariant,
-  {
-    title: string
-    subtitle: string
-    badge: string
-    BadgeIcon: LucideIcon
-  }
-> = {
+const cardTheme: Record<CardVariant, CardTheme> = {
   aluno: {
-    title: 'Carteira de Aluno',
-    subtitle: 'Identificação de músico em formação',
-    badge: 'Aluno',
+    variantClass: 'id-variant-aluno',
+    mesh: 'id-mesh-aluno',
+    accentText: 'text-sky-300',
+    accentSoft: 'text-sky-400',
+    faceBg: 'bg-gradient-to-br from-[#12263f] via-[#1B263B] to-[#071018]',
+    backBg: 'bg-gradient-to-br from-[#1a3350] via-[#1B263B] to-[#0A101D]',
+    header: 'bg-gradient-to-r from-sky-700 via-sky-500 to-cyan-500',
+    glowA: 'bg-sky-400/15',
+    glowB: 'bg-cyan-500/10',
+    photoRing: 'bg-gradient-to-br from-sky-300 via-cyan-400 to-sky-700',
+    chip: 'border-sky-400/35 bg-sky-500/15',
+    infoBox: 'border-sky-400/25 bg-sky-500/10',
     BadgeIcon: GraduationCap,
   },
   professor: {
-    title: 'Carteira de Professor',
-    subtitle: 'Identificação de corpo docente',
-    badge: 'Professor',
+    variantClass: 'id-variant-professor',
+    mesh: 'id-mesh-professor',
+    accentText: 'text-amber-300',
+    accentSoft: 'text-amber-400',
+    faceBg: 'bg-gradient-to-br from-[#2a2110] via-[#1B263B] to-[#0A101D]',
+    backBg: 'bg-gradient-to-br from-[#3a2e14] via-[#1B263B] to-[#0A101D]',
+    header: 'bg-gradient-to-r from-amber-700 via-amber-500 to-amber-600',
+    glowA: 'bg-amber-400/20',
+    glowB: 'bg-amber-600/15',
+    photoRing: 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700',
+    chip: 'border-amber-400/35 bg-amber-500/15',
+    infoBox: 'border-amber-400/25 bg-amber-500/10',
     BadgeIcon: Award,
+  },
+  admin: {
+    variantClass: 'id-variant-admin',
+    mesh: 'id-mesh-admin',
+    accentText: 'text-violet-300',
+    accentSoft: 'text-violet-400',
+    faceBg: 'bg-gradient-to-br from-[#241433] via-[#1B263B] to-[#0A101D]',
+    backBg: 'bg-gradient-to-br from-[#321848] via-[#1B263B] to-[#0A101D]',
+    header: 'bg-gradient-to-r from-violet-800 via-violet-500 to-indigo-500',
+    glowA: 'bg-violet-400/20',
+    glowB: 'bg-indigo-600/15',
+    photoRing: 'bg-gradient-to-br from-violet-300 via-violet-500 to-indigo-700',
+    chip: 'border-violet-400/35 bg-violet-500/15',
+    infoBox: 'border-violet-400/25 bg-violet-500/10',
+    BadgeIcon: ShieldCheck,
   },
 }
 
@@ -157,9 +193,10 @@ interface DigitalIdCardProps {
 export function DigitalIdCard({ profile, showActions = true, className }: DigitalIdCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
 
-  const variant = resolveVariant(profile.role)
-  const meta = variantMeta[variant]
-  const BadgeIcon = meta.BadgeIcon
+  const variant = resolveCardVariant(profile.role)
+  const meta = ROLE_CARD_COPY[variant]
+  const theme = cardTheme[variant]
+  const BadgeIcon = theme.BadgeIcon
 
   const verifyUrl = `${window.location.origin}/verify?id=${profile.id}`
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(verifyUrl)}&size=200x200`
@@ -169,10 +206,6 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
   const status = getStatus(profile.valid_until)
   const nameFontSize = useMemo(() => getNameFontSize(profile.full_name), [profile.full_name])
-
-  const isProfessor = variant === 'professor'
-  const accentText = isProfessor ? 'text-amber-300' : 'text-sky-300'
-  const accentSoft = isProfessor ? 'text-amber-400' : 'text-sky-400'
   const showGuardian = isMinor(profile.birth_date)
 
   return (
@@ -180,7 +213,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
       <div
         className={cn(
           'printable-id id-card-perspective relative w-full max-w-[360px] min-h-[560px] cursor-pointer select-none',
-          isProfessor ? 'id-variant-professor' : 'id-variant-aluno',
+          theme.variantClass,
         )}
         onClick={() => setIsFlipped(!isFlipped)}
         role="button"
@@ -209,31 +242,19 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
             }
           >
-            <div
-              className={cn(
-                'absolute inset-0',
-                isProfessor
-                  ? 'bg-gradient-to-br from-[#2a2110] via-[#1B263B] to-[#0A101D]'
-                  : 'bg-gradient-to-br from-[#12263f] via-[#1B263B] to-[#071018]',
-              )}
-            />
+            <div className={cn('absolute inset-0', theme.faceBg)} />
             <div className="absolute inset-0 id-holo-pattern" />
-            <div
-              className={cn(
-                'absolute inset-0 opacity-40',
-                isProfessor ? 'id-mesh-professor' : 'id-mesh-aluno',
-              )}
-            />
+            <div className={cn('absolute inset-0 opacity-40', theme.mesh)} />
             <div
               className={cn(
                 'absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl',
-                isProfessor ? 'bg-amber-400/20' : 'bg-sky-400/15',
+                theme.glowA,
               )}
             />
             <div
               className={cn(
                 'absolute -bottom-12 -left-8 h-32 w-32 rounded-full blur-3xl',
-                isProfessor ? 'bg-amber-600/15' : 'bg-cyan-500/10',
+                theme.glowB,
               )}
             />
 
@@ -241,9 +262,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               <div
                 className={cn(
                   'relative flex h-16 shrink-0 items-center justify-between overflow-hidden px-4',
-                  isProfessor
-                    ? 'bg-gradient-to-r from-amber-700 via-amber-500 to-amber-600'
-                    : 'bg-gradient-to-r from-sky-700 via-sky-500 to-cyan-500',
+                  theme.header,
                 )}
               >
                 <div className="absolute inset-0 id-card-shimmer" />
@@ -272,9 +291,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                   <div
                     className={cn(
                       'absolute -inset-[3px] rounded-[1.15rem] opacity-90 blur-[1px]',
-                      isProfessor
-                        ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700'
-                        : 'bg-gradient-to-br from-sky-300 via-cyan-400 to-sky-700',
+                      theme.photoRing,
                     )}
                   />
                   <div className="relative h-[5.5rem] w-[5.5rem] overflow-hidden rounded-[1rem] border border-white/25 bg-card shadow-xl">
@@ -302,16 +319,14 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                 <div
                   className={cn(
                     'mb-3 inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full border px-3 py-1',
-                    isProfessor
-                      ? 'border-amber-400/35 bg-amber-500/15'
-                      : 'border-sky-400/35 bg-sky-500/15',
+                    theme.chip,
                   )}
                 >
-                  <BadgeCheck className={cn('h-3 w-3 shrink-0', accentSoft)} />
+                  <BadgeCheck className={cn('h-3 w-3 shrink-0', theme.accentSoft)} />
                   <span
                     className={cn(
                       'truncate text-[10px] font-bold uppercase tracking-[0.14em]',
-                      accentText,
+                      theme.accentText,
                     )}
                   >
                     {meta.badge} · Botucatu/SP
@@ -323,37 +338,37 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                     icon={Music2}
                     label="Instrumento"
                     value={displayOrDash(profile.instrument)}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                   <InfoCell
                     icon={Hash}
                     label="Matrícula"
                     value={displayOrDash(profile.registration_number)}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                   <InfoCell
                     icon={MapPin}
                     label="Cidade/UF"
                     value={cityUF}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                   <InfoCell
                     icon={CalendarDays}
                     label="Nascimento"
                     value={formatDate(profile.birth_date)}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                   <InfoCell
                     icon={CreditCard}
                     label="CPF"
                     value={displayOrDash(profile.cpf)}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                   <InfoCell
                     icon={IdCard}
                     label="RG"
                     value={displayOrDash(profile.rg)}
-                    accentClass={accentSoft}
+                    accentClass={theme.accentSoft}
                   />
                 </div>
 
@@ -361,17 +376,15 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                   <div
                     className={cn(
                       'mt-2 w-full rounded-xl border px-2.5 py-2 backdrop-blur-sm',
-                      isProfessor
-                        ? 'border-amber-400/25 bg-amber-500/10'
-                        : 'border-sky-400/25 bg-sky-500/10',
+                      theme.infoBox,
                     )}
                   >
                     <div className="mb-0.5 flex items-center gap-1">
-                      <Accessibility className={cn('h-2.5 w-2.5 shrink-0', accentSoft)} />
+                      <Accessibility className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
                       <span
                         className={cn(
                           'text-[8px] font-semibold uppercase tracking-wide',
-                          accentText,
+                          theme.accentText,
                         )}
                       >
                         Acessibilidade
@@ -406,7 +419,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                     <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
                       Validade — território brasileiro
                     </p>
-                    <p className={cn('font-mono text-sm font-bold', accentSoft)}>
+                    <p className={cn('font-mono text-sm font-bold', theme.accentSoft)}>
                       {formatDate(profile.valid_until)}
                     </p>
                   </div>
@@ -437,27 +450,20 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
             }
           >
-            <div
-              className={cn(
-                'absolute inset-0',
-                isProfessor
-                  ? 'bg-gradient-to-br from-[#3a2e14] via-[#1B263B] to-[#0A101D]'
-                  : 'bg-gradient-to-br from-[#1a3350] via-[#1B263B] to-[#0A101D]',
-              )}
-            />
+            <div className={cn('absolute inset-0', theme.backBg)} />
             <div className="absolute inset-0 id-holo-pattern" />
-            <div
-              className={cn(
-                'absolute inset-0 opacity-35',
-                isProfessor ? 'id-mesh-professor' : 'id-mesh-aluno',
-              )}
-            />
+            <div className={cn('absolute inset-0 opacity-35', theme.mesh)} />
 
             <div className="relative z-10 flex h-full min-h-[560px] flex-col items-center justify-between p-6">
               <div className="w-full shrink-0 pt-1 text-center">
                 <div className="mb-1 flex items-center justify-center gap-2">
                   <img src="/brand-logo.png" alt="" className="h-7 w-7 object-contain" />
-                  <span className={cn('text-sm font-bold uppercase tracking-[0.14em]', accentSoft)}>
+                  <span
+                    className={cn(
+                      'text-sm font-bold uppercase tracking-[0.14em]',
+                      theme.accentSoft,
+                    )}
+                  >
                     Banda Marcial
                   </span>
                 </div>

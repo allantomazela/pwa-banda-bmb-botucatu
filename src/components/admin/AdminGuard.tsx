@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
+import { isSystemAdmin } from '@/lib/roles'
 
 export function AdminGuard() {
   const { profile, loading, profileLoading } = useAuth()
@@ -12,7 +13,7 @@ export function AdminGuard() {
     )
   }
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || !isSystemAdmin(profile.role)) {
     return <Navigate to="/portal" replace />
   }
 

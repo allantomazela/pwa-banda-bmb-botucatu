@@ -16,22 +16,25 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Pencil,
-  Search,
-  Loader2,
-  Eye,
-  CheckCircle2,
-  XCircle,
-  Clock3,
-} from 'lucide-react'
+import { Pencil, Search, Loader2, Eye, CheckCircle2, XCircle, Clock3 } from 'lucide-react'
 import { MemberEditDialog } from '@/components/admin/MemberEditDialog'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
+import { normalizeRole, roleLabel } from '@/lib/roles'
 
 const statusLabel: Record<string, string> = {
   pending: 'Pendente',
   approved: 'Aprovado',
   rejected: 'Recusado',
+}
+
+function RoleBadge({ role }: { role: string }) {
+  const normalized = normalizeRole(role)
+  const styles = {
+    member: 'bg-sky-500/15 text-sky-300 hover:bg-sky-500/15',
+    professor: 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/15',
+    admin: 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/15',
+  }
+  return <Badge className={styles[normalized]}>{roleLabel(normalized)}</Badge>
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -85,10 +88,7 @@ export function MembersManager() {
     fetchProfiles()
   }, [])
 
-  const pending = useMemo(
-    () => profiles.filter((p) => p.approval_status === 'pending'),
-    [profiles],
-  )
+  const pending = useMemo(() => profiles.filter((p) => p.approval_status === 'pending'), [profiles])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -98,7 +98,8 @@ export function MembersManager() {
         (p.email || '').toLowerCase().includes(q) ||
         p.registration_number.toLowerCase().includes(q) ||
         p.instrument.toLowerCase().includes(q) ||
-        p.city.toLowerCase().includes(q),
+        p.city.toLowerCase().includes(q) ||
+        roleLabel(p.role).toLowerCase().includes(q),
     )
   }, [profiles, search])
 
@@ -158,7 +159,9 @@ export function MembersManager() {
               >
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{p.full_name || 'Sem nome'}</p>
-                  <p className="truncate text-sm text-muted-foreground">{p.email || 'Sem e-mail'}</p>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {p.email || 'Sem e-mail'}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {[p.instrument, p.registration_number].filter(Boolean).join(' · ') ||
                       'Sem instrumento/matrícula'}
@@ -212,6 +215,7 @@ export function MembersManager() {
               <TableHead>E-mail</TableHead>
               <TableHead>Matrícula</TableHead>
               <TableHead>Instrumento</TableHead>
+              <TableHead>Função</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-28" />
             </TableRow>
@@ -223,6 +227,9 @@ export function MembersManager() {
                 <TableCell className="text-muted-foreground">{p.email || '—'}</TableCell>
                 <TableCell>{p.registration_number || '—'}</TableCell>
                 <TableCell>{p.instrument || '—'}</TableCell>
+                <TableCell>
+                  <RoleBadge role={p.role} />
+                </TableCell>
                 <TableCell>
                   <StatusBadge status={p.approval_status || 'pending'} />
                 </TableCell>

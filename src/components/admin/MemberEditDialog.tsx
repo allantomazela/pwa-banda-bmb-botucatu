@@ -227,16 +227,20 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
               </p>
             </div>
             <div className="space-y-2">
-              <Label>Função</Label>
+              <Label>Função na carteirinha</Label>
               <Select value={form.role} onValueChange={(v) => set('role', v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Membro</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
+                  <SelectItem value="member">Aluno</SelectItem>
+                  <SelectItem value="professor">Professor</SelectItem>
+                  <SelectItem value="admin">Administrador do Sistema</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Define o tipo da carteirinha. Só o Administrador do Sistema acessa o painel admin.
+              </p>
             </div>
           </div>
           <div className="space-y-2">

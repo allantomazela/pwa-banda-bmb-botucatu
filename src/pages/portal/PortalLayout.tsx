@@ -1,9 +1,19 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { IdCard, LayoutDashboard, Library, Video, LogOut, UserCog, ShieldCheck, Home } from 'lucide-react'
+import {
+  IdCard,
+  LayoutDashboard,
+  Library,
+  Video,
+  LogOut,
+  UserCog,
+  ShieldCheck,
+  Home,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { isSystemAdmin, roleLabel } from '@/lib/roles'
 
 const PORTAL_NAV = [
   { name: 'Dashboard', path: '/portal', icon: LayoutDashboard },
@@ -16,8 +26,6 @@ const PORTAL_NAV = [
 export default function PortalLayout() {
   const { user, profile, loading, profileLoading, signOut } = useAuth()
   const location = useLocation()
-
-  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
 
   if (loading)
     return <div className="flex-1 flex items-center justify-center min-h-screen">Carregando...</div>
@@ -40,7 +48,7 @@ export default function PortalLayout() {
           <div className="overflow-hidden">
             <p className="font-semibold text-sm truncate">{displayName}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {displayInstrument || (profile?.role === 'admin' ? 'Professor' : 'Aluno')}
+              {displayInstrument || roleLabel(profile?.role)}
             </p>
           </div>
         </div>
@@ -60,7 +68,7 @@ export default function PortalLayout() {
               {item.name}
             </Link>
           ))}
-          {profile?.role === 'admin' && (
+          {isSystemAdmin(profile?.role) && (
             <Link
               to="/admin"
               className={cn(
@@ -76,7 +84,11 @@ export default function PortalLayout() {
           )}
         </nav>
         <div className="p-4 border-t border-white/5 space-y-1">
-          <Button asChild variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary">
+          <Button
+            asChild
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-primary"
+          >
             <Link to="/">
               <Home className="w-5 h-5 mr-3" />
               Voltar ao site
@@ -109,7 +121,7 @@ export default function PortalLayout() {
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 glass pb-safe border-t border-white/10 z-50">
         <div className="flex items-center justify-around h-16 px-2">
-          {profile?.role === 'admin' && (
+          {isSystemAdmin(profile?.role) && (
             <Link
               to="/admin"
               className={cn(

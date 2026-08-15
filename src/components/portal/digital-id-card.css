@@ -83,6 +83,18 @@
   filter: drop-shadow(0 18px 40px rgba(180, 120, 20, 0.35));
 }
 
+.id-mesh-admin {
+  background-image:
+    linear-gradient(rgba(167, 139, 250, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+}
+
+.id-variant-admin {
+  filter: drop-shadow(0 18px 40px rgba(109, 40, 217, 0.32));
+}
+
 @media print {
   .no-print {
     display: none !important;

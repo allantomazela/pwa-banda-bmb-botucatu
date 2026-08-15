@@ -7,6 +7,7 @@ import { publicPagePath } from '@/lib/cms'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { BrandMark } from '@/components/BrandMark'
+import { isSystemAdmin } from '@/lib/roles'
 
 const PUBLIC_NAV = [
   { name: 'Início', path: '/', icon: Home },
@@ -20,8 +21,8 @@ export function Header() {
   const { navPages } = useSitePages()
   const location = useLocation()
 
-  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
-  const portalLabel = profile?.role === 'admin' ? 'Painel Admin' : 'Portal do Aluno'
+  const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
+  const portalLabel = isSystemAdmin(profile?.role) ? 'Painel Admin' : 'Portal'
 
   return (
     <header className="hidden md:flex glass sticky top-0 z-50 w-full h-16 items-center px-6 lg:px-12 justify-between">
@@ -110,7 +111,7 @@ export function Header() {
 
 export function MobileHeader() {
   const { user, profile } = useAuth()
-  const portalPath = profile?.role === 'admin' ? '/admin' : '/portal'
+  const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
   return (
     <header className="md:hidden glass sticky top-0 z-50 w-full h-14 flex items-center justify-between px-4">
