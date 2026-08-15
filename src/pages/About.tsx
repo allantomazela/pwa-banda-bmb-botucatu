@@ -9,6 +9,8 @@ import {
 import Autoplay from 'embla-carousel-autoplay'
 import { useRef } from 'react'
 import { CmsSections } from '@/components/cms/CmsSections'
+import { BrandCrest } from '@/components/BrandMark'
+import { BRAND_NAME } from '@/lib/brand'
 
 export default function About() {
   const plugin = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }))
@@ -21,11 +23,20 @@ export default function About() {
 
   return (
     <div className="container py-12 lg:py-20 animate-fade-in-up">
-      <div className="max-w-3xl mx-auto mb-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-primary">Nossa História</h1>
+      <div className="mx-auto mb-16 max-w-3xl text-center">
+        <div className="mx-auto mb-6 h-24 w-24">
+          <BrandCrest className="crest-glow" />
+        </div>
+        <p className="mb-3 font-crest text-[11px] font-semibold uppercase tracking-[0.4em] text-primary">
+          {BRAND_NAME}
+        </p>
+        <h1 className="mb-6 font-crest text-4xl font-bold text-primary md:text-5xl">
+          Nossa História
+        </h1>
         <p className="text-lg text-muted-foreground">
-          Fundada com o propósito de levar cultura e disciplina aos jovens de Botucatu, a Banda BMB
-          se consolidou como um dos principais corpos musicais do interior paulista.
+          Fundada com o propósito de levar cultura e disciplina aos jovens de Botucatu, a Banda
+          Marcial de Botucatu se consolidou como um dos principais corpos musicais do interior
+          paulista.
         </p>
       </div>
 

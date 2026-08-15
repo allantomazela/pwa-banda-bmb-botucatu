@@ -23,6 +23,8 @@ export interface Profile {
   approved_at: string | null
   approved_by: string | null
   updated_at: string
+  guardian_name: string | null
+  guardian_phone: string | null
 }
 
 interface AuthContextType {

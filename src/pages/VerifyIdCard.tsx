@@ -40,6 +40,8 @@ export default function VerifyIdCard() {
               cpf: data.cpf,
               rg: data.rg,
               disability_info: data.disability_info,
+              guardian_name: data.guardian_name,
+              guardian_phone: data.guardian_phone,
               role: data.role,
             }}
           />

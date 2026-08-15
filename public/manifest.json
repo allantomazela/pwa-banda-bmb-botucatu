@@ -1,7 +1,7 @@
 {
-  "name": "Banda BMB - Botucatu",
-  "short_name": "Banda BMB",
-  "description": "Progressive Web App da Banda BMB de Botucatu-SP",
+  "name": "Banda Marcial de Botucatu",
+  "short_name": "BMB",
+  "description": "Banda Marcial de Botucatu — tradição, disciplina e honra pela música.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1B263B",
@@ -16,6 +16,12 @@
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     }

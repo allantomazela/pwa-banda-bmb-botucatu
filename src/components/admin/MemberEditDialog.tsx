@@ -20,10 +20,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AvatarUpload } from '@/components/AvatarUpload'
+import { GuardianFields } from '@/components/GuardianFields'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { addYearsToDate, formatCPF } from '@/lib/formatters'
+import { addYearsToDate, formatCPF, getGuardianValidationError, isMinor } from '@/lib/formatters'
 
 interface MemberEditDialogProps {
   profile: Profile | null
@@ -48,6 +49,8 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
     role: 'member',
     avatar_url: '',
     disability_info: '',
+    guardian_name: '',
+    guardian_phone: '',
   })
 
   useEffect(() => {
@@ -65,6 +68,8 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
         role: profile.role || 'member',
         avatar_url: profile.avatar_url || '',
         disability_info: profile.disability_info || '',
+        guardian_name: profile.guardian_name || '',
+        guardian_phone: profile.guardian_phone || '',
       })
     }
   }, [profile])
@@ -84,6 +89,15 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
       toast({ title: 'Erro', description: 'O nome é obrigatório.', variant: 'destructive' })
       return
     }
+    const guardianError = getGuardianValidationError(
+      form.birth_date,
+      form.guardian_name,
+      form.guardian_phone,
+    )
+    if (guardianError) {
+      toast({ title: 'Dados do responsável', description: guardianError, variant: 'destructive' })
+      return
+    }
     setSaving(true)
     const { error } = await updateProfileAdmin(profile.id, {
       full_name: form.full_name,
@@ -97,6 +111,8 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
       valid_until: form.valid_until || null,
       role: form.role,
       disability_info: form.disability_info || null,
+      guardian_name: form.guardian_name.trim() || null,
+      guardian_phone: form.guardian_phone.trim() || null,
     })
     setSaving(false)
     if (error) {
@@ -143,7 +159,9 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
             <div className="space-y-2">
               <Label htmlFor="me-reg">Matrícula (automática)</Label>
               <Input id="me-reg" value={form.registration_number} readOnly className="opacity-80" />
-              <p className="text-xs text-muted-foreground">Gerada pelo sistema no cadastro. Não editar.</p>
+              <p className="text-xs text-muted-foreground">
+                Gerada pelo sistema no cadastro. Não editar.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="me-city">Cidade</Label>
@@ -204,8 +222,8 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Identificação institucional válida em todo o território brasileiro junto à Banda BMB,
-                até esta data. Não substitui documento oficial.
+                Identificação institucional válida em todo o território brasileiro junto à Banda
+                BMB, até esta data. Não substitui documento oficial.
               </p>
             </div>
             <div className="space-y-2">
@@ -230,6 +248,15 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
               rows={2}
             />
           </div>
+          {isMinor(form.birth_date) && (
+            <GuardianFields
+              idPrefix="me-guardian"
+              name={form.guardian_name}
+              phone={form.guardian_phone}
+              onNameChange={(v) => set('guardian_name', v)}
+              onPhoneChange={(v) => set('guardian_phone', v)}
+            />
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

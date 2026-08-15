@@ -14,6 +14,8 @@ export type IdCardVerification = {
   cpf: string
   rg: string
   disability_info: string | null
+  guardian_name: string | null
+  guardian_phone: string | null
 }
 
 export async function verifyIdCard(memberId: string): Promise<IdCardVerification | null> {

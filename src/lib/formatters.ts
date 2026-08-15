@@ -48,3 +48,39 @@ export function isDateOnOrAfterToday(dateStr: string | null | undefined): boolea
   const iso = dateStr.split('T')[0]
   return iso >= toISODateLocal()
 }
+
+export function isMinor(birthDate: string | null | undefined, today = new Date()): boolean {
+  if (!birthDate) return false
+  const [year, month, day] = birthDate.split('T')[0].split('-').map(Number)
+  if (!year || !month || !day) return false
+  const eighteenth = new Date(year + 18, month - 1, day)
+  const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  return todayLocal < eighteenth
+}
+
+export function formatPhoneBR(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length === 0) return ''
+  if (digits.length <= 2) return `(${digits}`
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  }
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+}
+
+export function isValidPhoneBR(phone: string): boolean {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length === 10 || digits.length === 11
+}
+
+export function getGuardianValidationError(
+  birthDate: string | null | undefined,
+  name: string,
+  phone: string,
+): string | null {
+  if (!isMinor(birthDate)) return null
+  if (!name.trim()) return 'Informe o nome do responsável do menor de idade.'
+  if (!isValidPhoneBR(phone)) return 'Informe um telefone válido do responsável.'
+  return null
+}

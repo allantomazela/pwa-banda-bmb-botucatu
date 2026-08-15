@@ -14,10 +14,12 @@ import {
   BadgeCheck,
   GraduationCap,
   Award,
+  Phone,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { formatDateBR, isDateOnOrAfterToday } from '@/lib/formatters'
+import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
 import './digital-id-card.css'
 
 export interface DigitalIdProfile {
@@ -34,6 +36,8 @@ export interface DigitalIdProfile {
   disability_info: string | null
   rg: string
   role: string
+  guardian_name: string | null
+  guardian_phone: string | null
 }
 
 type CardVariant = 'aluno' | 'professor'
@@ -169,6 +173,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
   const isProfessor = variant === 'professor'
   const accentText = isProfessor ? 'text-amber-300' : 'text-sky-300'
   const accentSoft = isProfessor ? 'text-amber-400' : 'text-sky-400'
+  const showGuardian = isMinor(profile.birth_date)
 
   return (
     <div className={cn('flex w-full flex-col items-center', className)}>
@@ -243,15 +248,16 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               >
                 <div className="absolute inset-0 id-card-shimmer" />
                 <div className="relative z-10 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B263B] shadow-md ring-1 ring-white/20">
-                    <Music2
-                      className={cn('h-4 w-4', isProfessor ? 'text-amber-300' : 'text-sky-300')}
-                      strokeWidth={2.5}
+                  <div className="h-9 w-9 overflow-hidden rounded-full bg-[#1B263B] shadow-md ring-1 ring-white/20">
+                    <img
+                      src="/brand-logo.png"
+                      alt="Brasão da Banda Marcial de Botucatu"
+                      className="h-full w-full object-contain"
                     />
                   </div>
                   <div className="leading-tight">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#1B263B]/90">
-                      Banda BMB
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1B263B]/90">
+                      Banda Marcial
                     </p>
                     <p className="text-sm font-extrabold uppercase tracking-wide text-[#1B263B]">
                       {meta.badge}
@@ -377,6 +383,24 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                   </div>
                 )}
 
+                {showGuardian && (
+                  <div className="mt-2 w-full rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-2 backdrop-blur-sm">
+                    <div className="mb-0.5 flex items-center gap-1">
+                      <Users className="h-2.5 w-2.5 shrink-0 text-amber-300" />
+                      <span className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                        Responsável
+                      </span>
+                    </div>
+                    <p className="break-words text-[10px] font-medium leading-tight text-white">
+                      {displayOrDash(profile.guardian_name)}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-white/85">
+                      <Phone className="h-2.5 w-2.5 shrink-0 text-amber-300" />
+                      {displayOrDash(profile.guardian_phone)}
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10 pt-3">
                   <div className="min-w-0">
                     <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
@@ -432,14 +456,9 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
             <div className="relative z-10 flex h-full min-h-[560px] flex-col items-center justify-between p-6">
               <div className="w-full shrink-0 pt-1 text-center">
                 <div className="mb-1 flex items-center justify-center gap-2">
-                  <Music2 className={cn('h-5 w-5', accentSoft)} />
-                  <span
-                    className={cn(
-                      'text-sm font-bold uppercase tracking-[0.2em]',
-                      accentSoft,
-                    )}
-                  >
-                    Banda BMB
+                  <img src="/brand-logo.png" alt="" className="h-7 w-7 object-contain" />
+                  <span className={cn('text-sm font-bold uppercase tracking-[0.14em]', accentSoft)}>
+                    Banda Marcial
                   </span>
                 </div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/55">
@@ -460,9 +479,22 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                 <p className="text-center text-[11px] leading-relaxed text-white/70">
                   Escaneie o QR Code para validar a autenticidade desta carteirinha.
                 </p>
+                {showGuardian && (
+                  <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-center">
+                    <p className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                      Contato de emergência
+                    </p>
+                    <p className="mt-0.5 text-[11px] font-medium text-white">
+                      {displayOrDash(profile.guardian_name)}
+                    </p>
+                    <p className="font-mono text-[11px] text-white/85">
+                      {displayOrDash(profile.guardian_phone)}
+                    </p>
+                  </div>
+                )}
                 <div className="border-t border-white/10 pt-3 text-center">
                   <p className="text-[9px] leading-relaxed text-white/45">
-                    Identificação institucional da Banda BMB — Botucatu/SP.
+                    Identificação institucional da Banda Marcial de Botucatu.
                     <br />
                     Válida em todo o território brasileiro para reconhecimento do integrante junto à
                     associação, até a data de validade.

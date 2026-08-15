@@ -126,6 +126,8 @@ export type Database = {
           disability_info: string | null
           email: string
           full_name: string
+          guardian_name: string | null
+          guardian_phone: string | null
           id: string
           instrument: string
           registration_number: string
@@ -146,6 +148,8 @@ export type Database = {
           disability_info?: string | null
           email?: string
           full_name?: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
           id: string
           instrument?: string
           registration_number?: string
@@ -166,6 +170,8 @@ export type Database = {
           disability_info?: string | null
           email?: string
           full_name?: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
           id?: string
           instrument?: string
           registration_number?: string
@@ -399,6 +405,8 @@ export type Database = {
           cpf: string
           disability_info: string | null
           full_name: string
+          guardian_name: string | null
+          guardian_phone: string | null
           instrument: string
           is_valid: boolean
           registration_number: string

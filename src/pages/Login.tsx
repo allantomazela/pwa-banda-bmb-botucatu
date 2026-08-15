@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Music, AlertCircle, KeyRound } from 'lucide-react'
+import { Loader2, AlertCircle, KeyRound } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import type { AuthError } from '@supabase/supabase-js'
+import { GuardianFields } from '@/components/GuardianFields'
+import { getGuardianValidationError, isMinor } from '@/lib/formatters'
+import { BrandMark } from '@/components/BrandMark'
 
 type AuthMode = 'login' | 'register' | 'forgot'
 
@@ -18,6 +21,9 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [instrument, setInstrument] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [guardianName, setGuardianName] = useState('')
+  const [guardianPhone, setGuardianPhone] = useState('')
   const { signIn, signUp, resetPassword, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -78,6 +84,18 @@ export default function Login() {
       return
     }
 
+    if (mode === 'register') {
+      if (!birthDate) {
+        setErrorMessage('Informe a data de nascimento.')
+        return
+      }
+      const guardianError = getGuardianValidationError(birthDate, guardianName, guardianPhone)
+      if (guardianError) {
+        setErrorMessage(guardianError)
+        return
+      }
+    }
+
     setSubmitting(true)
     try {
       if (mode === 'forgot') {
@@ -123,6 +141,9 @@ export default function Login() {
       const { error } = await signUp(email, password, {
         full_name: fullName,
         instrument,
+        birth_date: birthDate,
+        guardian_name: guardianName.trim(),
+        guardian_phone: guardianPhone.trim(),
       })
       if (error) {
         const msg = getErrorMessage(error)
@@ -169,9 +190,7 @@ export default function Login() {
 
       <Card className="relative z-10 w-full max-w-md animate-fade-in border-white/10 bg-card/80 shadow-2xl backdrop-blur-xl">
         <CardHeader className="space-y-3 pb-6 text-center">
-          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-glow">
-            <Music className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <BrandMark variant="login" />
           <CardTitle className="text-2xl font-bold">{titles[mode].title}</CardTitle>
           <CardDescription>{titles[mode].description}</CardDescription>
         </CardHeader>
@@ -207,6 +226,25 @@ export default function Login() {
                     required
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="birthDate">Data de nascimento</Label>
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    className="h-12 bg-background/50"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    required
+                  />
+                </div>
+                {isMinor(birthDate) && (
+                  <GuardianFields
+                    name={guardianName}
+                    phone={guardianPhone}
+                    onNameChange={setGuardianName}
+                    onPhoneChange={setGuardianPhone}
+                  />
+                )}
               </>
             )}
             <div className="space-y-2">

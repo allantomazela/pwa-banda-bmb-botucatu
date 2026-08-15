@@ -28,6 +28,7 @@ export default {
       fontFamily: {
         sans: ['Inter var', 'Montserrat', 'system-ui', 'sans-serif'],
         display: ['Montserrat', 'Inter var', 'system-ui', 'sans-serif'],
+        crest: ['Cinzel', 'Times New Roman', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

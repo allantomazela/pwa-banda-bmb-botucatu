@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useSiteSettings } from '@/hooks/use-site-settings'
 import { useSitePages } from '@/hooks/use-site-pages'
-import { publicPagePath } from '@/lib/cms'
+import { BrandMark } from '@/components/BrandMark'
+import { BRAND_NAME_TITLE } from '@/lib/brand'
 
 export function Footer() {
   const location = useLocation()
@@ -21,13 +22,8 @@ export function Footer() {
     <footer className="bg-background border-t border-white/5 py-12 px-6 lg:px-12 mt-auto">
       <div className="container max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
-              B
-            </div>
-            <span className="font-display font-bold text-xl">
-              {settings.header_title || 'Banda BMB'}
-            </span>
+          <div className="mb-4">
+            <BrandMark variant="footer" />
           </div>
           <p className="text-muted-foreground text-sm max-w-xs">
             {settings.footer_about ||
@@ -65,7 +61,10 @@ export function Footer() {
             </li>
             {navPages.map((page) => (
               <li key={page.id}>
-                <Link to={publicPagePath(page.slug)} className="hover:text-primary transition-colors">
+                <Link
+                  to={publicPagePath(page.slug)}
+                  className="hover:text-primary transition-colors"
+                >
                   {page.nav_label}
                 </Link>
               </li>
@@ -84,7 +83,9 @@ export function Footer() {
         </div>
       </div>
       <div className="container max-w-6xl mx-auto mt-12 pt-6 border-t border-white/5 text-center text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Banda BMB. Todos os direitos reservados.</p>
+        <p>
+          &copy; {new Date().getFullYear()} {BRAND_NAME_TITLE}. Todos os direitos reservados.
+        </p>
         <p className="mt-1">Criado por Allan Tomazela de Camargo</p>
       </div>
     </footer>

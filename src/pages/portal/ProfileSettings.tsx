@@ -17,8 +17,9 @@ import { useToast } from '@/hooks/use-toast'
 import { Loader2, Save, AlertCircle, UserRound } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { formatCPF, isValidCPF } from '@/lib/formatters'
+import { formatCPF, getGuardianValidationError, isMinor, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
+import { GuardianFields } from '@/components/GuardianFields'
 import { ChangePasswordCard } from '@/components/portal/ChangePasswordCard'
 
 export default function ProfileSettings() {
@@ -37,6 +38,8 @@ export default function ProfileSettings() {
     birth_date: '',
     avatar_url: '',
     disability_info: '',
+    guardian_name: '',
+    guardian_phone: '',
   })
 
   useEffect(() => {
@@ -52,6 +55,8 @@ export default function ProfileSettings() {
         birth_date: profile.birth_date ? profile.birth_date.split('T')[0] : '',
         avatar_url: profile.avatar_url || '',
         disability_info: profile.disability_info || '',
+        guardian_name: profile.guardian_name || '',
+        guardian_phone: profile.guardian_phone || '',
       })
     }
   }, [profile])
@@ -89,6 +94,15 @@ export default function ProfileSettings() {
       })
       return
     }
+    const guardianError = getGuardianValidationError(
+      form.birth_date,
+      form.guardian_name,
+      form.guardian_phone,
+    )
+    if (guardianError) {
+      toast({ title: 'Dados do responsável', description: guardianError, variant: 'destructive' })
+      return
+    }
     setSaving(true)
     const { error } = await updateProfile(user.id, {
       full_name: form.full_name,
@@ -100,6 +114,8 @@ export default function ProfileSettings() {
       birth_date: form.birth_date || null,
       avatar_url: form.avatar_url,
       disability_info: form.disability_info || null,
+      guardian_name: form.guardian_name.trim() || null,
+      guardian_phone: form.guardian_phone.trim() || null,
     })
     setSaving(false)
     if (error) {
@@ -132,10 +148,13 @@ export default function ProfileSettings() {
     'birth_date',
     'avatar_url',
   ]
-  const filledCount = MANDATORY_FIELDS.filter(
-    (f) => form[f] && String(form[f]).trim() !== '',
-  ).length
-  const completion = Math.round((filledCount / MANDATORY_FIELDS.length) * 100)
+  const minor = isMinor(form.birth_date)
+  const guardianFilled =
+    !minor || (form.guardian_name.trim() !== '' && form.guardian_phone.trim() !== '')
+  const filledCount =
+    MANDATORY_FIELDS.filter((f) => form[f] && String(form[f]).trim() !== '').length +
+    (guardianFilled ? 1 : 0)
+  const completion = Math.round((filledCount / (MANDATORY_FIELDS.length + (minor ? 1 : 0))) * 100)
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-6 lg:p-10">
@@ -297,6 +316,14 @@ export default function ProfileSettings() {
               rows={3}
             />
           </div>
+          {minor && (
+            <GuardianFields
+              name={form.guardian_name}
+              phone={form.guardian_phone}
+              onNameChange={(v) => handleChange('guardian_name', v)}
+              onPhoneChange={(v) => handleChange('guardian_phone', v)}
+            />
+          )}
 
           <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
             {saving ? (
