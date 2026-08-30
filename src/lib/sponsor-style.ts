@@ -1,5 +1,5 @@
 export type SponsorBgType = 'solid' | 'gradient'
-export type SponsorTier = 'master' | 'ouro' | 'prata' | 'apoiador'
+export type SponsorTier = 'master' | 'ouro' | 'prata' | 'bronze' | 'apoiador'
 
 export type SponsorCardStyle = {
   bg_type: SponsorBgType
@@ -17,11 +17,20 @@ export const SPONSOR_TIERS: Array<{
   { value: 'master', label: 'Master', badge: 'Patrocinador Master', kind: 'patrocinador', rank: 0 },
   { value: 'ouro', label: 'Ouro', badge: 'Patrocinador Ouro', kind: 'patrocinador', rank: 1 },
   { value: 'prata', label: 'Prata', badge: 'Patrocinador Prata', kind: 'patrocinador', rank: 2 },
-  { value: 'apoiador', label: 'Apoiador', badge: 'Apoiador Cultural', kind: 'apoiador', rank: 3 },
+  { value: 'bronze', label: 'Bronze', badge: 'Patrocinador Bronze', kind: 'patrocinador', rank: 3 },
+  { value: 'apoiador', label: 'Apoiador', badge: 'Apoiador Cultural', kind: 'apoiador', rank: 4 },
 ]
 
 export function normalizeSponsorTier(tier?: string | null): SponsorTier {
-  if (tier === 'master' || tier === 'ouro' || tier === 'prata' || tier === 'apoiador') return tier
+  if (
+    tier === 'master' ||
+    tier === 'ouro' ||
+    tier === 'prata' ||
+    tier === 'bronze' ||
+    tier === 'apoiador'
+  ) {
+    return tier
+  }
   return 'ouro'
 }
 

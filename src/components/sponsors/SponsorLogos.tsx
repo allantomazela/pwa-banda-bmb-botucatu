@@ -7,6 +7,7 @@ import {
   isLightColor,
   sponsorCardBackground,
   sponsorTierMeta,
+  SPONSOR_TIERS,
   type SponsorBgType,
 } from '@/lib/sponsor-style'
 import { cn } from '@/lib/utils'
@@ -18,13 +19,15 @@ const TIER_BADGE_CLASS: Record<string, string> = {
     'border border-amber-300/70 bg-gradient-to-r from-amber-300 to-yellow-500 text-slate-900 shadow-[0_0_24px_rgba(251,192,45,0.55)]',
   ouro: 'border border-primary/50 bg-primary text-primary-foreground shadow-[0_0_20px_rgba(251,192,45,0.35)]',
   prata: 'border border-slate-300/40 bg-slate-200/90 text-slate-900',
+  bronze: 'border border-orange-400/40 bg-orange-700/80 text-orange-50',
   apoiador: 'border border-sky-300/30 bg-sky-500/20 text-sky-100',
 }
 
 const TIER_CARD_CLASS: Record<string, string> = {
   master: 'ring-2 ring-amber-300/50 sm:h-[260px] sm:w-[300px]',
   ouro: 'ring-1 ring-primary/35',
-  prata: '',
+  prata: 'ring-1 ring-slate-300/20',
+  bronze: 'ring-1 ring-orange-500/25',
   apoiador: '',
 }
 
@@ -181,9 +184,21 @@ export function SponsorLogos({ showCta = false }: Props) {
           </h2>
           <p className="mx-auto max-w-2xl text-balance text-base text-muted-foreground md:text-lg">
             Empresas e parceiros essenciais que mantêm nossos instrumentos afinados, viagens
-            possíveis e o sonho musical vivo — com destaque em níveis Master, Ouro, Prata e
-            Apoiador Cultural.
+            possíveis e o sonho musical vivo.
           </p>
+          <ul className="flex flex-wrap items-center justify-center gap-2 pt-1">
+            {SPONSOR_TIERS.map((tier) => (
+              <li
+                key={tier.value}
+                className={cn(
+                  'rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]',
+                  TIER_BADGE_CLASS[tier.value],
+                )}
+              >
+                {tier.label}
+              </li>
+            ))}
+          </ul>
         </header>
 
         {loading ? (
@@ -226,8 +241,8 @@ export function SponsorLogos({ showCta = false }: Props) {
                 Sua marca no mesmo palco da BMB
               </p>
               <p className="text-sm text-muted-foreground sm:text-base">
-                Escolha o nível Master, Ouro, Prata ou Apoiador Cultural e ganhe destaque premium
-                neste espaço — visibilidade, prestígio e impacto cultural em Botucatu.
+                Escolha o nível Master, Ouro, Prata, Bronze ou Apoiador Cultural e ganhe destaque
+                premium neste espaço — visibilidade, prestígio e impacto cultural em Botucatu.
               </p>
               <Button asChild size="lg" className="h-12 px-8 shadow-glow transition-transform hover:scale-[1.03]">
                 <Link to="/patrocinadores#formulario">

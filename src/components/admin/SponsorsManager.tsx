@@ -157,7 +157,7 @@ export function SponsorsManager() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-4">
         <p className="text-sm text-muted-foreground">
-          Cadastre logos com nível Master, Ouro, Prata ou Apoiador Cultural.
+          Cadastre logos com nível Master, Ouro, Prata, Bronze ou Apoiador Cultural.
         </p>
         <Button onClick={openCreate}>
           <Plus className="w-4 h-4 mr-2" /> Nova logo
