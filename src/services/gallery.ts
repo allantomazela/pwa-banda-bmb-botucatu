@@ -22,6 +22,18 @@ export async function getEventPhotos(): Promise<GalleryPhoto[]> {
   return data ?? []
 }
 
+/** Fotos recentes para o card principal da home (exclui Banner). */
+export async function getShowcasePhotos(limit = 12): Promise<GalleryPhoto[]> {
+  const { data, error } = await supabase
+    .from('gallery_photos')
+    .select('*')
+    .neq('category', 'Banner')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data ?? []
+}
+
 export async function createGalleryPhoto(
   data: Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>,
 ): Promise<{ error: string | null }> {

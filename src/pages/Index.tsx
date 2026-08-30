@@ -7,6 +7,7 @@ import { useSiteSettings } from '@/hooks/use-site-settings'
 import { CmsSections } from '@/components/cms/CmsSections'
 import { SponsorLogos } from '@/components/sponsors/SponsorLogos'
 import { HomeHero } from '@/components/home/HomeHero'
+import { HomeGalleryShowcase } from '@/components/home/HomeGalleryShowcase'
 
 export default function Index() {
   const { user } = useAuth()
@@ -16,8 +17,10 @@ export default function Index() {
     <div className="flex flex-col">
       <HomeHero />
 
+      <HomeGalleryShowcase />
+
       {/* Quick Access Tiles */}
-      <section className="relative z-20 -mt-6 bg-background py-10 lg:-mt-10 lg:py-20">
+      <section className="relative z-20 bg-background py-10 lg:py-20">
         <div className="container px-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             <Link to="/sobre" className="block group">
