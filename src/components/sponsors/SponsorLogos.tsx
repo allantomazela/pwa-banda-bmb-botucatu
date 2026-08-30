@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, Handshake, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/use-fetch'
@@ -126,11 +126,31 @@ function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
   )
 }
 
+function goToSponsorContactForm(
+  pathname: string,
+  navigate: ReturnType<typeof useNavigate>,
+) {
+  if (pathname === '/patrocinadores') {
+    const el = document.getElementById('formulario')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (window.location.hash !== '#formulario') {
+      navigate('/patrocinadores#formulario', { replace: true })
+    }
+    return
+  }
+  navigate('/patrocinadores#formulario')
+}
+
 function InviteCard() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   return (
-    <Link
-      to="/patrocinadores#formulario"
-      className="block shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl"
+    <button
+      type="button"
+      onClick={() => goToSponsorContactForm(location.pathname, navigate)}
+      className="block shrink-0 rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      aria-label="Quero ser patrocinador e entrar em contato"
     >
       <article className="sponsor-card-glow sponsor-invite-border group relative flex h-[220px] w-[260px] shrink-0 flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl bg-zinc-900/50 px-6 py-7 backdrop-blur-xl sm:h-[240px] sm:w-[280px]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(251,192,45,0.18),transparent_60%)]" />
@@ -144,11 +164,11 @@ function InviteCard() {
           Coloque sua marca no palco da tradição musical de Botucatu
         </p>
         <span className="relative z-10 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-primary transition-transform duration-300 group-hover:translate-x-1">
-          Quero apoiar
+          Entrar em contato
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </span>
       </article>
-    </Link>
+    </button>
   )
 }
 
@@ -158,6 +178,8 @@ type Props = {
 
 export function SponsorLogos({ showCta = false }: Props) {
   const { data: sponsors, loading } = useFetch<Sponsor[]>(getVisibleSponsors)
+  const location = useLocation()
+  const navigate = useNavigate()
   const trackItems = buildTrackItems(sponsors ?? [])
   const durationSec = Math.max(28, trackItems.length * 7)
 
@@ -244,11 +266,14 @@ export function SponsorLogos({ showCta = false }: Props) {
                 Escolha o nível Master, Ouro, Prata, Bronze ou Apoiador Cultural e ganhe destaque
                 premium neste espaço — visibilidade, prestígio e impacto cultural em Botucatu.
               </p>
-              <Button asChild size="lg" className="h-12 px-8 shadow-glow transition-transform hover:scale-[1.03]">
-                <Link to="/patrocinadores#formulario">
-                  Quero ser patrocinador
-                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                </Link>
+              <Button
+                type="button"
+                size="lg"
+                className="h-12 px-8 shadow-glow transition-transform hover:scale-[1.03]"
+                onClick={() => goToSponsorContactForm(location.pathname, navigate)}
+              >
+                Quero ser patrocinador
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
               </Button>
             </div>
           </div>
