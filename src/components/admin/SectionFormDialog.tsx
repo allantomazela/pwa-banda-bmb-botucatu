@@ -73,15 +73,23 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Erro', description: 'Arquivo muito grande (máx 5MB).', variant: 'destructive' })
+      toast({
+        title: 'Erro',
+        description: 'Arquivo muito grande (máx 5MB).',
+        variant: 'destructive',
+      })
       return
     }
-    const url = await uploadGalleryImage(file)
+    const { url, error } = await uploadGalleryImage(file)
     if (url) {
       setForm((prev) => ({ ...prev, media_url: url }))
       toast({ title: 'Imagem enviada!' })
     } else {
-      toast({ title: 'Erro', description: 'Falha no upload.', variant: 'destructive' })
+      toast({
+        title: 'Erro',
+        description: error || 'Falha no upload.',
+        variant: 'destructive',
+      })
     }
     if (fileRef.current) fileRef.current.value = ''
   }
@@ -146,7 +154,13 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
           {form.section_type === 'image' ? (
             <div className="space-y-2">
               <Label>Imagem</Label>
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleUpload}
+              />
               <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
                 <Upload className="w-4 h-4 mr-2" />
                 Enviar imagem

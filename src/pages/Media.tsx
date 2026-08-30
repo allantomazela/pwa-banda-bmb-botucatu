@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFetch } from '@/hooks/use-fetch'
@@ -6,11 +6,12 @@ import { getEventPhotos, getGalleryPhotos, type GalleryPhoto } from '@/services/
 import { getPublicVideos, type VideoItem } from '@/services/videos'
 import { getVideoThumbnail } from '@/lib/video-embed'
 import { MediaLightbox } from '@/components/media/MediaLightbox'
+import { PhotoMasonryGrid } from '@/components/media/PhotoMasonryGrid'
 import { CmsSections } from '@/components/cms/CmsSections'
-import { ImageIcon, Loader2, Play, Video } from 'lucide-react'
+import { Loader2, Play, Video } from 'lucide-react'
 
 type SelectedMedia =
-  | { kind: 'photo'; item: GalleryPhoto }
+  | { kind: 'photo'; list: GalleryPhoto[]; index: number }
   | { kind: 'video'; item: VideoItem }
   | null
 
@@ -32,19 +33,47 @@ export default function Media() {
 
   useEffect(() => {
     const fromUrl = searchParams.get('tab')
-    if (fromUrl && VALID_TABS.has(fromUrl) && fromUrl !== tab) {
-      setTab(fromUrl)
-    }
+    if (fromUrl && VALID_TABS.has(fromUrl) && fromUrl !== tab) setTab(fromUrl)
   }, [searchParams, tab])
+
+  useEffect(() => {
+    if (selected?.kind !== 'photo') return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setSelected((prev) =>
+          prev?.kind === 'photo'
+            ? {
+                ...prev,
+                index: (prev.index - 1 + prev.list.length) % prev.list.length,
+              }
+            : prev,
+        )
+      }
+      if (e.key === 'ArrowRight') {
+        setSelected((prev) =>
+          prev?.kind === 'photo'
+            ? { ...prev, index: (prev.index + 1) % prev.list.length }
+            : prev,
+        )
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selected?.kind])
 
   const handleTabChange = (value: string) => {
     setTab(value)
     setSearchParams(value === 'fotos' ? {} : { tab: value }, { replace: true })
   }
 
-  const selectedTitle =
+  const activePhoto = useMemo(() => {
+    if (selected?.kind !== 'photo') return null
+    return selected.list[selected.index] ?? null
+  }, [selected])
+
+  const lightboxTitle =
     selected?.kind === 'photo'
-      ? selected.item.title || 'Foto da galeria'
+      ? activePhoto?.title || 'Foto da galeria'
       : selected?.kind === 'video'
         ? selected.item.title
         : 'Mídia'
@@ -57,8 +86,8 @@ export default function Media() {
             Galeria de <span className="text-primary">Mídia</span>
           </h1>
           <p className="text-base text-muted-foreground sm:text-lg">
-            Fotos, memórias de eventos e vídeos públicos das apresentações da Banda Marcial de
-            Botucatu.
+            Explore as fotos e vídeos da Banda Marcial de Botucatu em um mosaico visual — toque para
+            ampliar e navegue com as setas.
           </p>
         </div>
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full md:w-auto">
@@ -72,39 +101,47 @@ export default function Media() {
 
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
         <TabsContent value="fotos" className="mt-0">
-          <PhotoGrid
+          <PhotoMasonryGrid
             loading={photosLoading}
             error={photosError}
             photos={photos}
             emptyText="Nenhuma foto publicada no momento."
-            onSelect={(item) => setSelected({ kind: 'photo', item })}
+            onSelect={(_photo, index) =>
+              setSelected({ kind: 'photo', list: photos ?? [], index })
+            }
           />
         </TabsContent>
 
-        <TabsContent value="eventos" className="mt-0">
-          <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
-            Espaço atualizado com registros fotográficos dos eventos já realizados. Novas fotos
-            publicadas no admin (categoria <strong className="text-primary">Eventos</strong>)
-            aparecem automaticamente aqui.
+        <TabsContent value="eventos" className="mt-0 space-y-6">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
+            Memórias dos eventos realizados. Novas fotos com categoria{' '}
+            <strong className="text-primary">Eventos</strong> aparecem automaticamente.
           </div>
-          <PhotoGrid
+          <PhotoMasonryGrid
             loading={eventsLoading}
             error={eventsError}
             photos={eventPhotos}
             emptyText="Ainda não há fotos de eventos. Em breve novas memórias aparecerão."
-            onSelect={(item) => setSelected({ kind: 'photo', item })}
+            onSelect={(_photo, index) =>
+              setSelected({ kind: 'photo', list: eventPhotos ?? [], index })
+            }
           />
         </TabsContent>
 
         <TabsContent value="videos" className="mt-0">
           {videosLoading ? (
-            <LoadingState />
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
           ) : videosError ? (
             <p className="py-16 text-center text-muted-foreground">
               Não foi possível carregar os vídeos.
             </p>
           ) : !videos?.length ? (
-            <EmptyState icon={Video} text="Nenhum vídeo público publicado no momento." />
+            <div className="py-16 text-center text-muted-foreground">
+              <Video className="mx-auto mb-4 h-12 w-12 opacity-20" />
+              <p>Nenhum vídeo público publicado no momento.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {videos.map((video) => (
@@ -112,7 +149,7 @@ export default function Media() {
                   key={video.id}
                   type="button"
                   onClick={() => setSelected({ kind: 'video', item: video })}
-                  className="group overflow-hidden rounded-xl border border-white/5 bg-card/50 text-left transition-colors hover:border-primary/30"
+                  className="group overflow-hidden rounded-2xl border border-white/5 bg-card/50 text-left transition-colors hover:border-primary/30"
                 >
                   <div className="relative aspect-video bg-black">
                     <img
@@ -146,77 +183,43 @@ export default function Media() {
 
       <MediaLightbox
         open={!!selected}
-        title={selectedTitle}
-        imageUrl={selected?.kind === 'photo' ? selected.item.image_url : null}
+        title={lightboxTitle}
+        imageUrl={selected?.kind === 'photo' ? activePhoto?.image_url : null}
         videoUrl={selected?.kind === 'video' ? selected.item.video_url : null}
+        counter={
+          selected?.kind === 'photo'
+            ? `${selected.index + 1} / ${selected.list.length}`
+            : undefined
+        }
+        onPrev={
+          selected?.kind === 'photo'
+            ? () =>
+                setSelected((prev) =>
+                  prev?.kind === 'photo'
+                    ? {
+                        ...prev,
+                        index: (prev.index - 1 + prev.list.length) % prev.list.length,
+                      }
+                    : prev,
+                )
+            : undefined
+        }
+        onNext={
+          selected?.kind === 'photo'
+            ? () =>
+                setSelected((prev) =>
+                  prev?.kind === 'photo'
+                    ? { ...prev, index: (prev.index + 1) % prev.list.length }
+                    : prev,
+                )
+            : undefined
+        }
         onClose={() => setSelected(null)}
       />
 
       <div className="mt-12 sm:mt-16">
         <CmsSections slug="media" />
       </div>
-    </div>
-  )
-}
-
-function PhotoGrid({
-  loading,
-  error,
-  photos,
-  emptyText,
-  onSelect,
-}: {
-  loading: boolean
-  error: string | null
-  photos: GalleryPhoto[] | null
-  emptyText: string
-  onSelect: (photo: GalleryPhoto) => void
-}) {
-  if (loading) return <LoadingState />
-  if (error) {
-    return <p className="py-16 text-center text-muted-foreground">Não foi possível carregar as fotos.</p>
-  }
-  if (!photos?.length) return <EmptyState icon={ImageIcon} text={emptyText} />
-
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
-      {photos.map((photo) => (
-        <button
-          key={photo.id}
-          type="button"
-          onClick={() => onSelect(photo)}
-          className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/5 bg-card text-left transition-colors hover:border-primary/30"
-        >
-          <img
-            src={photo.image_url}
-            alt={photo.title || 'Foto da galeria'}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-            <span className="line-clamp-1 text-sm font-medium text-white">
-              {photo.title || 'Ampliar'}
-            </span>
-          </div>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function LoadingState() {
-  return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  )
-}
-
-function EmptyState({ icon: Icon, text }: { icon: typeof ImageIcon; text: string }) {
-  return (
-    <div className="py-16 text-center text-muted-foreground">
-      <Icon className="mx-auto mb-4 h-12 w-12 opacity-20" />
-      <p>{text}</p>
     </div>
   )
 }

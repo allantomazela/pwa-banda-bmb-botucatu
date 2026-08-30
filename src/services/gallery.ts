@@ -25,9 +25,27 @@ export async function getEventPhotos(): Promise<GalleryPhoto[]> {
 export async function createGalleryPhoto(
   data: Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>,
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase.from('gallery_photos').insert(data)
+  const { error } = await supabase.from('gallery_photos').insert({
+    title: data.title?.trim() || '',
+    image_url: data.image_url,
+    category: data.category || 'Galeria',
+  })
   if (error) return { error: error.message }
   return { error: null }
+}
+
+export async function createGalleryPhotos(
+  items: Array<Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>>,
+): Promise<{ error: string | null; count: number }> {
+  if (items.length === 0) return { error: 'Nenhuma imagem para salvar.', count: 0 }
+  const payload = items.map((item) => ({
+    title: item.title?.trim() || '',
+    image_url: item.image_url,
+    category: item.category || 'Galeria',
+  }))
+  const { error, data } = await supabase.from('gallery_photos').insert(payload).select('id')
+  if (error) return { error: error.message, count: 0 }
+  return { error: null, count: data?.length ?? payload.length }
 }
 
 export async function deleteGalleryPhoto(id: string): Promise<{ error: string | null }> {
@@ -36,13 +54,20 @@ export async function deleteGalleryPhoto(id: string): Promise<{ error: string | 
   return { error: null }
 }
 
-export async function uploadGalleryImage(file: File): Promise<string | null> {
+export async function uploadGalleryImage(file: File): Promise<{ url: string | null; error: string | null }> {
+  const maxBytes = 5 * 1024 * 1024
+  if (file.size > maxBytes) {
+    return { url: null, error: `${file.name}: arquivo muito grande (máx 5MB).` }
+  }
+  if (!file.type.startsWith('image/')) {
+    return { url: null, error: `${file.name}: formato inválido.` }
+  }
   const ext = file.name.split('.').pop() || 'jpg'
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
   const { error } = await supabase.storage.from('gallery').upload(fileName, file)
-  if (error) return null
+  if (error) return { url: null, error: `${file.name}: falha no envio.` }
   const { data } = supabase.storage.from('gallery').getPublicUrl(fileName)
-  return data.publicUrl
+  return { url: data.publicUrl, error: null }
 }
 
 const SITE_IMAGE_TYPES: Record<'logo' | 'hero' | 'sponsor', string[]> = {

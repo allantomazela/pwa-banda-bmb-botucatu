@@ -36,10 +36,13 @@ export default function Agenda() {
   const { data: upcoming, loading, error } = useFetch<EventItem[]>(getUpcomingEvents)
   const { data: past } = useFetch<EventItem[]>(() => getPastEvents(6))
   const { data: eventPhotos } = useFetch<GalleryPhoto[]>(getEventPhotos)
-  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null)
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null)
 
   const next = upcoming?.[0] ?? null
   const rest = upcoming?.slice(1) ?? []
+  const previewPhotos = eventPhotos?.slice(0, 8) ?? []
+  const selectedPhoto =
+    photoIndex !== null && previewPhotos[photoIndex] ? previewPhotos[photoIndex] : null
 
   return (
     <div className="animate-fade-in">
@@ -165,11 +168,11 @@ export default function Agenda() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
-              {eventPhotos.slice(0, 8).map((photo) => (
+              {previewPhotos.map((photo, index) => (
                 <button
                   key={photo.id}
                   type="button"
-                  onClick={() => setSelectedPhoto(photo)}
+                  onClick={() => setPhotoIndex(index)}
                   className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/8 bg-card text-left transition-colors hover:border-primary/40"
                 >
                   <img
@@ -193,11 +196,30 @@ export default function Agenda() {
       </div>
 
       <MediaLightbox
-        open={!!selectedPhoto}
+        open={photoIndex !== null}
         title={selectedPhoto?.title || 'Foto do evento'}
         imageUrl={selectedPhoto?.image_url ?? null}
         videoUrl={null}
-        onClose={() => setSelectedPhoto(null)}
+        counter={
+          photoIndex !== null && previewPhotos.length
+            ? `${photoIndex + 1} / ${previewPhotos.length}`
+            : undefined
+        }
+        onPrev={() =>
+          setPhotoIndex((prev) =>
+            prev === null || !previewPhotos.length
+              ? prev
+              : (prev - 1 + previewPhotos.length) % previewPhotos.length,
+          )
+        }
+        onNext={() =>
+          setPhotoIndex((prev) =>
+            prev === null || !previewPhotos.length
+              ? prev
+              : (prev + 1) % previewPhotos.length,
+          )
+        }
+        onClose={() => setPhotoIndex(null)}
       />
     </div>
   )
