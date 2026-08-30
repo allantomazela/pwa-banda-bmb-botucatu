@@ -110,12 +110,69 @@ export function SiteSettingsManager() {
           />
           <ImageUrlField
             id="hero_image_url"
-            label="Imagem do Hero (vazio = padrão)"
-            hint="Formatos: WebP, JPEG ou PNG (máx 5MB). A imagem fica no Storage; no banco salvamos só a URL."
+            label="Imagem de fundo do Hero (home)"
+            hint="Formatos: WebP, JPEG ou PNG (máx 5MB). Aparece atrás do título na página inicial."
             value={form.hero_image_url || ''}
             kind="hero"
             accept="image/webp,image/jpeg,image/png"
             onChange={set('hero_image_url')}
+          />
+          <ImageUrlField
+            id="site_bg_image_url"
+            label="Foto de fundo geral do site (opcional)"
+            hint="Fundo sutil em todas as páginas públicas. Deixe vazio para o fundo sólido padrão."
+            value={form.site_bg_image_url || ''}
+            kind="hero"
+            accept="image/webp,image/jpeg,image/png"
+            onChange={set('site_bg_image_url')}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card/50 border-white/5">
+        <CardHeader>
+          <CardTitle className="text-base">Página Sobre</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Field
+            id="about_text"
+            label="Texto introdutório"
+            value={form.about_text || ''}
+            onChange={set('about_text')}
+            textarea
+          />
+          <Field
+            id="about_carousel_caption"
+            label="Legenda do carrossel"
+            value={form.about_carousel_caption || ''}
+            onChange={set('about_carousel_caption')}
+          />
+          <ImageUrlField
+            id="about_image_1_url"
+            label="Foto 1 do carrossel"
+            hint="WebP, JPEG ou PNG (máx 5MB). Se vazio, usa imagem padrão."
+            value={form.about_image_1_url || ''}
+            kind="hero"
+            accept="image/webp,image/jpeg,image/png"
+            onChange={set('about_image_1_url')}
+          />
+          <ImageUrlField
+            id="about_image_2_url"
+            label="Foto 2 do carrossel"
+            hint="WebP, JPEG ou PNG (máx 5MB). Se vazio, usa imagem padrão."
+            value={form.about_image_2_url || ''}
+            kind="hero"
+            accept="image/webp,image/jpeg,image/png"
+            onChange={set('about_image_2_url')}
+          />
+          <ImageUrlField
+            id="about_image_3_url"
+            label="Foto 3 do carrossel"
+            hint="WebP, JPEG ou PNG (máx 5MB). Se vazio, usa imagem padrão."
+            value={form.about_image_3_url || ''}
+            kind="hero"
+            accept="image/webp,image/jpeg,image/png"
+            onChange={set('about_image_3_url')}
           />
         </CardContent>
       </Card>
@@ -125,13 +182,6 @@ export function SiteSettingsManager() {
           <CardTitle className="text-base">Textos & CTAs</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Field
-            id="about_text"
-            label="Texto Sobre"
-            value={form.about_text || ''}
-            onChange={set('about_text')}
-            textarea
-          />
           <Field
             id="join_cta_title"
             label="Título do CTA"

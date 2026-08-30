@@ -10,7 +10,7 @@ export default function AdminSiteSettings() {
       <header>
         <h1 className="text-3xl font-bold font-display mb-2">Administração do Site</h1>
         <p className="text-muted-foreground">
-          Edite textos da identidade e acrescente seções, imagens e vídeos nas páginas públicas.
+          Edite textos, fotos de fundo, imagens da página Sobre e seções das páginas públicas.
         </p>
       </header>
       <Tabs defaultValue="textos">

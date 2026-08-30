@@ -17,9 +17,15 @@ const DEFAULTS: Record<string, string> = {
   hero_subtitle:
     'Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.',
   hero_image_url: '',
+  site_bg_image_url: '',
   contact_email: 'contato@bandabmb.com.br',
   contact_phone: '(14) 99999-9999',
-  about_text: 'Décadas de dedicação à cultura e educação musical na nossa região.',
+  about_text:
+    'Fundada com o propósito de levar cultura e disciplina aos jovens de Botucatu, a Banda Marcial de Botucatu se consolidou como um dos principais corpos musicais do interior paulista.',
+  about_image_1_url: '',
+  about_image_2_url: '',
+  about_image_3_url: '',
+  about_carousel_caption: 'Apresentações Inesquecíveis',
   join_cta_title: 'Quer fazer parte da banda?',
   join_cta_text:
     'Não é necessário ter experiência prévia. Nós oferecemos aulas práticas e teóricas para que você aprenda do zero. Venha construir essa história com a gente.',
