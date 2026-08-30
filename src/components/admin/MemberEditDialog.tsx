@@ -11,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -21,6 +20,12 @@ import {
 } from '@/components/ui/select'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { GuardianFields } from '@/components/GuardianFields'
+import {
+  HealthFields,
+  healthFormFromProfile,
+  healthPayloadFromForm,
+  type HealthFormValues,
+} from '@/components/HealthFields'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
@@ -48,9 +53,9 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
     valid_until: '',
     role: 'member',
     avatar_url: '',
-    disability_info: '',
     guardian_name: '',
     guardian_phone: '',
+    ...healthFormFromProfile({}),
   })
 
   useEffect(() => {
@@ -67,14 +72,15 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
         valid_until: profile.valid_until ? profile.valid_until.split('T')[0] : '',
         role: profile.role || 'member',
         avatar_url: profile.avatar_url || '',
-        disability_info: profile.disability_info || '',
         guardian_name: profile.guardian_name || '',
         guardian_phone: profile.guardian_phone || '',
+        ...healthFormFromProfile(profile),
       })
     }
   }, [profile])
 
   const set = (f: string, v: string) => setForm((p) => ({ ...p, [f]: v }))
+  const setHealth = (field: keyof HealthFormValues, value: string) => set(field, value)
 
   const handleAvatar = async (url: string) => {
     set('avatar_url', url)
@@ -110,9 +116,9 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
       birth_date: form.birth_date || null,
       valid_until: form.valid_until || null,
       role: form.role,
-      disability_info: form.disability_info || null,
       guardian_name: form.guardian_name.trim() || null,
       guardian_phone: form.guardian_phone.trim() || null,
+      ...healthPayloadFromForm(form),
     })
     setSaving(false)
     if (error) {
@@ -243,15 +249,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
               </p>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="me-disability">Observação de deficiência ou limitação</Label>
-            <Textarea
-              id="me-disability"
-              value={form.disability_info}
-              onChange={(e) => set('disability_info', e.target.value)}
-              rows={2}
-            />
-          </div>
+          <HealthFields idPrefix="me-health" values={form} onChange={setHealth} />
           {isMinor(form.birth_date) && (
             <GuardianFields
               idPrefix="me-guardian"

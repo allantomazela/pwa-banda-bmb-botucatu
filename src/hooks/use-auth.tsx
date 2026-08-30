@@ -16,6 +16,11 @@ export interface Profile {
   state: string
   cpf: string
   disability_info: string | null
+  health_problems: string | null
+  continuous_medications: string | null
+  diseases: string | null
+  surgeries: string | null
+  dietary_restrictions: string | null
   rg: string
   role: string
   email: string

@@ -3,10 +3,11 @@ import { useFetch } from '@/hooks/use-fetch'
 import { getNextEvent, type EventItem } from '@/services/events'
 import { getMaterials, type Material } from '@/services/materials'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, FileText, ChevronRight } from 'lucide-react'
+import { Calendar, FileText, ChevronRight, FilePenLine } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { isMinor } from '@/lib/formatters'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const { data: materials } = useFetch<Material[]>(() => getMaterials().then((m) => m.slice(0, 3)))
 
   const firstName = profile?.full_name?.split(' ')[0] || 'membro'
+  const showTravel = isMinor(profile?.birth_date)
 
   return (
     <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-8 animate-fade-in">
@@ -58,6 +60,54 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {showTravel ? (
+          <Card className="border-amber-500/25 bg-gradient-to-br from-amber-500/10 to-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FilePenLine className="h-5 w-5 text-primary" /> Autorizações de viagem
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Viagens da banda exigem assinatura do responsável. Confira pendências e assine pelo
+                celular.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/portal/autorizacoes">Ver autorizações</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card border-white/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" /> Proximo Compromisso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {nextEvent ? (
+                <div>
+                  <h4 className="font-bold text-white mb-1">{nextEvent.title}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {new Date(nextEvent.event_date).toLocaleDateString('pt-BR')} as{' '}
+                    {new Date(nextEvent.event_date).toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                  <div className="text-xs bg-background/50 inline-block px-2 py-1 rounded text-muted-foreground">
+                    {nextEvent.location}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Nenhum evento proximo.</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {showTravel ? (
         <Card className="bg-card border-white/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -84,7 +134,7 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
+      ) : null}
 
       <div>
         <div className="flex items-center justify-between mb-4">

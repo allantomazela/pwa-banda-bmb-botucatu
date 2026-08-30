@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -20,6 +19,12 @@ import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 import { formatCPF, getGuardianValidationError, isMinor, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { GuardianFields } from '@/components/GuardianFields'
+import {
+  HealthFields,
+  healthFormFromProfile,
+  healthPayloadFromForm,
+  type HealthFormValues,
+} from '@/components/HealthFields'
 import { ChangePasswordCard } from '@/components/portal/ChangePasswordCard'
 
 export default function ProfileSettings() {
@@ -37,9 +42,9 @@ export default function ProfileSettings() {
     rg: '',
     birth_date: '',
     avatar_url: '',
-    disability_info: '',
     guardian_name: '',
     guardian_phone: '',
+    ...healthFormFromProfile({}),
   })
 
   useEffect(() => {
@@ -54,14 +59,18 @@ export default function ProfileSettings() {
         rg: profile.rg || '',
         birth_date: profile.birth_date ? profile.birth_date.split('T')[0] : '',
         avatar_url: profile.avatar_url || '',
-        disability_info: profile.disability_info || '',
         guardian_name: profile.guardian_name || '',
         guardian_phone: profile.guardian_phone || '',
+        ...healthFormFromProfile(profile),
       })
     }
   }, [profile])
 
   const handleChange = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleHealthChange = (field: keyof HealthFormValues, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -113,9 +122,9 @@ export default function ProfileSettings() {
       rg: form.rg,
       birth_date: form.birth_date || null,
       avatar_url: form.avatar_url,
-      disability_info: form.disability_info || null,
       guardian_name: form.guardian_name.trim() || null,
       guardian_phone: form.guardian_phone.trim() || null,
+      ...healthPayloadFromForm(form),
     })
     setSaving(false)
     if (error) {
@@ -292,30 +301,19 @@ export default function ProfileSettings() {
                 onChange={(e) => handleChange('birth_date', e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="valid_until">Validade da carteirinha</Label>
-              <Input
-                id="valid_until"
-                type="date"
-                value={profile.valid_until ? profile.valid_until.split('T')[0] : ''}
-                disabled
-                className="cursor-not-allowed opacity-60"
-              />
-              <p className="text-xs text-muted-foreground">Definida pelo administrador.</p>
-            </div>
-          </div>
           <div className="space-y-2">
-            <Label htmlFor="disability_info">
-              Observação de deficiência ou limitação de mobilidade
-            </Label>
-            <Textarea
-              id="disability_info"
-              placeholder="Descreva qualquer deficiência ou limitação de mobilidade que precise ser informada à organização."
-              value={form.disability_info}
-              onChange={(e) => handleChange('disability_info', e.target.value)}
-              rows={3}
+            <Label htmlFor="valid_until">Validade da carteirinha</Label>
+            <Input
+              id="valid_until"
+              type="date"
+              value={profile.valid_until ? profile.valid_until.split('T')[0] : ''}
+              disabled
+              className="cursor-not-allowed opacity-60"
             />
+            <p className="text-xs text-muted-foreground">Definida pelo administrador.</p>
           </div>
+          </div>
+          <HealthFields values={form} onChange={handleHealthChange} />
           {minor && (
             <GuardianFields
               name={form.guardian_name}

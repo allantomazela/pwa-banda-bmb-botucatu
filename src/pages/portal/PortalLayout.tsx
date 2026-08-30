@@ -8,17 +8,20 @@ import {
   UserCog,
   ShieldCheck,
   Home,
+  FilePenLine,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { isSystemAdmin, roleLabel } from '@/lib/roles'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
+import { isMinor } from '@/lib/formatters'
 
 const PORTAL_NAV = [
   { name: 'Dashboard', path: '/portal', icon: LayoutDashboard },
   { name: 'Identidade', path: '/portal/id', icon: IdCard },
   { name: 'Perfil', path: '/portal/perfil', icon: UserCog },
+  { name: 'Autorizações', path: '/portal/autorizacoes', icon: FilePenLine },
   { name: 'Biblioteca', path: '/portal/biblioteca', icon: Library },
 ]
 
@@ -35,6 +38,9 @@ export default function PortalLayout() {
   const displayAvatar =
     profile?.avatar_url ||
     `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
+  const navItems = PORTAL_NAV.filter(
+    (item) => item.path !== '/portal/autorizacoes' || isMinor(profile?.birth_date),
+  )
 
   return (
     <div className="flex min-h-dvh bg-background">
@@ -52,7 +58,7 @@ export default function PortalLayout() {
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-2">
-          {PORTAL_NAV.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -129,7 +135,7 @@ export default function PortalLayout() {
             tone="danger"
           />
         ) : null}
-        {PORTAL_NAV.map((item) => (
+        {navItems.map((item) => (
           <BottomBarItem
             key={item.path}
             to={item.path}

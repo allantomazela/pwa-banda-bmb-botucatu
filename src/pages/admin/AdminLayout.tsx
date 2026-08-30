@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   Inbox,
   Home,
+  Bus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ const ADMIN_NAV = [
   { name: 'Membros', path: '/admin/members', icon: Users },
   { name: 'Interesses', path: '/admin/inquiries', icon: Inbox },
   { name: 'Eventos', path: '/admin/events', icon: Calendar },
+  { name: 'Viagens', path: '/admin/viagens', icon: Bus },
   { name: 'Biblioteca', path: '/admin/biblioteca', icon: Library },
   { name: 'Site', path: '/admin/site', icon: Settings },
   { name: 'Galeria', path: '/admin/gallery', icon: ImageIcon },

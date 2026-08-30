@@ -124,6 +124,11 @@ export type Database = {
           city: string
           cpf: string
           disability_info: string | null
+          dietary_restrictions: string | null
+          diseases: string | null
+          continuous_medications: string | null
+          health_problems: string | null
+          surgeries: string | null
           email: string
           full_name: string
           guardian_name: string | null
@@ -146,6 +151,11 @@ export type Database = {
           city?: string
           cpf?: string
           disability_info?: string | null
+          dietary_restrictions?: string | null
+          diseases?: string | null
+          continuous_medications?: string | null
+          health_problems?: string | null
+          surgeries?: string | null
           email?: string
           full_name?: string
           guardian_name?: string | null
@@ -168,6 +178,11 @@ export type Database = {
           city?: string
           cpf?: string
           disability_info?: string | null
+          dietary_restrictions?: string | null
+          diseases?: string | null
+          continuous_medications?: string | null
+          health_problems?: string | null
+          surgeries?: string | null
           email?: string
           full_name?: string
           guardian_name?: string | null
@@ -180,6 +195,90 @@ export type Database = {
           state?: string
           updated_at?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      travel_trips: {
+        Row: {
+          id: string
+          title: string
+          destination: string
+          departure_at: string
+          return_at: string | null
+          description: string
+          created_by: string | null
+          created_at: string
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          title: string
+          destination?: string
+          departure_at: string
+          return_at?: string | null
+          description?: string
+          created_by?: string | null
+          created_at?: string
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          title?: string
+          destination?: string
+          departure_at?: string
+          return_at?: string | null
+          description?: string
+          created_by?: string | null
+          created_at?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      travel_authorizations: {
+        Row: {
+          id: string
+          trip_id: string
+          member_id: string
+          guardian_name: string
+          guardian_phone: string
+          guardian_document: string
+          status: string
+          signature_method: string
+          signature_data: string | null
+          signed_at: string | null
+          signer_user_id: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trip_id: string
+          member_id: string
+          guardian_name?: string
+          guardian_phone?: string
+          guardian_document?: string
+          status?: string
+          signature_method?: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_user_id?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trip_id?: string
+          member_id?: string
+          guardian_name?: string
+          guardian_phone?: string
+          guardian_document?: string
+          status?: string
+          signature_method?: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_user_id?: string | null
+          user_agent?: string | null
+          created_at?: string
         }
         Relationships: []
       }

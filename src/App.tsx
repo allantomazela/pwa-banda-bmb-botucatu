@@ -28,6 +28,7 @@ import DigitalId from '@/pages/portal/DigitalId'
 import ProfileSettings from '@/pages/portal/ProfileSettings'
 import Library from '@/pages/portal/Library'
 import Videos from '@/pages/portal/Videos'
+import PortalAuthorizations from '@/pages/portal/PortalAuthorizations'
 
 // Admin Pages
 import AdminDashboard from '@/pages/admin/AdminDashboard'
@@ -39,6 +40,7 @@ import AdminVideos from '@/pages/admin/AdminVideos'
 import AdminSiteSettings from '@/pages/admin/AdminSiteSettings'
 import AdminGallery from '@/pages/admin/AdminGallery'
 import AdminInquiries from '@/pages/admin/AdminInquiries'
+import AdminTrips from '@/pages/admin/AdminTrips'
 import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 import { SitePagesProvider } from '@/hooks/use-site-pages'
 
@@ -70,6 +72,7 @@ const App = () => (
                 <Route index element={<Dashboard />} />
                 <Route path="id" element={<DigitalId />} />
                 <Route path="perfil" element={<ProfileSettings />} />
+                <Route path="autorizacoes" element={<PortalAuthorizations />} />
                 <Route path="biblioteca" element={<Library />} />
                 <Route path="videos" element={<Videos />} />
               </Route>
@@ -80,6 +83,7 @@ const App = () => (
                   <Route index element={<AdminDashboard />} />
                   <Route path="members" element={<AdminMembers />} />
                   <Route path="events" element={<AdminEvents />} />
+                  <Route path="viagens" element={<AdminTrips />} />
                   <Route path="biblioteca" element={<AdminLibrary />} />
                   <Route path="materials" element={<AdminMaterials />} />
                   <Route path="videos" element={<AdminVideos />} />
