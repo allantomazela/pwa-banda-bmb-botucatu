@@ -19,6 +19,17 @@ export async function getUpcomingEvents(): Promise<EventItem[]> {
   return data ?? []
 }
 
+export async function getPastEvents(limit = 8): Promise<EventItem[]> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .lt('event_date', new Date().toISOString())
+    .order('event_date', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data ?? []
+}
+
 export async function getNextEvent(): Promise<EventItem | null> {
   const events = await getUpcomingEvents()
   return events[0] ?? null

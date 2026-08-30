@@ -1,35 +1,24 @@
+import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowRight, Handshake, Sparkles } from 'lucide-react'
+import Autoplay from 'embla-carousel-autoplay'
+import { ArrowRight, ChevronLeft, ChevronRight, Handshake, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 import { useFetch } from '@/hooks/use-fetch'
 import { getVisibleSponsors, toExternalUrl, type Sponsor } from '@/services/sponsors'
 import {
   isLightColor,
   sponsorCardBackground,
-  sponsorTierMeta,
-  SPONSOR_TIERS,
   type SponsorBgType,
 } from '@/lib/sponsor-style'
 import { cn } from '@/lib/utils'
 
-const MIN_TRACK_ITEMS = 6
-
-const TIER_BADGE_CLASS: Record<string, string> = {
-  master:
-    'border border-amber-300/70 bg-gradient-to-r from-amber-300 to-yellow-500 text-slate-900 shadow-[0_0_24px_rgba(251,192,45,0.55)]',
-  ouro: 'border border-primary/50 bg-primary text-primary-foreground shadow-[0_0_20px_rgba(251,192,45,0.35)]',
-  prata: 'border border-slate-300/40 bg-slate-200/90 text-slate-900',
-  bronze: 'border border-orange-400/40 bg-orange-700/80 text-orange-50',
-  apoiador: 'border border-sky-300/30 bg-sky-500/20 text-sky-100',
-}
-
-const TIER_CARD_CLASS: Record<string, string> = {
-  master: 'ring-2 ring-amber-300/50 sm:h-[260px] sm:w-[300px]',
-  ouro: 'ring-1 ring-primary/35',
-  prata: 'ring-1 ring-slate-300/20',
-  bronze: 'ring-1 ring-orange-500/25',
-  apoiador: '',
-}
+const MIN_TRACK_ITEMS = 4
 
 type TrackItem =
   | { key: string; type: 'logo'; sponsor: Sponsor }
@@ -42,21 +31,28 @@ function buildTrackItems(sponsors: Sponsor[]): TrackItem[] {
     type: 'logo',
     sponsor,
   }))
-
   items.push({ key: 'invite-main', type: 'invite' })
-
   let inviteIndex = 1
   while (items.length < MIN_TRACK_ITEMS) {
     items.push({ key: `invite-fill-${inviteIndex}`, type: 'invite' })
     inviteIndex += 1
   }
-
   return items
+}
+
+function goToSponsorContactForm(pathname: string, navigate: ReturnType<typeof useNavigate>) {
+  if (pathname === '/patrocinadores') {
+    document.getElementById('formulario')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (window.location.hash !== '#formulario') {
+      navigate('/patrocinadores#formulario', { replace: true })
+    }
+    return
+  }
+  navigate('/patrocinadores#formulario')
 }
 
 function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
   const href = toExternalUrl(sponsor.website_url)
-  const tier = sponsorTierMeta(sponsor.tier)
   const style = {
     bg_type: (sponsor.bg_type as SponsorBgType) || 'solid',
     bg_color: sponsor.bg_color || '#ffffff',
@@ -69,34 +65,19 @@ function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
   const card = (
     <article
       className={cn(
-        'sponsor-card-glow group relative flex h-[220px] w-[260px] shrink-0 flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 px-6 py-7 sm:h-[240px] sm:w-[280px]',
+        'sponsor-card-glow group relative flex h-[230px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 px-6 py-8',
         hasCustomBg
-          ? 'shadow-[0_12px_40px_rgba(0,0,0,0.3)]'
-          : 'bg-zinc-900/60 shadow-[0_12px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl',
-        TIER_CARD_CLASS[tier.value],
+          ? 'shadow-[0_16px_48px_rgba(0,0,0,0.35)]'
+          : 'bg-zinc-900/70 shadow-[0_16px_48px_rgba(0,0,0,0.3)] backdrop-blur-xl',
       )}
       style={hasCustomBg ? { background: sponsorCardBackground(style) } : undefined}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent" />
-      <span
-        className={cn(
-          'absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em]',
-          light && tier.value !== 'master' && tier.value !== 'ouro'
-            ? 'bg-slate-900/85 text-white'
-            : TIER_BADGE_CLASS[tier.value],
-        )}
-      >
-        {tier.badge}
-      </span>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,192,45,0.12),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       <img
         src={sponsor.logo_url}
         alt={`Logo ${sponsor.name}`}
-        className={cn(
-          'relative z-10 w-auto object-contain transition-[filter] duration-300',
-          tier.value === 'master'
-            ? 'max-h-[112px] max-w-[220px] sm:max-h-[128px] sm:max-w-[240px]'
-            : 'max-h-[100px] max-w-[200px] sm:max-h-[112px] sm:max-w-[220px]',
-        )}
+        className="relative z-10 max-h-[120px] w-auto max-w-[220px] object-contain drop-shadow-lg transition-[filter,transform] duration-300 group-hover:scale-[1.04]"
         loading="lazy"
         decoding="async"
       />
@@ -118,7 +99,7 @@ function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="block shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl"
+      className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       title={`Visitar site de ${sponsor.name}`}
     >
       {card}
@@ -126,42 +107,24 @@ function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
   )
 }
 
-function goToSponsorContactForm(
-  pathname: string,
-  navigate: ReturnType<typeof useNavigate>,
-) {
-  if (pathname === '/patrocinadores') {
-    const el = document.getElementById('formulario')
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    if (window.location.hash !== '#formulario') {
-      navigate('/patrocinadores#formulario', { replace: true })
-    }
-    return
-  }
-  navigate('/patrocinadores#formulario')
-}
-
-function InviteCard() {
-  const location = useLocation()
-  const navigate = useNavigate()
-
+function InviteCard({ onContact }: { onContact: () => void }) {
   return (
     <button
       type="button"
-      onClick={() => goToSponsorContactForm(location.pathname, navigate)}
-      className="block shrink-0 rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      onClick={onContact}
+      className="block w-full rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label="Quero ser patrocinador e entrar em contato"
     >
-      <article className="sponsor-card-glow sponsor-invite-border group relative flex h-[220px] w-[260px] shrink-0 flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl bg-zinc-900/50 px-6 py-7 backdrop-blur-xl sm:h-[240px] sm:w-[280px]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(251,192,45,0.18),transparent_60%)]" />
+      <article className="sponsor-card-glow sponsor-invite-border group relative flex h-[230px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl bg-zinc-900/55 px-6 py-8 backdrop-blur-xl">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(251,192,45,0.2),transparent_60%)]" />
         <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110">
           <Handshake className="h-5 w-5" aria-hidden />
         </span>
-        <p className="relative z-10 text-center font-display text-base font-bold leading-snug text-primary sm:text-lg">
+        <p className="relative z-10 text-center font-display text-lg font-bold leading-snug text-primary">
           Seja um patrocinador
         </p>
-        <p className="relative z-10 max-w-[200px] text-center text-xs text-muted-foreground sm:text-sm">
-          Coloque sua marca no palco da tradição musical de Botucatu
+        <p className="relative z-10 max-w-[210px] text-center text-sm text-muted-foreground">
+          Sua marca no palco da tradição musical de Botucatu
         </p>
         <span className="relative z-10 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-primary transition-transform duration-300 group-hover:translate-x-1">
           Entrar em contato
@@ -172,27 +135,57 @@ function InviteCard() {
   )
 }
 
+function CarouselNav({ api }: { api: CarouselApi | undefined }) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="h-11 w-11 rounded-full border-primary/40 bg-background/80 text-primary hover:bg-primary hover:text-primary-foreground"
+        onClick={() => api?.scrollPrev()}
+        aria-label="Patrocinador anterior"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="h-11 w-11 rounded-full border-primary/40 bg-background/80 text-primary hover:bg-primary hover:text-primary-foreground"
+        onClick={() => api?.scrollNext()}
+        aria-label="Próximo patrocinador"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </Button>
+    </div>
+  )
+}
+
 type Props = {
   showCta?: boolean
 }
 
 export function SponsorLogos({ showCta = false }: Props) {
+  const autoplay = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }))
+  const [api, setApi] = useState<CarouselApi>()
   const { data: sponsors, loading } = useFetch<Sponsor[]>(getVisibleSponsors)
   const location = useLocation()
   const navigate = useNavigate()
   const trackItems = buildTrackItems(sponsors ?? [])
-  const durationSec = Math.max(28, trackItems.length * 7)
+
+  const openContact = () => goToSponsorContactForm(location.pathname, navigate)
 
   return (
     <section
       className="relative overflow-hidden py-16 md:py-24"
       aria-labelledby="sponsors-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsla(42,96%,58%,0.12),transparent_68%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsla(42,96%,58%,0.14),transparent_68%)]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
-      <div className="container relative z-10 space-y-12">
+      <div className="container relative z-10 space-y-10">
         <header className="mx-auto max-w-3xl space-y-5 text-center">
           <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
@@ -208,50 +201,43 @@ export function SponsorLogos({ showCta = false }: Props) {
             Empresas e parceiros essenciais que mantêm nossos instrumentos afinados, viagens
             possíveis e o sonho musical vivo.
           </p>
-          <ul className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            {SPONSOR_TIERS.map((tier) => (
-              <li
-                key={tier.value}
-                className={cn(
-                  'rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]',
-                  TIER_BADGE_CLASS[tier.value],
-                )}
-              >
-                {tier.label}
-              </li>
-            ))}
-          </ul>
         </header>
 
         {loading ? (
           <div className="flex justify-center gap-4 overflow-hidden py-8" aria-busy="true">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[220px] w-[260px] shrink-0 animate-shimmer rounded-2xl border border-white/10 sm:h-[240px] sm:w-[280px]"
+                className="h-[230px] w-full max-w-[280px] shrink-0 animate-shimmer rounded-2xl border border-white/10"
               />
             ))}
           </div>
         ) : (
-          <div className="sponsor-marquee-mask relative -mx-4 sm:mx-0">
-            <div
-              className="sponsor-marquee-track flex w-max gap-5 py-4 pl-4 sm:gap-6"
-              style={{ ['--sponsor-marquee-duration' as string]: `${durationSec}s` }}
-              role="list"
-              aria-label="Carrossel de patrocinadores e apoiadores"
-            >
-              {[0, 1].map((copy) =>
-                trackItems.map((item) => (
-                  <div key={`${copy}-${item.key}`} role="listitem" className="shrink-0">
-                    {item.type === 'logo' ? (
-                      <SponsorCard sponsor={item.sponsor} />
-                    ) : (
-                      <InviteCard />
-                    )}
-                  </div>
-                )),
-              )}
+          <div className="space-y-6">
+            <div className="sponsor-marquee-mask relative rounded-3xl border border-primary/20 bg-card/40 p-3 shadow-[0_0_80px_hsla(42,96%,58%,0.1)] backdrop-blur-sm md:p-6">
+              <Carousel
+                setApi={setApi}
+                opts={{ align: 'start', loop: true }}
+                plugins={[autoplay.current]}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-3 md:-ml-4">
+                  {trackItems.map((item) => (
+                    <CarouselItem
+                      key={item.key}
+                      className="basis-[85%] pl-3 sm:basis-1/2 md:pl-4 lg:basis-1/3"
+                    >
+                      {item.type === 'logo' ? (
+                        <SponsorCard sponsor={item.sponsor} />
+                      ) : (
+                        <InviteCard onContact={openContact} />
+                      )}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
             </div>
+            <CarouselNav api={api} />
           </div>
         )}
 
@@ -263,14 +249,14 @@ export function SponsorLogos({ showCta = false }: Props) {
                 Sua marca no mesmo palco da BMB
               </p>
               <p className="text-sm text-muted-foreground sm:text-base">
-                Escolha o nível Master, Ouro, Prata, Bronze ou Apoiador Cultural e ganhe destaque
-                premium neste espaço — visibilidade, prestígio e impacto cultural em Botucatu.
+                Apoie a banda com doação ao caixa e ganhe destaque neste espaço — prestígio,
+                visibilidade e impacto cultural em Botucatu.
               </p>
               <Button
                 type="button"
                 size="lg"
                 className="h-12 px-8 shadow-glow transition-transform hover:scale-[1.03]"
-                onClick={() => goToSponsorContactForm(location.pathname, navigate)}
+                onClick={openContact}
               >
                 Quero ser patrocinador
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
@@ -281,7 +267,12 @@ export function SponsorLogos({ showCta = false }: Props) {
 
         {showCta ? (
           <div className="flex justify-center">
-            <Button asChild variant="outline" size="lg" className="h-11 border-primary/40 px-7 text-primary hover:bg-primary hover:text-primary-foreground">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-11 border-primary/40 px-7 text-primary hover:bg-primary hover:text-primary-foreground"
+            >
               <Link to="/patrocinadores">Conhecer oportunidades de patrocínio</Link>
             </Button>
           </div>

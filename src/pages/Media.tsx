@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFetch } from '@/hooks/use-fetch'
-import { getGalleryPhotos, type GalleryPhoto } from '@/services/gallery'
+import { getEventPhotos, getGalleryPhotos, type GalleryPhoto } from '@/services/gallery'
 import { getPublicVideos, type VideoItem } from '@/services/videos'
 import { getVideoThumbnail } from '@/lib/video-embed'
 import { MediaLightbox } from '@/components/media/MediaLightbox'
@@ -13,13 +14,33 @@ type SelectedMedia =
   | { kind: 'video'; item: VideoItem }
   | null
 
+const VALID_TABS = new Set(['fotos', 'eventos', 'videos'])
+
 export default function Media() {
-  const [tab, setTab] = useState('fotos')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialTab = VALID_TABS.has(searchParams.get('tab') || '')
+    ? (searchParams.get('tab') as string)
+    : 'fotos'
+  const [tab, setTab] = useState(initialTab)
   const [selected, setSelected] = useState<SelectedMedia>(null)
   const { data: photos, loading: photosLoading, error: photosError } =
     useFetch<GalleryPhoto[]>(getGalleryPhotos)
+  const { data: eventPhotos, loading: eventsLoading, error: eventsError } =
+    useFetch<GalleryPhoto[]>(getEventPhotos)
   const { data: videos, loading: videosLoading, error: videosError } =
     useFetch<VideoItem[]>(getPublicVideos)
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('tab')
+    if (fromUrl && VALID_TABS.has(fromUrl) && fromUrl !== tab) {
+      setTab(fromUrl)
+    }
+  }, [searchParams, tab])
+
+  const handleTabChange = (value: string) => {
+    setTab(value)
+    setSearchParams(value === 'fotos' ? {} : { tab: value }, { replace: true })
+  }
 
   const selectedTitle =
     selected?.kind === 'photo'
@@ -36,56 +57,52 @@ export default function Media() {
             Galeria de <span className="text-primary">Mídia</span>
           </h1>
           <p className="text-base text-muted-foreground sm:text-lg">
-            Fotos e vídeos públicos das apresentações e ensaios da Banda Marcial de Botucatu.
+            Fotos, memórias de eventos e vídeos públicos das apresentações da Banda Marcial de
+            Botucatu.
           </p>
         </div>
-        <Tabs value={tab} onValueChange={setTab} className="w-full md:w-auto">
-          <TabsList className="grid w-full grid-cols-2 md:w-[280px]">
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-full md:w-auto">
+          <TabsList className="grid w-full grid-cols-3 md:w-[360px]">
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
+            <TabsTrigger value="eventos">Eventos</TabsTrigger>
             <TabsTrigger value="videos">Vídeos</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      <Tabs value={tab} className="w-full">
+      <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
         <TabsContent value="fotos" className="mt-0">
-          {photosLoading ? (
-            <LoadingState />
-          ) : photosError ? (
-            <p className="py-16 text-center text-muted-foreground">Não foi possível carregar as fotos.</p>
-          ) : !photos?.length ? (
-            <EmptyState icon={ImageIcon} text="Nenhuma foto publicada no momento." />
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
-              {photos.map((photo) => (
-                <button
-                  key={photo.id}
-                  type="button"
-                  onClick={() => setSelected({ kind: 'photo', item: photo })}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/5 bg-card text-left transition-colors hover:border-primary/30"
-                >
-                  <img
-                    src={photo.image_url}
-                    alt={photo.title || 'Foto da galeria'}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-                    <span className="line-clamp-1 text-sm font-medium text-white">
-                      {photo.title || 'Ampliar'}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+          <PhotoGrid
+            loading={photosLoading}
+            error={photosError}
+            photos={photos}
+            emptyText="Nenhuma foto publicada no momento."
+            onSelect={(item) => setSelected({ kind: 'photo', item })}
+          />
+        </TabsContent>
+
+        <TabsContent value="eventos" className="mt-0">
+          <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
+            Espaço atualizado com registros fotográficos dos eventos já realizados. Novas fotos
+            publicadas no admin (categoria <strong className="text-primary">Eventos</strong>)
+            aparecem automaticamente aqui.
+          </div>
+          <PhotoGrid
+            loading={eventsLoading}
+            error={eventsError}
+            photos={eventPhotos}
+            emptyText="Ainda não há fotos de eventos. Em breve novas memórias aparecerão."
+            onSelect={(item) => setSelected({ kind: 'photo', item })}
+          />
         </TabsContent>
 
         <TabsContent value="videos" className="mt-0">
           {videosLoading ? (
             <LoadingState />
           ) : videosError ? (
-            <p className="py-16 text-center text-muted-foreground">Não foi possível carregar os vídeos.</p>
+            <p className="py-16 text-center text-muted-foreground">
+              Não foi possível carregar os vídeos.
+            </p>
           ) : !videos?.length ? (
             <EmptyState icon={Video} text="Nenhum vídeo público publicado no momento." />
           ) : (
@@ -138,6 +155,51 @@ export default function Media() {
       <div className="mt-12 sm:mt-16">
         <CmsSections slug="media" />
       </div>
+    </div>
+  )
+}
+
+function PhotoGrid({
+  loading,
+  error,
+  photos,
+  emptyText,
+  onSelect,
+}: {
+  loading: boolean
+  error: string | null
+  photos: GalleryPhoto[] | null
+  emptyText: string
+  onSelect: (photo: GalleryPhoto) => void
+}) {
+  if (loading) return <LoadingState />
+  if (error) {
+    return <p className="py-16 text-center text-muted-foreground">Não foi possível carregar as fotos.</p>
+  }
+  if (!photos?.length) return <EmptyState icon={ImageIcon} text={emptyText} />
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
+      {photos.map((photo) => (
+        <button
+          key={photo.id}
+          type="button"
+          onClick={() => onSelect(photo)}
+          className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/5 bg-card text-left transition-colors hover:border-primary/30"
+        >
+          <img
+            src={photo.image_url}
+            alt={photo.title || 'Foto da galeria'}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+            <span className="line-clamp-1 text-sm font-medium text-white">
+              {photo.title || 'Ampliar'}
+            </span>
+          </div>
+        </button>
+      ))}
     </div>
   )
 }

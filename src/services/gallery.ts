@@ -12,6 +12,16 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   return data ?? []
 }
 
+export async function getEventPhotos(): Promise<GalleryPhoto[]> {
+  const { data, error } = await supabase
+    .from('gallery_photos')
+    .select('*')
+    .eq('category', 'Eventos')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
 export async function createGalleryPhoto(
   data: Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>,
 ): Promise<{ error: string | null }> {
@@ -61,7 +71,8 @@ export async function uploadSiteImage(
   if (file.size > maxBytes) {
     return {
       url: null,
-      error: kind === 'hero' ? 'Arquivo muito grande (máx 5MB).' : 'Arquivo muito grande (máx 2MB).',
+      error:
+        kind === 'hero' ? 'Arquivo muito grande (máx 5MB).' : 'Arquivo muito grande (máx 2MB).',
     }
   }
   const ext = SITE_IMAGE_EXT[file.type] || 'webp'
