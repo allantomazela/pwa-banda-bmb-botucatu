@@ -75,14 +75,14 @@ export function HomeGalleryShowcase() {
           <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(ellipse_at_top,hsla(42,96%,58%,0.12),transparent_50%)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
 
-          <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[2/1]">
+          <div className="relative aspect-[4/3] w-full bg-zinc-950 sm:aspect-[16/9] lg:aspect-[2/1]">
             {photos.map((photo, index) => (
               <img
                 key={photo.id}
                 src={photo.image_url}
                 alt={photo.title || 'Foto da Banda Marcial'}
                 className={cn(
-                  'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ease-out',
+                  'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-out',
                   index === current ? 'opacity-100' : 'opacity-0',
                 )}
                 loading={index === 0 ? 'eager' : 'lazy'}

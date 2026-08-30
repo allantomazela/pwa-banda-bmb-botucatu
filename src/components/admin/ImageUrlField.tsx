@@ -23,7 +23,6 @@ type Props = {
 }
 
 function defaultAspectFor(kind: Props['kind']): ImageAdjustAspect {
-  if (kind === 'hero') return '16:9'
   if (kind === 'logo' || kind === 'sponsor') return '1:1'
   return 'free'
 }

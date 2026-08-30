@@ -463,7 +463,7 @@ export function GalleryManager() {
         open={!!adjustingItem}
         file={adjustingItem?.file ?? null}
         title="Ajustar foto da galeria"
-        defaultAspect="4:3"
+        defaultAspect="free"
         onCancel={() => setAdjustingId(null)}
         onConfirm={handleAdjustedPending}
       />

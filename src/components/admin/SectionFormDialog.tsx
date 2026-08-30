@@ -246,7 +246,7 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
       open={!!adjustFile}
       file={adjustFile}
       title="Ajustar imagem da seção"
-      defaultAspect="16:9"
+      defaultAspect="free"
       onCancel={() => setAdjustFile(null)}
       onConfirm={handleAdjusted}
     />
