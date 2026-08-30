@@ -1,42 +1,55 @@
 import { supabase } from '@/lib/supabase/client'
 import type { Tables, TablesInsert, TablesUpdate } from '@/lib/supabase/types'
+import { normalizeSponsorTier, sponsorTierMeta, sponsorTierRank } from '@/lib/sponsor-style'
 
 export type Sponsor = Tables<'sponsors'>
 export type SponsorKind = 'patrocinador' | 'apoiador'
 export type SponsorInquiry = Tables<'sponsor_inquiries'>
 
+function sortSponsors(list: Sponsor[]): Sponsor[] {
+  return [...list].sort((a, b) => {
+    const tierDiff = sponsorTierRank(a.tier) - sponsorTierRank(b.tier)
+    if (tierDiff !== 0) return tierDiff
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+    return a.created_at.localeCompare(b.created_at)
+  })
+}
+
 export async function getVisibleSponsors(): Promise<Sponsor[]> {
-  const { data, error } = await supabase
-    .from('sponsors')
-    .select('*')
-    .eq('is_visible', true)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true })
+  const { data, error } = await supabase.from('sponsors').select('*').eq('is_visible', true)
   if (error) throw error
-  return data ?? []
+  return sortSponsors(data ?? [])
 }
 
 export async function getSponsors(): Promise<Sponsor[]> {
-  const { data, error } = await supabase
-    .from('sponsors')
-    .select('*')
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true })
+  const { data, error } = await supabase.from('sponsors').select('*')
   if (error) throw error
-  return data ?? []
+  return sortSponsors(data ?? [])
 }
 
 export async function createSponsor(
   data: Pick<
     TablesInsert<'sponsors'>,
-    'name' | 'logo_url' | 'website_url' | 'kind' | 'is_visible' | 'sort_order' | 'bg_type' | 'bg_color' | 'bg_color_end'
+    | 'name'
+    | 'logo_url'
+    | 'website_url'
+    | 'kind'
+    | 'tier'
+    | 'is_visible'
+    | 'sort_order'
+    | 'bg_type'
+    | 'bg_color'
+    | 'bg_color_end'
   >,
 ): Promise<{ error: string | null }> {
+  const tier = normalizeSponsorTier(data.tier)
+  const kind = sponsorTierMeta(tier).kind
   const { error } = await supabase.from('sponsors').insert({
     name: data.name.trim(),
     logo_url: data.logo_url.trim(),
     website_url: data.website_url?.trim() || '',
-    kind: data.kind,
+    kind,
+    tier,
     is_visible: data.is_visible ?? true,
     sort_order: data.sort_order ?? 0,
     bg_type: data.bg_type || 'solid',
@@ -51,7 +64,13 @@ export async function updateSponsor(
   id: string,
   data: TablesUpdate<'sponsors'>,
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase.from('sponsors').update(data).eq('id', id)
+  const payload = { ...data }
+  if (payload.tier) {
+    const tier = normalizeSponsorTier(payload.tier)
+    payload.tier = tier
+    payload.kind = sponsorTierMeta(tier).kind
+  }
+  const { error } = await supabase.from('sponsors').update(payload).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
 }

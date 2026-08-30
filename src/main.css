@@ -227,6 +227,108 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* —— Patrocinadores: marquee infinito premium —— */
+  .sponsor-marquee-mask {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+  }
+
+  @keyframes sponsor-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .sponsor-marquee-track {
+    animation: sponsor-marquee var(--sponsor-marquee-duration, 40s) linear infinite;
+    will-change: transform;
+  }
+
+  .sponsor-marquee-track:hover,
+  .sponsor-marquee-track:focus-within {
+    animation-play-state: paused;
+  }
+
+  .sponsor-card-glow {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s ease,
+      border-color 0.35s ease,
+      filter 0.35s ease;
+  }
+
+  .sponsor-card-glow:hover {
+    transform: scale(1.05);
+    border-color: rgba(251, 192, 45, 0.45);
+    box-shadow:
+      0 0 0 1px rgba(251, 192, 45, 0.2),
+      0 12px 40px rgba(0, 0, 0, 0.35),
+      0 0 48px rgba(251, 192, 45, 0.22);
+  }
+
+  .sponsor-card-glow:hover img {
+    filter: brightness(1.08) contrast(1.05) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.25));
+  }
+
+  .sponsor-invite-border {
+    position: relative;
+  }
+
+  .sponsor-invite-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+      135deg,
+      rgba(251, 192, 45, 0.95),
+      rgba(251, 192, 45, 0.2),
+      rgba(74, 90, 120, 0.85),
+      rgba(251, 192, 45, 0.75)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.95;
+  }
+
+  .sponsor-invite-border::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    border-radius: inherit;
+    border: 1.5px dashed rgba(251, 192, 45, 0.45);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sponsor-marquee-track {
+      animation: none;
+    }
+  }
 }
 
 @media print {

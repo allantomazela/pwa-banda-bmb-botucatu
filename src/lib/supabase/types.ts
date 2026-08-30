@@ -331,6 +331,7 @@ export type Database = {
           bg_type: string
           bg_color: string
           bg_color_end: string
+          tier: string
           sort_order: number
           website_url: string
         }
@@ -344,6 +345,7 @@ export type Database = {
           bg_type?: string
           bg_color?: string
           bg_color_end?: string
+          tier?: string
           sort_order?: number
           website_url?: string
         }
@@ -357,6 +359,7 @@ export type Database = {
           bg_type?: string
           bg_color?: string
           bg_color_end?: string
+          tier?: string
           sort_order?: number
           website_url?: string
         }

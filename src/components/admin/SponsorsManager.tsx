@@ -5,7 +5,6 @@ import {
   getSponsors,
   updateSponsor,
   type Sponsor,
-  type SponsorKind,
 } from '@/services/sponsors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,13 +28,21 @@ import { ImageUrlField } from '@/components/admin/ImageUrlField'
 import { SponsorBgFields } from '@/components/admin/SponsorBgFields'
 import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { sponsorCardBackground, safeHex, type SponsorBgType } from '@/lib/sponsor-style'
+import {
+  SPONSOR_TIERS,
+  normalizeSponsorTier,
+  safeHex,
+  sponsorCardBackground,
+  sponsorTierMeta,
+  type SponsorBgType,
+  type SponsorTier,
+} from '@/lib/sponsor-style'
 
 const EMPTY_FORM = {
   name: '',
   logo_url: '',
   website_url: '',
-  kind: 'patrocinador' as SponsorKind,
+  tier: 'ouro' as SponsorTier,
   is_visible: true,
   sort_order: 0,
   bg_type: 'solid' as SponsorBgType,
@@ -78,7 +85,7 @@ export function SponsorsManager() {
       name: item.name,
       logo_url: item.logo_url,
       website_url: item.website_url,
-      kind: item.kind as SponsorKind,
+      tier: normalizeSponsorTier(item.tier || (item.kind === 'apoiador' ? 'apoiador' : 'ouro')),
       is_visible: item.is_visible,
       sort_order: item.sort_order,
       bg_type: (item.bg_type as SponsorBgType) || 'solid',
@@ -94,15 +101,21 @@ export function SponsorsManager() {
       return
     }
     if (!form.logo_url.trim()) {
-      toast({ title: 'Erro', description: 'Envie ou informe a URL da logo.', variant: 'destructive' })
+      toast({
+        title: 'Erro',
+        description: 'Envie ou informe a URL da logo.',
+        variant: 'destructive',
+      })
       return
     }
     setSaving(true)
+    const tier = normalizeSponsorTier(form.tier)
     const payload = {
       name: form.name.trim(),
       logo_url: form.logo_url.trim(),
       website_url: form.website_url.trim(),
-      kind: form.kind,
+      tier,
+      kind: sponsorTierMeta(tier).kind,
       is_visible: form.is_visible,
       sort_order: Number(form.sort_order) || 0,
       bg_type: form.bg_type,
@@ -144,7 +157,7 @@ export function SponsorsManager() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-4">
         <p className="text-sm text-muted-foreground">
-          Cadastre as logos que aparecem na página pública de patrocínio.
+          Cadastre logos com nível Master, Ouro, Prata ou Apoiador Cultural.
         </p>
         <Button onClick={openCreate}>
           <Plus className="w-4 h-4 mr-2" /> Nova logo
@@ -155,38 +168,46 @@ export function SponsorsManager() {
         <p className="text-center text-muted-foreground py-12">Nenhum patrocinador cadastrado.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-4 rounded-lg border border-white/10 p-4"
-            >
-              <img
-                src={item.logo_url}
-                alt={item.name}
-                className="h-14 w-28 object-contain rounded border border-white/10"
-                style={{
-                  background: sponsorCardBackground({
-                    bg_type: (item.bg_type as SponsorBgType) || 'solid',
-                    bg_color: item.bg_color || '#ffffff',
-                    bg_color_end: item.bg_color_end || '#ffffff',
-                  }),
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {item.kind === 'apoiador' ? 'Apoiador' : 'Patrocinador'}
-                  {item.is_visible ? '' : ' · oculto'}
-                </p>
+          {items.map((item) => {
+            const tier = sponsorTierMeta(item.tier || (item.kind === 'apoiador' ? 'apoiador' : 'ouro'))
+            return (
+              <div
+                key={item.id}
+                className="flex items-center gap-4 rounded-lg border border-white/10 p-4"
+              >
+                <img
+                  src={item.logo_url}
+                  alt={item.name}
+                  className="h-14 w-28 object-contain rounded border border-white/10"
+                  style={{
+                    background: sponsorCardBackground({
+                      bg_type: (item.bg_type as SponsorBgType) || 'solid',
+                      bg_color: item.bg_color || '#ffffff',
+                      bg_color_end: item.bg_color_end || '#ffffff',
+                    }),
+                  }}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {tier.badge}
+                    {item.is_visible ? '' : ' · oculto'}
+                  </p>
+                </div>
+                <Button size="icon" variant="ghost" onClick={() => openEdit(item)} title="Editar">
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDelete(item.id)}
+                  title="Excluir"
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => openEdit(item)} title="Editar">
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => handleDelete(item.id)} title="Excluir">
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -233,17 +254,20 @@ export function SponsorsManager() {
             />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Tipo</Label>
+                <Label>Nível</Label>
                 <Select
-                  value={form.kind}
-                  onValueChange={(kind) => setForm({ ...form, kind: kind as SponsorKind })}
+                  value={form.tier}
+                  onValueChange={(tier) => setForm({ ...form, tier: tier as SponsorTier })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="patrocinador">Patrocinador</SelectItem>
-                    <SelectItem value="apoiador">Apoiador</SelectItem>
+                    {SPONSOR_TIERS.map((tier) => (
+                      <SelectItem key={tier.value} value={tier.value}>
+                        {tier.badge}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
