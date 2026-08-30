@@ -18,6 +18,7 @@ const DEFAULTS: Record<string, string> = {
     'Mais que uma banda marcial, uma família unida pela paixão à música, disciplina e arte.',
   hero_image_url: '',
   site_bg_image_url: '',
+  home_showcase_photo_ids: '[]',
   contact_email: 'contato@bandabmb.com.br',
   contact_phone: '(14) 99999-9999',
   about_text:

@@ -1,7 +1,61 @@
 import { supabase } from '@/lib/supabase/client'
 import type { Tables, TablesInsert } from '@/lib/supabase/types'
+import { getSiteSettings, updateSiteSettings } from '@/services/site-settings'
 
 export type GalleryPhoto = Tables<'gallery_photos'>
+
+const SHOWCASE_KEY = 'home_showcase_photo_ids'
+export const MAX_HOME_SHOWCASE = 12
+
+export function parseShowcaseIds(raw?: string): string[] {
+  if (!raw?.trim()) return []
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (Array.isArray(parsed)) {
+      return parsed.filter((id): id is string => typeof id === 'string' && id.length > 0)
+    }
+  } catch {
+    return raw
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+export async function getShowcasePhotoIds(): Promise<string[]> {
+  const settings = await getSiteSettings()
+  return parseShowcaseIds(settings[SHOWCASE_KEY])
+}
+
+export async function setShowcasePhotoIds(
+  ids: string[],
+): Promise<{ error: string | null }> {
+  const unique = [...new Set(ids)].slice(0, MAX_HOME_SHOWCASE)
+  return updateSiteSettings({ [SHOWCASE_KEY]: JSON.stringify(unique) })
+}
+
+export async function toggleShowcasePhoto(
+  id: string,
+): Promise<{ error: string | null; active: boolean; ids: string[] }> {
+  const ids = await getShowcasePhotoIds()
+  const active = ids.includes(id)
+  if (active) {
+    const next = ids.filter((item) => item !== id)
+    const { error } = await setShowcasePhotoIds(next)
+    return { error, active: false, ids: next }
+  }
+  if (ids.length >= MAX_HOME_SHOWCASE) {
+    return {
+      error: `Máximo de ${MAX_HOME_SHOWCASE} fotos no destaque da home.`,
+      active: false,
+      ids,
+    }
+  }
+  const next = [...ids, id]
+  const { error } = await setShowcasePhotoIds(next)
+  return { error, active: true, ids: next }
+}
 
 export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   const { data, error } = await supabase
@@ -22,16 +76,16 @@ export async function getEventPhotos(): Promise<GalleryPhoto[]> {
   return data ?? []
 }
 
-/** Fotos recentes para o card principal da home (exclui Banner). */
-export async function getShowcasePhotos(limit = 12): Promise<GalleryPhoto[]> {
-  const { data, error } = await supabase
-    .from('gallery_photos')
-    .select('*')
-    .neq('category', 'Banner')
-    .order('created_at', { ascending: false })
-    .limit(limit)
+/** Fotos escolhidas no admin para o card principal da home. */
+export async function getShowcasePhotos(): Promise<GalleryPhoto[]> {
+  const ids = await getShowcasePhotoIds()
+  if (ids.length === 0) return []
+
+  const { data, error } = await supabase.from('gallery_photos').select('*').in('id', ids)
   if (error) throw error
-  return data ?? []
+
+  const byId = new Map((data ?? []).map((photo) => [photo.id, photo]))
+  return ids.map((id) => byId.get(id)).filter((photo): photo is GalleryPhoto => Boolean(photo))
 }
 
 export async function createGalleryPhoto(
@@ -48,21 +102,26 @@ export async function createGalleryPhoto(
 
 export async function createGalleryPhotos(
   items: Array<Pick<TablesInsert<'gallery_photos'>, 'title' | 'image_url' | 'category'>>,
-): Promise<{ error: string | null; count: number }> {
-  if (items.length === 0) return { error: 'Nenhuma imagem para salvar.', count: 0 }
+): Promise<{ error: string | null; count: number; ids: string[] }> {
+  if (items.length === 0) return { error: 'Nenhuma imagem para salvar.', count: 0, ids: [] }
   const payload = items.map((item) => ({
     title: item.title?.trim() || '',
     image_url: item.image_url,
     category: item.category || 'Galeria',
   }))
   const { error, data } = await supabase.from('gallery_photos').insert(payload).select('id')
-  if (error) return { error: error.message, count: 0 }
-  return { error: null, count: data?.length ?? payload.length }
+  if (error) return { error: error.message, count: 0, ids: [] }
+  const ids = (data ?? []).map((row) => row.id)
+  return { error: null, count: ids.length || payload.length, ids }
 }
 
 export async function deleteGalleryPhoto(id: string): Promise<{ error: string | null }> {
   const { error } = await supabase.from('gallery_photos').delete().eq('id', id)
   if (error) return { error: error.message }
+  const showcaseIds = await getShowcasePhotoIds()
+  if (showcaseIds.includes(id)) {
+    await setShowcasePhotoIds(showcaseIds.filter((item) => item !== id))
+  }
   return { error: null }
 }
 

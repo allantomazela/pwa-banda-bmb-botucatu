@@ -11,7 +11,7 @@ const INTERVAL_MS = 5000
 export function HomeGalleryShowcase() {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
-  const { data: photos, loading } = useFetch<GalleryPhoto[]>(() => getShowcasePhotos(12))
+  const { data: photos, loading } = useFetch<GalleryPhoto[]>(getShowcasePhotos)
   const total = photos?.length ?? 0
 
   useEffect(() => {
@@ -22,12 +22,25 @@ export function HomeGalleryShowcase() {
     return () => window.clearInterval(id)
   }, [total, paused])
 
+  useEffect(() => {
+    if (current >= total && total > 0) setCurrent(0)
+  }, [current, total])
+
   if (loading || !photos?.length) return null
 
   const active = photos[current] ?? photos[0]
 
-  const goPrev = () => setCurrent((prev) => (prev - 1 + photos.length) % photos.length)
-  const goNext = () => setCurrent((prev) => (prev + 1) % photos.length)
+  const goPrev = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrent((prev) => (prev - 1 + photos.length) % photos.length)
+  }
+
+  const goNext = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setCurrent((prev) => (prev + 1) % photos.length)
+  }
 
   return (
     <section className="relative z-20 -mt-4 pb-2 lg:-mt-8">
@@ -41,7 +54,7 @@ export function HomeGalleryShowcase() {
               A força da marcha em imagem
             </h2>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-              Ensaios, desfiles e apresentações — a energia da BMB passando ao vivo neste destaque.
+              Ensaios, desfiles e apresentações — toque no destaque para ver toda a galeria.
             </p>
           </div>
           <Button variant="outline" asChild className="w-full sm:w-auto">
@@ -52,15 +65,16 @@ export function HomeGalleryShowcase() {
           </Button>
         </div>
 
-        <div
-          className="group relative overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
+        <Link
+          to="/media"
+          className="group relative block overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-[0_24px_80px_rgba(0,0,0,0.45)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
+          aria-label="Abrir galeria completa de mídia"
         >
           <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(ellipse_at_top,hsla(42,96%,58%,0.12),transparent_50%)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
 
-          {/* Área fixa: object-cover evita distorção em retrato/paisagem */}
           <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[2/1]">
             {photos.map((photo, index) => (
               <img
@@ -87,6 +101,9 @@ export function HomeGalleryShowcase() {
                 </span>
                 <p className="line-clamp-2 max-w-xl font-display text-lg font-bold text-white drop-shadow sm:text-2xl">
                   {active?.title || 'Banda Marcial de Botucatu'}
+                </p>
+                <p className="mt-1 text-xs text-primary/90 sm:text-sm">
+                  Clique para ver todas as fotos →
                 </p>
               </div>
 
@@ -120,7 +137,11 @@ export function HomeGalleryShowcase() {
                   key={photo.id}
                   type="button"
                   aria-label={`Ir para foto ${index + 1}`}
-                  onClick={() => setCurrent(index)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setCurrent(index)
+                  }}
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-300',
                     index === current
@@ -131,7 +152,7 @@ export function HomeGalleryShowcase() {
               ))}
             </div>
           </div>
-        </div>
+        </Link>
       </div>
     </section>
   )

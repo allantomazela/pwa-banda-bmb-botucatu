@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast'
 import { SECTION_TYPE_LABELS, SECTION_TYPES, toEmbedUrl, type SectionType } from '@/lib/cms'
 import { createSection, updateSection, type SiteSection } from '@/services/site-cms'
 import { uploadGalleryImage } from '@/services/gallery'
+import { ImageAdjustDialog } from '@/components/media/ImageAdjustDialog'
 
 const EMPTY = {
   section_type: 'text' as SectionType,
@@ -47,6 +48,8 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
   const { toast } = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [adjustFile, setAdjustFile] = useState<File | null>(null)
   const [form, setForm] = useState(EMPTY)
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
   const set = (key: keyof typeof EMPTY) => (value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
@@ -78,9 +81,18 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
         description: 'Arquivo muito grande (máx 5MB).',
         variant: 'destructive',
       })
+      if (fileRef.current) fileRef.current.value = ''
       return
     }
+    setAdjustFile(file)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const handleAdjusted = async (file: File) => {
+    setAdjustFile(null)
+    setUploading(true)
     const { url, error } = await uploadGalleryImage(file)
+    setUploading(false)
     if (url) {
       setForm((prev) => ({ ...prev, media_url: url }))
       toast({ title: 'Imagem enviada!' })
@@ -91,7 +103,6 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
         variant: 'destructive',
       })
     }
-    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleSave = async () => {
@@ -122,6 +133,7 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
@@ -161,9 +173,18 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
                 className="hidden"
                 onChange={handleUpload}
               />
-              <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
-                <Upload className="w-4 h-4 mr-2" />
-                Enviar imagem
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {uploading ? 'Enviando...' : 'Enviar imagem'}
               </Button>
               {form.media_url ? (
                 <img src={form.media_url} alt="" className="h-24 rounded-md object-cover" />
@@ -220,5 +241,15 @@ export function SectionFormDialog({ open, pageId, nextOrder, editing, onClose, o
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ImageAdjustDialog
+      open={!!adjustFile}
+      file={adjustFile}
+      title="Ajustar imagem da seção"
+      defaultAspect="16:9"
+      onCancel={() => setAdjustFile(null)}
+      onConfirm={handleAdjusted}
+    />
+    </>
   )
 }

@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Camera, Loader2, User } from 'lucide-react'
 import { useAvatarUpload } from '@/hooks/use-avatar-upload'
 import { useToast } from '@/hooks/use-toast'
+import { ImageAdjustDialog } from '@/components/media/ImageAdjustDialog'
 
 interface AvatarUploadProps {
   userId: string
@@ -16,8 +17,9 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
   const fileRef = useRef<HTMLInputElement>(null)
   const { upload, uploading } = useAvatarUpload()
   const { toast } = useToast()
+  const [adjustFile, setAdjustFile] = useState<File | null>(null)
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
@@ -26,8 +28,15 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
         description: 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.',
         variant: 'destructive',
       })
+      if (fileRef.current) fileRef.current.value = ''
       return
     }
+    setAdjustFile(file)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const handleAdjusted = async (file: File) => {
+    setAdjustFile(null)
     const url = await upload(userId, file)
     if (url) {
       onUploaded(url)
@@ -39,7 +48,6 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
         variant: 'destructive',
       })
     }
-    if (fileRef.current) fileRef.current.value = ''
   }
 
   return (
@@ -49,9 +57,10 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
           src={
             currentUrl || `https://img.usecurling.com/ppl/medium?gender=male&seed=${userId}&dpr=2`
           }
+          alt={name || 'Avatar'}
         />
         <AvatarFallback>
-          <User className="w-8 h-8 text-muted-foreground" />
+          <User className="h-8 w-8 text-muted-foreground" />
         </AvatarFallback>
       </Avatar>
       <div>
@@ -69,14 +78,25 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
           disabled={uploading}
         >
           {uploading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <Camera className="w-4 h-4 mr-2" />
+            <Camera className="mr-2 h-4 w-4" />
           )}
           {uploading ? 'Enviando...' : 'Alterar foto'}
         </Button>
-        <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Tamanho máximo: 5MB.</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          JPG, PNG ou WebP. Máx. 5MB. Você pode ajustar o enquadramento antes de enviar.
+        </p>
       </div>
+
+      <ImageAdjustDialog
+        open={!!adjustFile}
+        file={adjustFile}
+        title="Ajustar foto de perfil"
+        defaultAspect="1:1"
+        onCancel={() => setAdjustFile(null)}
+        onConfirm={handleAdjusted}
+      />
     </div>
   )
 }
