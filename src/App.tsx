@@ -43,6 +43,7 @@ import AdminInquiries from '@/pages/admin/AdminInquiries'
 import AdminTrips from '@/pages/admin/AdminTrips'
 import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 import { SitePagesProvider } from '@/hooks/use-site-pages'
+import { PwaInstallPrompt } from '@/components/PwaInstallPrompt'
 
 const App = () => (
   <BrowserRouter>
@@ -52,6 +53,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <PwaInstallPrompt />
             <Routes>
               {/* Public Routes with standard Layout */}
               <Route element={<Layout />}>

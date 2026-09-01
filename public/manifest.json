@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "Banda Marcial de Botucatu",
   "short_name": "BMB",
   "description": "Banda Marcial de Botucatu — tradição, disciplina e honra pela música.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1B263B",
   "theme_color": "#1B263B",

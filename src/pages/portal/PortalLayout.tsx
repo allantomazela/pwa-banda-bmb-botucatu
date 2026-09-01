@@ -57,7 +57,7 @@ export default function PortalLayout() {
   }
 
   return (
-    <div className="flex min-h-dvh min-w-0 overflow-x-clip bg-background">
+    <div className="flex h-svh max-h-dvh min-h-0 min-w-0 overflow-hidden bg-background lg:min-h-dvh lg:max-h-none lg:overflow-x-clip">
       <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-gradient-to-b from-card/50 to-card/20 lg:flex">
         <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
           <Avatar className="h-12 w-12 border-2 border-primary shadow-glow/30">
@@ -125,7 +125,7 @@ export default function PortalLayout() {
         </div>
       </aside>
 
-      <main className="relative min-h-full min-w-0 flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+      <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:overflow-visible lg:pb-0">
         <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />

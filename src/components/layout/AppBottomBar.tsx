@@ -14,13 +14,20 @@ export function AppBottomBar({ children, scrollable = false }: AppBottomBarProps
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 glass pb-safe lg:hidden">
       <div
         className={cn(
-          'scrollbar-none flex items-stretch overflow-x-auto px-safe',
+          'scrollbar-none flex items-stretch overflow-y-hidden px-safe',
           scrollable
-            ? 'min-h-[4.75rem] snap-x snap-mandatory gap-1 px-2'
-            : 'min-h-[4.25rem] gap-0.5 sm:gap-1 sm:px-1.5',
+            ? 'min-h-[4.75rem] touch-pan-x overflow-x-auto overscroll-x-contain gap-1 px-2 [-webkit-overflow-scrolling:touch]'
+            : 'min-h-[4.25rem] gap-0.5 overflow-x-auto overscroll-x-contain sm:gap-1 sm:px-1.5',
         )}
       >
-        {children}
+        <div
+          className={cn(
+            'flex items-stretch',
+            scrollable ? 'w-max min-w-full snap-x snap-mandatory gap-1' : 'w-full gap-0.5 sm:gap-1',
+          )}
+        >
+          {children}
+        </div>
       </div>
     </nav>
   )

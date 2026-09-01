@@ -43,7 +43,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="relative flex min-h-dvh min-w-0 overflow-x-clip bg-background">
+    <div className="relative flex h-svh max-h-dvh min-h-0 min-w-0 overflow-hidden bg-background lg:min-h-dvh lg:max-h-none lg:overflow-x-clip">
       <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-card/30 lg:flex">
         <div className="flex items-center gap-3 border-b border-white/5 p-6">
           <div className="h-10 w-10">
@@ -93,7 +93,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:overflow-visible lg:pb-0">
         <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
@@ -101,19 +101,20 @@ export default function AdminLayout() {
           </Link>
         </div>
         <Outlet />
-        <AppBottomBar scrollable>
-          {ADMIN_NAV.map((item) => (
-            <BottomBarItem
-              key={item.path}
-              to={item.path}
-              icon={item.icon}
-              label={item.shortName}
-              active={isActive(item.path)}
-              scrollable
-            />
-          ))}
-        </AppBottomBar>
       </main>
+
+      <AppBottomBar scrollable>
+        {ADMIN_NAV.map((item) => (
+          <BottomBarItem
+            key={item.path}
+            to={item.path}
+            icon={item.icon}
+            label={item.shortName}
+            active={isActive(item.path)}
+            scrollable
+          />
+        ))}
+      </AppBottomBar>
     </div>
   )
 }
