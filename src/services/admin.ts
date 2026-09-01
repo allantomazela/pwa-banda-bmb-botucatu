@@ -20,7 +20,12 @@ export async function getAllEvents(): Promise<EventItem[]> {
     .select('*')
     .order('event_date', { ascending: false })
   if (error) throw error
-  return (data as EventItem[]) ?? []
+  return ((data as EventItem[]) ?? []).map((row) => ({
+    ...row,
+    description: row.description || '',
+    location: row.location || '',
+    image_url: row.image_url?.trim() || '',
+  }))
 }
 
 export async function updateProfileAdmin(
@@ -69,8 +74,12 @@ export async function createEvent(data: {
   description: string | null
   event_date: string
   location: string | null
+  image_url?: string | null
 }): Promise<{ error: string | null }> {
-  const { error } = await supabase.from('events').insert(data)
+  const { error } = await supabase.from('events').insert({
+    ...data,
+    image_url: data.image_url?.trim() || '',
+  })
   if (error) return { error: error.message }
   return { error: null }
 }
@@ -82,9 +91,14 @@ export async function updateEvent(
     description: string | null
     event_date: string
     location: string | null
+    image_url: string | null
   }>,
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase.from('events').update(data).eq('id', id)
+  const payload = { ...data }
+  if (payload.image_url !== undefined) {
+    payload.image_url = payload.image_url?.trim() || ''
+  }
+  const { error } = await supabase.from('events').update(payload).eq('id', id)
   if (error) return { error: error.message }
   return { error: null }
 }

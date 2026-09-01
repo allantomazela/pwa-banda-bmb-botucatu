@@ -20,10 +20,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ImageUrlField } from '@/components/admin/ImageUrlField'
 import { Pencil, Plus, Trash2, Search, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
-const EMPTY_FORM = { title: '', description: '', event_date: '', location: '' }
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  event_date: '',
+  location: '',
+  image_url: '',
+}
 
 export function EventsManager() {
   const { toast } = useToast()
@@ -67,6 +74,7 @@ export function EventsManager() {
       description: e.description || '',
       event_date: e.event_date.slice(0, 16),
       location: e.location || '',
+      image_url: e.image_url || '',
     })
     setOpen(true)
   }
@@ -89,6 +97,7 @@ export function EventsManager() {
       description: form.description || null,
       event_date: new Date(form.event_date).toISOString(),
       location: form.location || null,
+      image_url: form.image_url.trim() || '',
     }
     const { error } = editing ? await updateEvent(editing.id, payload) : await createEvent(payload)
     setSaving(false)
@@ -137,6 +146,7 @@ export function EventsManager() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-14">Flyer</TableHead>
               <TableHead>Título</TableHead>
               <TableHead>Data</TableHead>
               <TableHead>Local</TableHead>
@@ -146,6 +156,17 @@ export function EventsManager() {
           <TableBody>
             {filtered.map((e) => (
               <TableRow key={e.id}>
+                <TableCell>
+                  {e.image_url ? (
+                    <img
+                      src={e.image_url}
+                      alt=""
+                      className="h-10 w-8 rounded object-cover border border-white/10"
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </TableCell>
                 <TableCell className="font-medium">{e.title}</TableCell>
                 <TableCell>{new Date(e.event_date).toLocaleDateString('pt-BR')}</TableCell>
                 <TableCell className="max-w-[200px] truncate">{e.location || '—'}</TableCell>
@@ -170,7 +191,7 @@ export function EventsManager() {
         </Table>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[92dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Editar Evento' : 'Novo Evento'}</DialogTitle>
           </DialogHeader>
@@ -192,7 +213,7 @@ export function EventsManager() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="ev-date">Data e Hora</Label>
                 <Input
@@ -211,6 +232,27 @@ export function EventsManager() {
                 />
               </div>
             </div>
+            <ImageUrlField
+              id="ev-flyer"
+              label="Flyer / cartaz"
+              hint="Imagem de divulgação do evento (opcional). Ideal em formato vertical."
+              value={form.image_url}
+              kind="event"
+              accept="image/webp,image/jpeg,image/png,.webp,.jpg,.jpeg,.png"
+              successDescription="Clique em Salvar para gravar o evento com o flyer."
+              onChange={(url) => setForm({ ...form, image_url: url })}
+            />
+            {form.image_url ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => setForm({ ...form, image_url: '' })}
+              >
+                Remover flyer
+              </Button>
+            ) : null}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>

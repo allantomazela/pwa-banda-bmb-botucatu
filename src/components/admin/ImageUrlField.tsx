@@ -15,7 +15,7 @@ type Props = {
   label: string
   hint: string
   value: string
-  kind: 'logo' | 'hero' | 'sponsor'
+  kind: 'logo' | 'hero' | 'sponsor' | 'event'
   accept: string
   successDescription?: string
   defaultAspect?: ImageAdjustAspect
@@ -24,6 +24,7 @@ type Props = {
 
 function defaultAspectFor(kind: Props['kind']): ImageAdjustAspect {
   if (kind === 'logo' || kind === 'sponsor') return '1:1'
+  if (kind === 'event') return '3:4'
   return 'free'
 }
 
@@ -96,15 +97,19 @@ export function ImageUrlField({
         </Button>
       </div>
       {value ? (
-        <img
-          src={value}
-          alt=""
-          className={
-            kind === 'hero'
-              ? 'h-28 w-full max-w-md rounded-lg border border-white/10 object-cover'
-              : 'h-16 w-auto max-w-[160px] rounded-lg border border-white/10 bg-white/5 object-contain p-2'
-          }
-        />
+        <div className="relative inline-block">
+          <img
+            src={value}
+            alt=""
+            className={
+              kind === 'hero'
+                ? 'h-28 w-full max-w-md rounded-lg border border-white/10 object-cover'
+                : kind === 'event'
+                  ? 'h-40 w-auto max-w-[12rem] rounded-lg border border-white/10 object-cover'
+                  : 'h-16 w-auto max-w-[160px] rounded-lg border border-white/10 bg-white/5 object-contain p-2'
+            }
+          />
+        </div>
       ) : null}
 
       <ImageAdjustDialog

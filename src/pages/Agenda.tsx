@@ -112,17 +112,27 @@ export default function Agenda() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {past.map((event) => {
                 const parts = formatParts(event.event_date)
+                const hasFlyer = Boolean(event.image_url?.trim())
                 return (
                   <div
                     key={event.id}
                     className="flex items-center gap-4 rounded-xl border border-white/8 bg-card/40 px-4 py-3"
                   >
-                    <div className="min-w-[56px] rounded-lg border border-white/10 bg-background/80 px-2 py-2 text-center">
-                      <span className="block text-[10px] font-bold text-primary">{parts.month}</span>
-                      <span className="block text-xl font-display font-bold leading-none text-white">
-                        {parts.day}
-                      </span>
-                    </div>
+                    {hasFlyer ? (
+                      <img
+                        src={event.image_url}
+                        alt=""
+                        className="h-14 w-11 shrink-0 rounded-lg border border-white/10 object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="min-w-[56px] rounded-lg border border-white/10 bg-background/80 px-2 py-2 text-center">
+                        <span className="block text-[10px] font-bold text-primary">{parts.month}</span>
+                        <span className="block text-xl font-display font-bold leading-none text-white">
+                          {parts.day}
+                        </span>
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-white">{event.title}</p>
                       <p className="truncate text-xs text-muted-foreground">
@@ -227,21 +237,55 @@ export default function Agenda() {
 
 function FeaturedEvent({ event }: { event: EventItem }) {
   const parts = formatParts(event.event_date)
+  const hasFlyer = Boolean(event.image_url?.trim())
+
   return (
     <section className="overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/15 via-card/80 to-card shadow-[0_0_60px_hsla(42,96%,58%,0.12)]">
-      <div className="grid gap-0 lg:grid-cols-[220px_1fr]">
-        <div className="flex flex-col items-center justify-center gap-1 border-b border-primary/20 bg-primary/10 px-6 py-8 lg:border-b-0 lg:border-r">
-          <span className="text-sm font-bold uppercase tracking-widest text-primary">
-            {parts.month}
-          </span>
-          <span className="font-display text-6xl font-bold leading-none text-white">{parts.day}</span>
-          <span className="capitalize text-sm text-muted-foreground">{parts.weekday}</span>
-        </div>
+      <div
+        className={
+          hasFlyer
+            ? 'grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]'
+            : 'grid gap-0 lg:grid-cols-[220px_1fr]'
+        }
+      >
+        {hasFlyer ? (
+          <div className="relative min-h-[18rem] overflow-hidden bg-zinc-950 sm:min-h-[22rem] lg:min-h-full">
+            <img
+              src={event.image_url}
+              alt={`Flyer — ${event.title}`}
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              loading="eager"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-background/80" />
+            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border border-white/15 bg-black/55 px-3 py-2 backdrop-blur-md lg:left-5 lg:top-5">
+              <div className="text-center">
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-primary">
+                  {parts.month}
+                </span>
+                <span className="block font-display text-3xl font-bold leading-none text-white">
+                  {parts.day}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-1 border-b border-primary/20 bg-primary/10 px-6 py-8 lg:border-b-0 lg:border-r">
+            <span className="text-sm font-bold uppercase tracking-widest text-primary">
+              {parts.month}
+            </span>
+            <span className="font-display text-6xl font-bold leading-none text-white">{parts.day}</span>
+            <span className="capitalize text-sm text-muted-foreground">{parts.weekday}</span>
+          </div>
+        )}
+
         <div className="space-y-5 p-6 sm:p-8">
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
               Destaque da agenda
             </p>
+            {hasFlyer ? (
+              <p className="mb-1 capitalize text-sm text-muted-foreground">{parts.weekday}</p>
+            ) : null}
             <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">{event.title}</h2>
             {event.description ? (
               <p className="mt-3 max-w-2xl text-muted-foreground">{event.description}</p>
@@ -279,27 +323,56 @@ function FeaturedEvent({ event }: { event: EventItem }) {
 
 function EventCard({ event, delay }: { event: EventItem; delay: number }) {
   const parts = formatParts(event.event_date)
+  const hasFlyer = Boolean(event.image_url?.trim())
+
   return (
     <Card
       className="overflow-hidden border-white/8 bg-card/60 transition-colors hover:border-primary/35"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="h-1.5 w-full bg-gradient-to-r from-primary/80 via-primary/40 to-transparent" />
-      <CardContent className="space-y-4 p-5">
-        <div className="flex gap-4">
-          <div className="min-w-[64px] rounded-xl border border-white/10 bg-background/70 p-2.5 text-center">
+      {hasFlyer ? (
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-950 sm:aspect-[3/4]">
+          <img
+            src={event.image_url}
+            alt={`Flyer — ${event.title}`}
+            className="h-full w-full object-cover object-center"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+          <div className="absolute left-3 top-3 min-w-[56px] rounded-lg border border-white/15 bg-black/55 px-2 py-1.5 text-center backdrop-blur-md">
             <span className="block text-[10px] font-bold text-primary">{parts.month}</span>
-            <span className="mt-0.5 block font-display text-2xl font-bold leading-none text-white">
+            <span className="block font-display text-xl font-bold leading-none text-white">
               {parts.day}
             </span>
           </div>
+        </div>
+      ) : (
+        <div className="h-1.5 w-full bg-gradient-to-r from-primary/80 via-primary/40 to-transparent" />
+      )}
+      <CardContent className="space-y-4 p-5">
+        {!hasFlyer ? (
+          <div className="flex gap-4">
+            <div className="min-w-[64px] rounded-xl border border-white/10 bg-background/70 p-2.5 text-center">
+              <span className="block text-[10px] font-bold text-primary">{parts.month}</span>
+              <span className="mt-0.5 block font-display text-2xl font-bold leading-none text-white">
+                {parts.day}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-bold leading-snug text-white">{event.title}</h3>
+              {event.description ? (
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
+              ) : null}
+            </div>
+          </div>
+        ) : (
           <div className="min-w-0">
             <h3 className="font-bold leading-snug text-white">{event.title}</h3>
             {event.description ? (
               <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
             ) : null}
           </div>
-        </div>
+        )}
         <div className="space-y-2 text-sm text-muted-foreground">
           <p className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
