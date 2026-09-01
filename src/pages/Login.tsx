@@ -158,9 +158,9 @@ export default function Login() {
         } else {
           setErrorMessage(null)
           toast({
-            title: 'Conta de responsável criada!',
+            title: 'Cadastro enviado!',
             description:
-              'Se houver convite pendente para este e-mail, o vínculo com o aluno será ativado automaticamente. Faça login para continuar.',
+              'Seu pedido de responsável foi registrado e aguarda aprovação do administrador antes do primeiro login.',
           })
           switchMode('login')
           setPassword('')
@@ -209,7 +209,7 @@ export default function Login() {
     },
     'register-guardian': {
       title: 'Conta de Responsável',
-      description: 'Use o e-mail convidado pela administração da banda',
+      description: 'Cadastre-se com o e-mail convidado e aguarde a aprovação do administrador',
     },
     forgot: {
       title: 'Recuperar senha',

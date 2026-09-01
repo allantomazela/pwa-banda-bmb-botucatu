@@ -13,7 +13,7 @@ export function AdminGuard() {
     )
   }
 
-  if (!profile || !isSystemAdmin(profile.role)) {
+  if (!profile || profile.approval_status !== 'approved' || !isSystemAdmin(profile.role)) {
     return <Navigate to="/portal" replace />
   }
 

@@ -37,6 +37,14 @@ export default function PortalLayout() {
     return <div className="flex min-h-dvh flex-1 items-center justify-center">Carregando...</div>
   if (!user) return <Navigate to="/login" replace />
 
+  if (!profileLoading && (!profile || profile.approval_status !== 'approved')) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (profileLoading && !profile) {
+    return <div className="flex min-h-dvh flex-1 items-center justify-center">Carregando...</div>
+  }
+
   const displayName = profile?.full_name || 'Usuario'
   const displayInstrument = profile?.instrument || ''
   const displayAvatar =

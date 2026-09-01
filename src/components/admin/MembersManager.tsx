@@ -122,10 +122,10 @@ export function MembersManager() {
       return
     }
     toast({
-      title: status === 'approved' ? 'Aluno aprovado' : 'Cadastro recusado',
+      title: status === 'approved' ? 'Cadastro aprovado' : 'Cadastro recusado',
       description:
         status === 'approved'
-          ? 'O aluno já pode fazer login no portal.'
+          ? 'A pessoa já pode fazer login no portal.'
           : 'O acesso deste cadastro foi bloqueado.',
     })
     await fetchProfiles()
@@ -148,7 +148,8 @@ export function MembersManager() {
               <CardTitle className="text-lg">Cadastros aguardando aprovação</CardTitle>
             </div>
             <CardDescription>
-              {pending.length} aluno{pending.length > 1 ? 's' : ''} aguardando liberação de acesso.
+              {pending.length} cadastro{pending.length > 1 ? 's' : ''} (aluno ou responsável)
+              aguardando liberação de acesso.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -163,8 +164,9 @@ export function MembersManager() {
                     {p.email || 'Sem e-mail'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {[p.instrument, p.registration_number].filter(Boolean).join(' · ') ||
-                      'Sem instrumento/matrícula'}
+                    {[roleLabel(p.role), p.instrument, p.registration_number]
+                      .filter(Boolean)
+                      .join(' · ') || 'Sem detalhes'}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

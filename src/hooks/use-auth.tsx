@@ -209,14 +209,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })
     if (error) return { error }
 
-    // Guardian já nasce aprovado — mantém sessão se disponível
-    if (data.user && !data.session) {
-      // e-mail confirmation pode exigir login manual
-      return { error: null }
-    }
-
+    // Cadastro de responsável também aguarda aprovação — não manter sessão
     if (data.session) {
-      await supabase.rpc('activate_guardian_invites')
+      await supabase.auth.signOut()
     }
 
     return { error: null }
