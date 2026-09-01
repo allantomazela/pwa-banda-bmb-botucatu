@@ -21,3 +21,9 @@ enabled = true
 site_url = "http://localhost:8080"
 additional_redirect_urls = ["http://localhost:8080"]
 enable_signup = true
+
+[functions.govbr-start]
+verify_jwt = true
+
+[functions.govbr-callback]
+verify_jwt = false

@@ -212,7 +212,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
     <div className={cn('flex w-full flex-col items-center', className)}>
       <div
         className={cn(
-          'printable-id id-card-perspective relative w-full max-w-[360px] min-h-[560px] cursor-pointer select-none',
+          'printable-id id-card-perspective relative w-full max-w-[360px] min-h-[clamp(30rem,85dvh,35rem)] cursor-pointer select-none',
           theme.variantClass,
         )}
         onClick={() => setIsFlipped(!isFlipped)}
@@ -228,7 +228,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
       >
         <div
           className={cn(
-            'id-card-inner relative h-full min-h-[560px] w-full',
+            'id-card-inner relative h-full min-h-[clamp(30rem,85dvh,35rem)] w-full',
             isFlipped && 'flipped',
           )}
         >
@@ -258,7 +258,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
               )}
             />
 
-            <div className="relative z-10 flex h-full min-h-[560px] flex-col">
+            <div className="relative z-10 flex h-full min-h-[clamp(30rem,85dvh,35rem)] flex-col">
               <div
                 className={cn(
                   'relative flex h-16 shrink-0 items-center justify-between overflow-hidden px-4',
@@ -445,7 +445,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
 
           {/* Verso */}
           <div
-            className="id-card-face id-card-back absolute inset-0 h-full min-h-[560px] w-full overflow-hidden rounded-[1.35rem] shadow-2xl"
+            className="id-card-face id-card-back absolute inset-0 h-full min-h-[clamp(30rem,85dvh,35rem)] w-full overflow-hidden rounded-[1.35rem] shadow-2xl"
             style={
               { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
             }
@@ -454,7 +454,7 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
             <div className="absolute inset-0 id-holo-pattern" />
             <div className={cn('absolute inset-0 opacity-35', theme.mesh)} />
 
-            <div className="relative z-10 flex h-full min-h-[560px] flex-col items-center justify-between p-6">
+            <div className="relative z-10 flex h-full min-h-[clamp(30rem,85dvh,35rem)] flex-col items-center justify-between p-6">
               <div className="w-full shrink-0 pt-1 text-center">
                 <div className="mb-1 flex items-center justify-center gap-2">
                   <img src="/brand-logo.png" alt="" className="h-7 w-7 object-contain" />

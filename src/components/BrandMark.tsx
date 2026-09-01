@@ -47,11 +47,12 @@ export function BrandMark({ variant = 'header', className }: BrandMarkProps) {
           </div>
         </div>
 
-        <p className="mb-3 font-crest text-[10px] font-semibold uppercase tracking-[0.55em] text-primary/90 sm:text-xs">
+        <p className="mb-3 font-crest text-[10px] font-semibold uppercase tracking-[0.35em] text-primary/90 sm:tracking-[0.55em] sm:text-xs">
           {BRAND_CITY}
         </p>
 
-        <h1 className="px-2 font-crest text-[1.65rem] font-bold leading-[1.15] tracking-[0.12em] text-white sm:text-4xl sm:tracking-[0.18em] md:text-5xl lg:text-6xl">
+        {/* clamp(): legível em 320px sem estourar largura por tracking */}
+        <h1 className="text-fluid-hero px-2 font-crest font-bold leading-[1.12] tracking-[0.08em] text-white sm:tracking-[0.14em] md:tracking-[0.18em]">
           <span className="block">BANDA MARCIAL</span>
           <span className="mt-1 block bg-gradient-to-b from-amber-200 via-primary to-amber-600 bg-clip-text text-transparent">
             DE BOTUCATU

@@ -41,6 +41,11 @@ interface AuthContextType {
     password: string,
     metadata?: Record<string, string>,
   ) => Promise<{ error: AuthError | null }>
+  signUpGuardian: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ error: AuthError | null }>
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<{ error: AuthError | null }>
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>
@@ -145,6 +150,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) return { error }
 
     if (data.user) {
+      // Ativa convites de responsável pendentes para este e-mail
+      await supabase.rpc('activate_guardian_invites')
+
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, approval_status, role')
@@ -183,6 +191,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: null }
   }
 
+  const signUpGuardian = async (
+    email: string,
+    password: string,
+    fullName: string,
+  ): Promise<{ error: AuthError | null }> => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+        data: {
+          full_name: fullName.trim(),
+          signup_as: 'guardian',
+        },
+      },
+    })
+    if (error) return { error }
+
+    // Guardian já nasce aprovado — mantém sessão se disponível
+    if (data.user && !data.session) {
+      // e-mail confirmation pode exigir login manual
+      return { error: null }
+    }
+
+    if (data.session) {
+      await supabase.rpc('activate_guardian_invites')
+    }
+
+    return { error: null }
+  }
+
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/redefinir-senha`,
@@ -202,6 +241,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         profile,
         signUp,
+        signUpGuardian,
         signIn,
         signOut,
         resetPassword,

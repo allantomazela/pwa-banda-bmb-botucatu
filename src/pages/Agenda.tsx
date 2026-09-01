@@ -54,7 +54,7 @@ export default function Agenda() {
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               Agenda BMB
             </p>
-            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            <h1 className="text-fluid-section font-display font-bold tracking-tight">
               Acompanhe a banda nos próximos{' '}
               <span className="text-primary">palcos</span>
             </h1>
@@ -91,7 +91,7 @@ export default function Agenda() {
                     </p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,17.5rem),1fr))] gap-5">
                   {rest.map((event, i) => (
                     <EventCard key={event.id} event={event} delay={i * 80} />
                   ))}
@@ -253,7 +253,7 @@ function FeaturedEvent({ event }: { event: EventItem }) {
               {parts.time}
             </span>
             {event.location ? (
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex max-w-full items-center gap-2 break-words">
                 <MapPin className="h-4 w-4 shrink-0 text-primary" />
                 {event.location}
               </span>

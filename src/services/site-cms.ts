@@ -27,7 +27,11 @@ export async function getNavPages(): Promise<SitePage[]> {
 }
 
 export async function getPageBySlug(slug: string): Promise<SitePage | null> {
-  const { data, error } = await supabase.from('site_pages').select('*').eq('slug', slug).maybeSingle()
+  const { data, error } = await supabase
+    .from('site_pages')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
   if (error) throw error
   return data
 }

@@ -82,7 +82,7 @@ export default function Media() {
     <div className="container animate-fade-in px-4 py-8 sm:py-12 lg:py-20">
       <div className="mb-8 flex flex-col gap-6 md:mb-12 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
-          <h1 className="mb-3 text-3xl font-bold sm:text-4xl md:text-5xl">
+          <h1 className="text-fluid-section mb-3 font-bold">
             Galeria de <span className="text-primary">Mídia</span>
           </h1>
           <p className="text-base text-muted-foreground sm:text-lg">
@@ -91,7 +91,7 @@ export default function Media() {
           </p>
         </div>
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full md:w-auto">
-          <TabsList className="grid w-full grid-cols-3 md:w-[360px]">
+          <TabsList className="grid h-auto min-h-11 w-full grid-cols-3 md:w-[min(100%,22.5rem)]">
             <TabsTrigger value="fotos">Fotos</TabsTrigger>
             <TabsTrigger value="eventos">Eventos</TabsTrigger>
             <TabsTrigger value="videos">Vídeos</TabsTrigger>
@@ -143,7 +143,7 @@ export default function Media() {
               <p>Nenhum vídeo público publicado no momento.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,17.5rem),1fr))] gap-4">
               {videos.map((video) => (
                 <button
                   key={video.id}

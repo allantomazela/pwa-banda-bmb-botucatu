@@ -10,6 +10,9 @@ export type TravelAuthorizationWithTrip = TravelAuthorization & {
     TravelTrip,
     'id' | 'title' | 'destination' | 'departure_at' | 'return_at' | 'description' | 'is_active'
   > | null
+  profiles?: {
+    full_name: string
+  } | null
 }
 
 export type TravelAuthorizationWithMember = TravelAuthorization & {
@@ -132,6 +135,11 @@ export async function revokeAuthorization(id: string): Promise<{ error: string |
       signature_data: null,
       signed_at: null,
       signature_method: 'canvas',
+      govbr_sub: null,
+      govbr_name: null,
+      govbr_email: null,
+      govbr_assurance: null,
+      signature_evidence: null,
     })
     .eq('id', id)
   if (error) return { error: error.message }
@@ -155,6 +163,34 @@ export async function listMyAuthorizations(): Promise<TravelAuthorizationWithTri
   return (data ?? []) as TravelAuthorizationWithTrip[]
 }
 
+/** Autorizações dos alunos vinculados ao responsável logado (RLS). */
+export async function listGuardianAuthorizations(): Promise<TravelAuthorizationWithTrip[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: links, error: linksError } = await supabase
+    .from('guardian_links')
+    .select('student_id')
+    .eq('guardian_id', user.id)
+    .eq('status', 'active')
+  if (linksError) throw linksError
+
+  const studentIds = (links ?? []).map((l) => l.student_id)
+  if (studentIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('travel_authorizations')
+    .select(
+      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name )',
+    )
+    .in('member_id', studentIds)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as TravelAuthorizationWithTrip[]
+}
+
 export async function signTravelAuthorization(input: {
   authorizationId: string
   guardianName: string
@@ -167,6 +203,7 @@ export async function signTravelAuthorization(input: {
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Sessão expirada. Faça login novamente.' }
 
+  // RLS: aluno não atualiza; guardian ativo ou admin pode assinar
   const { error } = await supabase
     .from('travel_authorizations')
     .update({
@@ -181,7 +218,6 @@ export async function signTravelAuthorization(input: {
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 500) : null,
     })
     .eq('id', input.authorizationId)
-    .eq('member_id', user.id)
     .eq('status', 'pending')
 
   if (error) return { error: error.message }

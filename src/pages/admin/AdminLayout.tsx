@@ -43,7 +43,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="relative flex min-h-dvh min-w-0 overflow-x-clip bg-background">
       <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-card/30 lg:flex">
         <div className="flex items-center gap-3 border-b border-white/5 p-6">
           <div className="h-10 w-10">
@@ -93,13 +93,14 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
-        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 glass lg:hidden">
+      <main className="min-w-0 flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site
           </Link>
         </div>
+        <Outlet />
         <AppBottomBar>
           {ADMIN_NAV.map((item) => (
             <BottomBarItem
@@ -111,7 +112,6 @@ export default function AdminLayout() {
             />
           ))}
         </AppBottomBar>
-        <Outlet />
       </main>
     </div>
   )

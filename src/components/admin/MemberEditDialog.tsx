@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { GuardianFields } from '@/components/GuardianFields'
+import { GuardianDigitalSection } from '@/components/admin/GuardianDigitalSection'
 import {
   HealthFields,
   healthFormFromProfile,
@@ -134,7 +135,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Membro: {profile.full_name}</DialogTitle>
         </DialogHeader>
@@ -251,13 +252,16 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
           </div>
           <HealthFields idPrefix="me-health" values={form} onChange={setHealth} />
           {isMinor(form.birth_date) && (
-            <GuardianFields
-              idPrefix="me-guardian"
-              name={form.guardian_name}
-              phone={form.guardian_phone}
-              onNameChange={(v) => set('guardian_name', v)}
-              onPhoneChange={(v) => set('guardian_phone', v)}
-            />
+            <>
+              <GuardianFields
+                idPrefix="me-guardian"
+                name={form.guardian_name}
+                phone={form.guardian_phone}
+                onNameChange={(v) => set('guardian_name', v)}
+                onPhoneChange={(v) => set('guardian_phone', v)}
+              />
+              <GuardianDigitalSection studentId={profile.id} />
+            </>
           )}
         </div>
         <DialogFooter>

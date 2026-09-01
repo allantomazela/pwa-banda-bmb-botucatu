@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ImageUrlField } from '@/components/admin/ImageUrlField'
+import { Switch } from '@/components/ui/switch'
 
 function Field({
   id,
@@ -281,6 +282,34 @@ export function SiteSettingsManager() {
             value={form.footer_city || ''}
             onChange={set('footer_city')}
           />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card/50 border-white/5">
+        <CardHeader>
+          <CardTitle className="text-base">Autorizações de viagem (Gov.br)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-start justify-between gap-4 rounded-lg border border-white/10 bg-white/[0.03] p-4">
+            <div className="space-y-1">
+              <Label htmlFor="govbr_signing_enabled">Assinatura via Login Único Gov.br</Label>
+              <p className="text-xs text-muted-foreground">
+                Exibe o botão &quot;Assinar com Gov.br&quot; para responsáveis. Só funciona após
+                cadastrar credenciais no Supabase Edge Functions e registrar a URL de callback no
+                Gov.br.
+              </p>
+            </div>
+            <Switch
+              id="govbr_signing_enabled"
+              checked={form.govbr_signing_enabled === 'true'}
+              onCheckedChange={(checked) =>
+                setForm((prev) => ({
+                  ...prev,
+                  govbr_signing_enabled: checked ? 'true' : 'false',
+                }))
+              }
+            />
+          </div>
         </CardContent>
       </Card>
 

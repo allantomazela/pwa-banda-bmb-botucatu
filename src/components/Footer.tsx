@@ -20,7 +20,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="mt-auto border-t border-white/5 bg-background px-4 py-8 sm:px-6 lg:px-12 lg:py-12">
+    <footer className="mt-auto border-t border-white/5 bg-background px-4 py-8 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] sm:px-6 lg:px-12 lg:py-12 lg:pb-12">
       <div className="container max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="mb-4">

@@ -13,7 +13,7 @@ import { GuardianFields } from '@/components/GuardianFields'
 import { getGuardianValidationError, isMinor } from '@/lib/formatters'
 import { BrandMark } from '@/components/BrandMark'
 
-type AuthMode = 'login' | 'register' | 'forgot'
+type AuthMode = 'login' | 'register' | 'register-guardian' | 'forgot'
 
 export default function Login() {
   const [mode, setMode] = useState<AuthMode>('login')
@@ -24,7 +24,7 @@ export default function Login() {
   const [birthDate, setBirthDate] = useState('')
   const [guardianName, setGuardianName] = useState('')
   const [guardianPhone, setGuardianPhone] = useState('')
-  const { signIn, signUp, resetPassword, user, loading } = useAuth()
+  const { signIn, signUp, signUpGuardian, resetPassword, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -53,7 +53,9 @@ export default function Login() {
         authError.message.includes('Perfil não encontrado') ||
         authError.message.includes('aguarda aprovação') ||
         authError.message.includes('foi recusado') ||
-        authError.message.includes('sem permissão')
+        authError.message.includes('sem permissão') ||
+        authError.message.includes('responsável') ||
+        authError.message.includes('aluno')
       ) {
         return authError.message
       }
@@ -96,6 +98,11 @@ export default function Login() {
       }
     }
 
+    if (mode === 'register-guardian' && !fullName.trim()) {
+      setErrorMessage('Informe o nome completo.')
+      return
+    }
+
     setSubmitting(true)
     try {
       if (mode === 'forgot') {
@@ -133,7 +140,30 @@ export default function Login() {
         } else {
           setErrorMessage(null)
           toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' })
-          navigate('/')
+          navigate('/portal')
+        }
+        return
+      }
+
+      if (mode === 'register-guardian') {
+        const { error } = await signUpGuardian(email, password, fullName)
+        if (error) {
+          const msg = getErrorMessage(error)
+          setErrorMessage(msg)
+          toast({
+            title: 'Erro ao cadastrar responsável',
+            description: msg,
+            variant: 'destructive',
+          })
+        } else {
+          setErrorMessage(null)
+          toast({
+            title: 'Conta de responsável criada!',
+            description:
+              'Se houver convite pendente para este e-mail, o vínculo com o aluno será ativado automaticamente. Faça login para continuar.',
+          })
+          switchMode('login')
+          setPassword('')
         }
         return
       }
@@ -170,12 +200,16 @@ export default function Login() {
 
   const titles: Record<AuthMode, { title: string; description: string }> = {
     login: {
-      title: 'Portal do Aluno',
-      description: 'Acesso restrito para membros aprovados da BMB',
+      title: 'Portal BMB',
+      description: 'Acesso para alunos, responsáveis e membros aprovados',
     },
     register: {
-      title: 'Criar Conta',
+      title: 'Criar Conta de Aluno',
       description: 'Cadastre-se e aguarde a aprovação do administrador',
+    },
+    'register-guardian': {
+      title: 'Conta de Responsável',
+      description: 'Use o e-mail convidado pela administração da banda',
     },
     forgot: {
       title: 'Recuperar senha',
@@ -184,7 +218,7 @@ export default function Login() {
   }
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background p-4">
+    <div className="relative flex min-h-dvh flex-1 items-center justify-center overflow-x-clip bg-background p-4 pb-safe px-safe">
       <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
 
@@ -202,19 +236,21 @@ export default function Login() {
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
+            {(mode === 'register' || mode === 'register-guardian') && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nome Completo</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Seu nome"
+                  className="h-12 bg-background/50"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             {mode === 'register' && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="Seu nome"
-                    className="h-12 bg-background/50"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="instrument">Instrumento</Label>
                   <Input
@@ -293,7 +329,9 @@ export default function Login() {
               ) : mode === 'login' ? (
                 'Entrar no Portal'
               ) : mode === 'register' ? (
-                'Enviar cadastro'
+                'Enviar cadastro de aluno'
+              ) : mode === 'register-guardian' ? (
+                'Criar conta de responsável'
               ) : (
                 <>
                   <KeyRound className="mr-2 h-4 w-4" />
@@ -311,13 +349,34 @@ export default function Login() {
                   Voltar ao login
                 </button>
               ) : (
-                <button
-                  type="button"
-                  className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
-                  onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-                >
-                  {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
-                </button>
+                <>
+                  {mode === 'login' ? (
+                    <>
+                      <button
+                        type="button"
+                        className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                        onClick={() => switchMode('register')}
+                      >
+                        Não tem conta? Cadastre-se como aluno
+                      </button>
+                      <button
+                        type="button"
+                        className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                        onClick={() => switchMode('register-guardian')}
+                      >
+                        Sou responsável — criar conta
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                      onClick={() => switchMode('login')}
+                    >
+                      Já tem conta? Faça login
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </form>

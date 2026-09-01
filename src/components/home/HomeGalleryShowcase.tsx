@@ -107,12 +107,12 @@ export function HomeGalleryShowcase() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="pointer-events-auto flex items-center gap-2">
                 <Button
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="h-10 w-10 rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
+                  className="touch-target rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
                   onClick={goPrev}
                   aria-label="Foto anterior"
                 >
@@ -122,7 +122,7 @@ export function HomeGalleryShowcase() {
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="h-10 w-10 rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
+                  className="touch-target rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
                   onClick={goNext}
                   aria-label="Próxima foto"
                 >
@@ -142,13 +142,17 @@ export function HomeGalleryShowcase() {
                     e.stopPropagation()
                     setCurrent(index)
                   }}
-                  className={cn(
-                    'h-1.5 rounded-full transition-all duration-300',
-                    index === current
-                      ? 'w-8 bg-primary'
-                      : 'w-1.5 bg-white/35 hover:bg-white/60',
-                  )}
-                />
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+                >
+                  <span
+                    className={cn(
+                      'block rounded-full transition-all duration-300',
+                      index === current
+                        ? 'h-1.5 w-8 bg-primary'
+                        : 'h-1.5 w-1.5 bg-white/35 hover:bg-white/60',
+                    )}
+                  />
+                </button>
               ))}
             </div>
           </div>

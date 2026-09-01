@@ -51,9 +51,7 @@ export function toEmbedUrl(url: string): string {
   if (!trimmed) return ''
   if (trimmed.includes('/embed/')) return trimmed
 
-  const youtube = trimmed.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/,
-  )
+  const youtube = trimmed.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/)
   if (youtube?.[1]) return `https://www.youtube.com/embed/${youtube[1]}`
 
   const vimeo = trimmed.match(/vimeo\.com\/(\d+)/)

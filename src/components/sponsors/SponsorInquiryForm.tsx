@@ -69,8 +69,8 @@ export function SponsorInquiryForm() {
           Quero patrocinar
         </CardTitle>
         <CardDescription className="text-base text-muted-foreground mt-2">
-          Empresas e pessoas que desejam apoiar a Banda BMB com doações ao caixa podem
-          deixar os dados abaixo. Retornamos para conversar sobre a parceria.
+          Empresas e pessoas que desejam apoiar a Banda BMB com doações ao caixa podem deixar os
+          dados abaixo. Retornamos para conversar sobre a parceria.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -65,7 +65,8 @@ function SponsorCard({ sponsor }: { sponsor: Sponsor }) {
   const card = (
     <article
       className={cn(
-        'sponsor-card-glow group relative flex h-[230px] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 px-6 py-8',
+        /* min-h fluido: evita cards rígidos em telas baixas */
+        'sponsor-card-glow group relative flex min-h-[11.5rem] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-white/10 px-4 py-6 sm:min-h-[230px] sm:px-6 sm:py-8',
         hasCustomBg
           ? 'shadow-[0_16px_48px_rgba(0,0,0,0.35)]'
           : 'bg-zinc-900/70 shadow-[0_16px_48px_rgba(0,0,0,0.3)] backdrop-blur-xl',
@@ -115,7 +116,7 @@ function InviteCard({ onContact }: { onContact: () => void }) {
       className="block w-full rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label="Quero ser patrocinador e entrar em contato"
     >
-      <article className="sponsor-card-glow sponsor-invite-border group relative flex h-[230px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl bg-zinc-900/55 px-6 py-8 backdrop-blur-xl">
+      <article className="sponsor-card-glow sponsor-invite-border group relative flex min-h-[11.5rem] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl bg-zinc-900/55 px-4 py-6 backdrop-blur-xl sm:min-h-[230px] sm:px-6 sm:py-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(251,192,45,0.2),transparent_60%)]" />
         <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110">
           <Handshake className="h-5 w-5" aria-hidden />
@@ -193,7 +194,7 @@ export function SponsorLogos({ showCta = false }: Props) {
           </p>
           <h2
             id="sponsors-heading"
-            className="text-balance font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl"
+            className="text-balance text-fluid-section font-display font-bold leading-tight tracking-tight"
           >
             Marcas que impulsionam a tradição e a música de Botucatu
           </h2>

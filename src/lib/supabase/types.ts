@@ -248,6 +248,11 @@ export type Database = {
           signed_at: string | null
           signer_user_id: string | null
           user_agent: string | null
+          govbr_sub: string | null
+          govbr_name: string | null
+          govbr_email: string | null
+          govbr_assurance: string | null
+          signature_evidence: Record<string, unknown> | null
           created_at: string
         }
         Insert: {
@@ -263,6 +268,11 @@ export type Database = {
           signed_at?: string | null
           signer_user_id?: string | null
           user_agent?: string | null
+          govbr_sub?: string | null
+          govbr_name?: string | null
+          govbr_email?: string | null
+          govbr_assurance?: string | null
+          signature_evidence?: Record<string, unknown> | null
           created_at?: string
         }
         Update: {
@@ -278,7 +288,78 @@ export type Database = {
           signed_at?: string | null
           signer_user_id?: string | null
           user_agent?: string | null
+          govbr_sub?: string | null
+          govbr_name?: string | null
+          govbr_email?: string | null
+          govbr_assurance?: string | null
+          signature_evidence?: Record<string, unknown> | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      govbr_oauth_states: {
+        Row: {
+          state: string
+          code_verifier: string
+          nonce: string
+          authorization_id: string
+          user_id: string
+          created_at: string
+          expires_at: string
+        }
+        Insert: {
+          state: string
+          code_verifier: string
+          nonce: string
+          authorization_id: string
+          user_id: string
+          created_at?: string
+          expires_at: string
+        }
+        Update: {
+          state?: string
+          code_verifier?: string
+          nonce?: string
+          authorization_id?: string
+          user_id?: string
+          created_at?: string
+          expires_at?: string
+        }
+        Relationships: []
+      }
+      guardian_links: {
+        Row: {
+          id: string
+          guardian_id: string | null
+          student_id: string
+          relationship: string
+          status: string
+          invited_email: string
+          created_by: string | null
+          created_at: string
+          activated_at: string | null
+        }
+        Insert: {
+          id?: string
+          guardian_id?: string | null
+          student_id: string
+          relationship?: string
+          status?: string
+          invited_email: string
+          created_by?: string | null
+          created_at?: string
+          activated_at?: string | null
+        }
+        Update: {
+          id?: string
+          guardian_id?: string | null
+          student_id?: string
+          relationship?: string
+          status?: string
+          invited_email?: string
+          created_by?: string | null
+          created_at?: string
+          activated_at?: string | null
         }
         Relationships: []
       }
@@ -499,6 +580,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_guardian_invites: { Args: never; Returns: number }
+      cleanup_expired_govbr_oauth_states: { Args: never; Returns: number }
+      invite_guardian_for_student: {
+        Args: {
+          p_student_id: string
+          p_email: string
+          p_relationship?: string
+        }
+        Returns: string
+      }
+      is_active_guardian_of: {
+        Args: { p_student_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
       next_registration_number: { Args: never; Returns: string }
       verify_id_card: {

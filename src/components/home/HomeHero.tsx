@@ -85,7 +85,7 @@ export function HomeHero() {
                 </div>
                 <Link
                   to="/agenda"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 transition-colors hover:bg-primary hover:text-primary-foreground"
+                  className="touch-target flex shrink-0 items-center justify-center rounded-full bg-primary/10 transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   <ArrowRight className="h-4 w-4" />
                 </Link>

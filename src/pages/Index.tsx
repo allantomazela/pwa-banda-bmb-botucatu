@@ -20,9 +20,9 @@ export default function Index() {
       <HomeGalleryShowcase />
 
       {/* Quick Access Tiles */}
-      <section className="relative z-20 bg-background py-10 lg:py-20">
+      <section className="relative z-20 overflow-hidden bg-background py-10 lg:py-20">
         <div className="container px-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,17.5rem),1fr))] gap-4 lg:gap-6">
             <Link to="/sobre" className="block group">
               <Card className="h-full bg-card/50 border-white/5 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-subtle">
                 <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:p-8">

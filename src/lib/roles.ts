@@ -1,14 +1,18 @@
-export const PROFILE_ROLES = ['member', 'professor', 'admin'] as const
+export const PROFILE_ROLES = ['member', 'professor', 'admin', 'guardian'] as const
 export type ProfileRole = (typeof PROFILE_ROLES)[number]
 export type CardVariant = 'aluno' | 'professor' | 'admin'
 
 export function normalizeRole(role: string | null | undefined): ProfileRole {
-  if (role === 'admin' || role === 'professor') return role
+  if (role === 'admin' || role === 'professor' || role === 'guardian') return role
   return 'member'
 }
 
 export function isSystemAdmin(role: string | null | undefined): boolean {
   return role === 'admin'
+}
+
+export function isGuardian(role: string | null | undefined): boolean {
+  return role === 'guardian'
 }
 
 export function resolveCardVariant(role: string | null | undefined): CardVariant {
@@ -22,6 +26,7 @@ export const ROLE_LABELS: Record<ProfileRole, string> = {
   member: 'Aluno',
   professor: 'Professor',
   admin: 'Administrador do Sistema',
+  guardian: 'Responsável',
 }
 
 export const ROLE_CARD_COPY: Record<

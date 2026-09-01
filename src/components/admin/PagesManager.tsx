@@ -90,7 +90,9 @@ export function PagesManager() {
       toast({ title: 'Erro', description: error, variant: 'destructive' })
       return
     }
-    setPages((prev) => prev.map((item) => (item.id === page.id ? { ...item, show_in_nav: checked } : item)))
+    setPages((prev) =>
+      prev.map((item) => (item.id === page.id ? { ...item, show_in_nav: checked } : item)),
+    )
     refreshNav()
   }
 
@@ -144,7 +146,9 @@ export function PagesManager() {
             >
               {page.title}
               {page.is_system ? (
-                <span className="block text-[10px] text-muted-foreground">Página atual do site</span>
+                <span className="block text-[10px] text-muted-foreground">
+                  Página atual do site
+                </span>
               ) : null}
             </button>
           ))}
@@ -162,7 +166,11 @@ export function PagesManager() {
               <Switch id="nav" checked={showInNav} onCheckedChange={setShowInNav} />
             </div>
             <Button onClick={handleCreatePage} disabled={creating} className="w-full" size="sm">
-              {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              {creating ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
               Criar página
             </Button>
           </div>
@@ -237,7 +245,11 @@ export function PagesManager() {
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDeleteSection(section)}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleDeleteSection(section)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

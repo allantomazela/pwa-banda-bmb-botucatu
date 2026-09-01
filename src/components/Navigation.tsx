@@ -26,12 +26,13 @@ export function Header() {
   const portalLabel = isSystemAdmin(profile?.role) ? 'Painel Admin' : 'Portal'
 
   return (
-    <header className="sticky top-0 z-50 hidden h-16 w-full items-center justify-between px-6 glass lg:flex lg:px-12">
-      <Link to="/" className="group">
+    <header className="sticky top-0 z-50 hidden w-full min-w-0 items-center gap-4 px-4 pt-safe glass lg:grid lg:h-16 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] lg:px-8 xl:px-12">
+      <Link to="/" className="group shrink-0">
         <BrandMark variant="header" />
       </Link>
 
-      <nav className="flex flex-wrap items-center justify-end gap-x-6 gap-y-1">
+      {/* Nav central: wrap + min-w-0 evita overflow com muitas páginas CMS */}
+      <nav className="flex min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-1 xl:gap-x-6">
         {PUBLIC_NAV.map((item) => (
           <Link
             key={item.path}
@@ -81,7 +82,7 @@ export function Header() {
         ))}
       </nav>
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center justify-end gap-3 lg:gap-4">
         {user ? (
           <div className="flex items-center gap-3">
             <Link to={portalPath} className="flex items-center gap-2 group">
@@ -115,7 +116,7 @@ export function MobileHeader() {
   const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 w-full items-center justify-between px-4 glass lg:hidden">
+    <header className="sticky top-0 z-50 flex h-14 w-full min-w-0 items-center justify-between px-4 pt-safe glass lg:hidden">
       <Link to="/" className="group">
         <BrandMark variant="header" />
       </Link>
@@ -129,7 +130,7 @@ export function MobileHeader() {
           </Avatar>
         </Link>
       ) : (
-        <Button asChild variant="ghost" size="sm" className="text-primary font-semibold">
+        <Button asChild variant="ghost" size="default" className="touch-target text-primary font-semibold">
           <Link to="/login">Área Restrita</Link>
         </Button>
       )}

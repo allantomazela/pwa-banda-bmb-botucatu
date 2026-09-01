@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { isSystemAdmin, roleLabel } from '@/lib/roles'
+import { isGuardian, isSystemAdmin, roleLabel } from '@/lib/roles'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 import { isMinor } from '@/lib/formatters'
 
@@ -24,6 +24,8 @@ const PORTAL_NAV = [
   { name: 'Autorizações', path: '/portal/autorizacoes', icon: FilePenLine },
   { name: 'Biblioteca', path: '/portal/biblioteca', icon: Library },
 ]
+
+const GUARDIAN_NAV_PATHS = new Set(['/portal', '/portal/autorizacoes', '/portal/perfil'])
 
 export default function PortalLayout() {
   const { user, profile, loading, profileLoading, signOut } = useAuth()
@@ -38,12 +40,24 @@ export default function PortalLayout() {
   const displayAvatar =
     profile?.avatar_url ||
     `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
-  const navItems = PORTAL_NAV.filter(
-    (item) => item.path !== '/portal/autorizacoes' || isMinor(profile?.birth_date),
-  )
+  const guardian = isGuardian(profile?.role)
+  const navItems = PORTAL_NAV.filter((item) => {
+    if (guardian) return GUARDIAN_NAV_PATHS.has(item.path)
+    if (item.path === '/portal/autorizacoes') return isMinor(profile?.birth_date)
+    return true
+  })
+
+  if (
+    guardian &&
+    (location.pathname.startsWith('/portal/id') ||
+      location.pathname.startsWith('/portal/biblioteca') ||
+      location.pathname.startsWith('/portal/videos'))
+  ) {
+    return <Navigate to="/portal" replace />
+  }
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="flex min-h-dvh min-w-0 overflow-x-clip bg-background">
       <aside className="fixed hidden h-dvh w-64 flex-col overflow-y-auto border-r border-white/5 bg-gradient-to-b from-card/50 to-card/20 lg:flex">
         <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
           <Avatar className="h-12 w-12 border-2 border-primary shadow-glow/30">
@@ -111,8 +125,8 @@ export default function PortalLayout() {
         </div>
       </aside>
 
-      <main className="relative min-h-full flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
-        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 glass lg:hidden">
+      <main className="relative min-h-full min-w-0 flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site

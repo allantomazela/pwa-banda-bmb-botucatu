@@ -35,7 +35,8 @@ export function PhotoMasonryGrid({ loading, error, photos, emptyText, onSelect }
   }
 
   return (
-    <div className="columns-2 gap-3 sm:columns-2 md:columns-3 md:gap-4 lg:columns-4">
+    /* 1 coluna em 320px; mais colunas conforme largura */
+    <div className="columns-1 gap-3 sm:columns-2 md:columns-3 md:gap-4 lg:columns-4">
       {photos.map((photo, index) => {
         const tall = index % 5 === 1 || index % 7 === 3
         return (

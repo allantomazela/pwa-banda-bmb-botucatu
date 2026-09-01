@@ -129,7 +129,11 @@ export default function ResetPassword() {
                   required
                 />
               </div>
-              <Button type="submit" className="h-12 w-full text-base font-bold" disabled={submitting}>
+              <Button
+                type="submit"
+                className="h-12 w-full text-base font-bold"
+                disabled={submitting}
+              >
                 {submitting ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (

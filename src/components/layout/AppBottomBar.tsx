@@ -10,7 +10,8 @@ interface AppBottomBarProps {
 export function AppBottomBar({ children }: AppBottomBarProps) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 glass pb-safe lg:hidden">
-      <div className="scrollbar-none flex h-[3.85rem] items-stretch gap-1 overflow-x-auto px-1.5">
+      {/* min-h 44px+ por item; scroll horizontal só se muitos links (admin) */}
+      <div className="scrollbar-none flex min-h-[4.25rem] items-stretch gap-0.5 overflow-x-auto px-safe sm:gap-1 sm:px-1.5">
         {children}
       </div>
     </nav>
@@ -40,7 +41,7 @@ export function BottomBarItem({
     <Link
       to={to}
       className={cn(
-        'flex min-w-[4.35rem] flex-1 flex-col items-center justify-center gap-0.5 px-2 text-muted-foreground transition-colors',
+        'touch-target flex min-h-[4.25rem] min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-0.5 px-1.5 text-muted-foreground transition-colors sm:min-w-[4.75rem] sm:px-2',
         active ? activeClass : 'hover:text-foreground',
       )}
     >
