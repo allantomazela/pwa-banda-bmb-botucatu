@@ -1,46 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronLeft, ChevronRight, Images } from 'lucide-react'
+import Autoplay from 'embla-carousel-autoplay'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 import { useFetch } from '@/hooks/use-fetch'
 import { getShowcasePhotos, type GalleryPhoto } from '@/services/gallery'
 import { cn } from '@/lib/utils'
 
-const INTERVAL_MS = 5000
-
 export function HomeGalleryShowcase() {
-  const [current, setCurrent] = useState(0)
-  const [paused, setPaused] = useState(false)
   const { data: photos, loading } = useFetch<GalleryPhoto[]>(getShowcasePhotos)
-  const total = photos?.length ?? 0
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  const onSelect = useCallback((carouselApi: CarouselApi) => {
+    if (!carouselApi) return
+    setCurrent(carouselApi.selectedScrollSnap())
+  }, [])
 
   useEffect(() => {
-    if (!total || paused) return
-    const id = window.setInterval(() => {
-      setCurrent((prev) => (prev + 1) % total)
-    }, INTERVAL_MS)
-    return () => window.clearInterval(id)
-  }, [total, paused])
-
-  useEffect(() => {
-    if (current >= total && total > 0) setCurrent(0)
-  }, [current, total])
+    if (!api) return
+    onSelect(api)
+    api.on('select', onSelect)
+    api.on('reInit', onSelect)
+    return () => {
+      api.off('select', onSelect)
+      api.off('reInit', onSelect)
+    }
+  }, [api, onSelect])
 
   if (loading || !photos?.length) return null
 
   const active = photos[current] ?? photos[0]
-
-  const goPrev = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setCurrent((prev) => (prev - 1 + photos.length) % photos.length)
-  }
-
-  const goNext = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setCurrent((prev) => (prev + 1) % photos.length)
-  }
+  const total = photos.length
 
   return (
     <section className="relative z-20 -mt-4 pb-2 lg:-mt-8">
@@ -54,7 +51,7 @@ export function HomeGalleryShowcase() {
               A força da marcha em imagem
             </h2>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-              Ensaios, desfiles e apresentações — toque no destaque para ver toda a galeria.
+              Deslize as fotos — toque na imagem para abrir a galeria completa.
             </p>
           </div>
           <Button variant="outline" asChild className="w-full sm:w-auto">
@@ -65,55 +62,93 @@ export function HomeGalleryShowcase() {
           </Button>
         </div>
 
-        <Link
-          to="/media"
-          className="group relative block overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-[0_24px_80px_rgba(0,0,0,0.45)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          aria-label="Abrir galeria completa de mídia"
-        >
-          <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(ellipse_at_top,hsla(42,96%,58%,0.12),transparent_50%)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-zinc-950 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:rounded-3xl">
+          <Carousel
+            setApi={setApi}
+            opts={{
+              align: 'center',
+              loop: true,
+              dragFree: false,
+              containScroll: false,
+            }}
+            plugins={[
+              Autoplay({
+                delay: 4500,
+                stopOnInteraction: true,
+                stopOnMouseEnter: true,
+              }),
+            ]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 sm:-ml-3">
+              {photos.map((photo, index) => (
+                <CarouselItem
+                  key={photo.id}
+                  className="basis-[88%] pl-2 sm:basis-[85%] sm:pl-3 md:basis-[70%] lg:basis-[62%]"
+                >
+                  <Link
+                    to="/media"
+                    className="group relative block overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:rounded-2xl"
+                    aria-label={`Abrir galeria — ${photo.title || 'foto da banda'}`}
+                  >
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-900 sm:aspect-[16/10] lg:aspect-[2/1]">
+                      <img
+                        src={photo.image_url}
+                        alt={photo.title || 'Foto da Banda Marcial'}
+                        className={cn(
+                          'h-full w-full object-cover object-center transition-transform duration-500 ease-out',
+                          index === current ? 'scale-100' : 'scale-[1.03]',
+                          'group-active:scale-[1.01]',
+                        )}
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        draggable={false}
+                      />
+                      <div
+                        className={cn(
+                          'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent transition-opacity duration-300',
+                          index === current ? 'opacity-100' : 'opacity-70',
+                        )}
+                      />
+                      {index === current ? (
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                          <p className="line-clamp-2 font-display text-base font-bold text-white drop-shadow sm:text-xl">
+                            {photo.title || 'Banda Marcial de Botucatu'}
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
 
-          <div className="relative aspect-[4/3] w-full bg-zinc-950 sm:aspect-[16/9] lg:aspect-[2/1]">
-            {photos.map((photo, index) => (
-              <img
-                key={photo.id}
-                src={photo.image_url}
-                alt={photo.title || 'Foto da Banda Marcial'}
-                className={cn(
-                  'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-out',
-                  index === current ? 'opacity-100' : 'opacity-0',
-                )}
-                loading={index === 0 ? 'eager' : 'lazy'}
-              />
-            ))}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-transparent" />
-          </div>
-
-          <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0">
-                <span className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary backdrop-blur">
-                  <Images className="h-3.5 w-3.5" />
-                  {current + 1} / {photos.length}
-                </span>
-                <p className="line-clamp-2 max-w-xl font-display text-lg font-bold text-white drop-shadow sm:text-2xl">
-                  {active?.title || 'Banda Marcial de Botucatu'}
+          {total > 1 ? (
+            <div className="flex items-center justify-between gap-3 border-t border-white/10 px-3 py-3 sm:px-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <p className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
+                  <span className="text-primary">{current + 1}</span>
+                  <span className="mx-1 text-white/30">/</span>
+                  {total}
                 </p>
-                <p className="mt-1 text-xs text-primary/90 sm:text-sm">
-                  Clique para ver todas as fotos →
+                <div className="hidden h-1 max-w-[10rem] flex-1 overflow-hidden rounded-full bg-white/10 sm:block">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
+                    style={{ width: `${((current + 1) / total) * 100}%` }}
+                  />
+                </div>
+                <p className="truncate text-xs text-muted-foreground sm:hidden">
+                  {active?.title || 'Deslize'}
                 </p>
               </div>
 
-              <div className="pointer-events-auto flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5">
                 <Button
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="touch-target rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
-                  onClick={goPrev}
+                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 text-white hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => api?.scrollPrev()}
                   aria-label="Foto anterior"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -122,41 +157,16 @@ export function HomeGalleryShowcase() {
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="touch-target rounded-full border border-white/15 bg-black/45 text-white backdrop-blur hover:bg-primary hover:text-primary-foreground"
-                  onClick={goNext}
+                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 text-white hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => api?.scrollNext()}
                   aria-label="Próxima foto"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {photos.map((photo, index) => (
-                <button
-                  key={photo.id}
-                  type="button"
-                  aria-label={`Ir para foto ${index + 1}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setCurrent(index)
-                  }}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-                >
-                  <span
-                    className={cn(
-                      'block rounded-full transition-all duration-300',
-                      index === current
-                        ? 'h-1.5 w-8 bg-primary'
-                        : 'h-1.5 w-1.5 bg-white/35 hover:bg-white/60',
-                    )}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        </Link>
+          ) : null}
+        </div>
       </div>
     </section>
   )
