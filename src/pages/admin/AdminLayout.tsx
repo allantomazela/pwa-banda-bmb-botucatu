@@ -17,14 +17,14 @@ import { BrandCrest } from '@/components/BrandMark'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
 const ADMIN_NAV = [
-  { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-  { name: 'Membros', path: '/admin/members', icon: Users },
-  { name: 'Interesses', path: '/admin/inquiries', icon: Inbox },
-  { name: 'Eventos', path: '/admin/events', icon: Calendar },
-  { name: 'Viagens', path: '/admin/viagens', icon: Bus },
-  { name: 'Biblioteca', path: '/admin/biblioteca', icon: Library },
-  { name: 'Site', path: '/admin/site', icon: Settings },
-  { name: 'Galeria', path: '/admin/gallery', icon: ImageIcon },
+  { name: 'Dashboard', shortName: 'Painel', path: '/admin', icon: LayoutDashboard },
+  { name: 'Membros', shortName: 'Membros', path: '/admin/members', icon: Users },
+  { name: 'Interesses', shortName: 'Contatos', path: '/admin/inquiries', icon: Inbox },
+  { name: 'Eventos', shortName: 'Eventos', path: '/admin/events', icon: Calendar },
+  { name: 'Viagens', shortName: 'Viagens', path: '/admin/viagens', icon: Bus },
+  { name: 'Biblioteca', shortName: 'Materiais', path: '/admin/biblioteca', icon: Library },
+  { name: 'Site', shortName: 'Site', path: '/admin/site', icon: Settings },
+  { name: 'Galeria', shortName: 'Fotos', path: '/admin/gallery', icon: ImageIcon },
 ]
 
 export default function AdminLayout() {
@@ -93,7 +93,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
+      <main className="min-w-0 flex-1 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:pb-0">
         <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
@@ -101,14 +101,15 @@ export default function AdminLayout() {
           </Link>
         </div>
         <Outlet />
-        <AppBottomBar>
+        <AppBottomBar scrollable>
           {ADMIN_NAV.map((item) => (
             <BottomBarItem
               key={item.path}
               to={item.path}
               icon={item.icon}
-              label={item.name}
+              label={item.shortName}
               active={isActive(item.path)}
+              scrollable
             />
           ))}
         </AppBottomBar>
