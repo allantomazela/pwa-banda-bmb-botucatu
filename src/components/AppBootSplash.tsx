@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 
-const MIN_VISIBLE_MS = 1400
-const FADE_MS = 550
+const MIN_VISIBLE_MS = 1800
+const FADE_MS = 650
 
 /**
  * Controla o splash HTML (#app-splash): permanece até o auth carregar

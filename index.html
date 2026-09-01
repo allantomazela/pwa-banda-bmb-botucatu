@@ -17,10 +17,54 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <!-- Splash nativo iOS (aparece ao tocar o ícone, antes do HTML) -->
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1125x2436.png"
+      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1170x2532.png"
+      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1179x2556.png"
+      media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1284x2778.png"
+      media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1290x2796.png"
+      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1080x1920.png"
+      media="(device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="preload" href="/brand-logo.png" as="image" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
     <meta property="og:title" content="Banda Marcial de Botucatu" />
     <meta property="og:image" content="/brand-logo.png" />
     <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #1b263b;
+      }
       #app-splash {
         position: fixed;
         inset: 0;
@@ -29,50 +73,80 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1.25rem;
-        background:
-          radial-gradient(ellipse 70% 50% at 50% 40%, rgba(251, 192, 45, 0.14), transparent 60%),
-          #1b263b;
+        padding: max(1.5rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+        overflow: hidden;
+        background: #1b263b;
         color: #fff;
-        transition: opacity 0.55s ease, visibility 0.55s ease;
+        transition: opacity 0.65s ease, visibility 0.65s ease;
       }
       #app-splash.app-splash-out {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
       }
+      #app-splash .splash-mesh {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(ellipse 85% 55% at 50% 28%, rgba(251, 192, 45, 0.18), transparent 58%),
+          radial-gradient(ellipse 60% 40% at 15% 85%, rgba(212, 175, 55, 0.08), transparent 50%),
+          radial-gradient(ellipse 50% 35% at 90% 75%, rgba(251, 192, 45, 0.06), transparent 45%),
+          linear-gradient(180deg, #152033 0%, #1b263b 45%, #121a28 100%);
+      }
+      #app-splash .splash-vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(ellipse 70% 70% at 50% 45%, transparent 35%, rgba(8, 12, 20, 0.55) 100%);
+      }
+      #app-splash .splash-stage {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.35rem;
+        animation: splash-rise 0.9s ease-out both;
+      }
       #app-splash .splash-crest {
         position: relative;
-        width: min(42vw, 11rem);
-        height: min(42vw, 11rem);
+        width: min(48vw, 12.5rem);
+        height: min(48vw, 12.5rem);
       }
       #app-splash .splash-halo {
         position: absolute;
-        inset: 0;
+        inset: -18%;
         border-radius: 9999px;
         background: radial-gradient(
           circle,
-          rgba(251, 192, 45, 0.4) 0%,
-          rgba(251, 192, 45, 0.1) 45%,
-          transparent 70%
+          rgba(251, 192, 45, 0.48) 0%,
+          rgba(251, 192, 45, 0.14) 42%,
+          transparent 68%
         );
-        transform: scale(1.35);
-        animation: splash-breathe 4.5s ease-in-out infinite;
+        animation: splash-breathe 3.8s ease-in-out infinite;
       }
       #app-splash .splash-ring {
         position: absolute;
-        inset: -0.75rem;
+        inset: -0.85rem;
         border-radius: 9999px;
-        border: 1px dashed rgba(251, 192, 45, 0.4);
-        animation: splash-spin 28s linear infinite;
+        border: 1.5px dashed rgba(251, 192, 45, 0.45);
+        animation: splash-spin 22s linear infinite;
       }
       #app-splash .splash-ring-outer {
-        inset: -1.5rem;
+        inset: -1.65rem;
         border-style: solid;
         border-width: 1px;
-        border-color: rgba(251, 192, 45, 0.18);
-        animation-duration: 40s;
+        border-color: rgba(251, 192, 45, 0.22);
+        animation-duration: 36s;
         animation-direction: reverse;
+      }
+      #app-splash .splash-ring-inner {
+        inset: 0.15rem;
+        border-style: solid;
+        border-width: 1px;
+        border-color: rgba(251, 192, 45, 0.12);
+        animation-duration: 16s;
       }
       #app-splash .splash-logo {
         position: relative;
@@ -80,33 +154,98 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 8px 24px rgba(212, 175, 55, 0.4));
+        filter: drop-shadow(0 10px 28px rgba(212, 175, 55, 0.45));
+        animation: splash-crest-in 1.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      #app-splash .splash-rule {
+        width: 3.5rem;
+        height: 2px;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, #fbc02d, transparent);
+        opacity: 0.9;
       }
       #app-splash .splash-label {
+        margin: 0;
         font-family: Cinzel, 'Times New Roman', serif;
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.35em;
+        font-size: clamp(0.85rem, 3.2vw, 1.05rem);
+        font-weight: 700;
+        letter-spacing: 0.42em;
+        text-indent: 0.42em;
         text-transform: uppercase;
         color: #fbc02d;
-        opacity: 0.95;
+        text-shadow: 0 0 24px rgba(251, 192, 45, 0.35);
       }
-      #app-splash .splash-sub {
-        margin-top: -0.5rem;
+      #app-splash .splash-name {
+        margin: -0.55rem 0 0;
         font-family: Montserrat, system-ui, sans-serif;
-        font-size: 0.75rem;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.55);
+        font-size: clamp(0.7rem, 2.6vw, 0.82rem);
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.88);
+      }
+      #app-splash .splash-motto {
+        margin: 0.15rem 0 0;
+        max-width: 16rem;
+        font-family: Cinzel, 'Times New Roman', serif;
+        font-size: clamp(0.65rem, 2.4vw, 0.75rem);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        line-height: 1.45;
+        text-align: center;
+        color: rgba(251, 192, 45, 0.72);
+      }
+      #app-splash .splash-bar {
+        position: absolute;
+        z-index: 2;
+        bottom: max(2.25rem, calc(env(safe-area-inset-bottom) + 1.25rem));
+        left: 50%;
+        width: min(9rem, 42vw);
+        height: 2px;
+        transform: translateX(-50%);
+        overflow: hidden;
+        border-radius: 9999px;
+        background: rgba(251, 192, 45, 0.15);
+      }
+      #app-splash .splash-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        width: 40%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, transparent, #fbc02d, transparent);
+        animation: splash-bar 1.35s ease-in-out infinite;
+      }
+      @keyframes splash-rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes splash-crest-in {
+        from {
+          opacity: 0;
+          transform: scale(0.88);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
       @keyframes splash-breathe {
         0%,
         100% {
-          opacity: 0.7;
-          transform: scale(1.3);
+          opacity: 0.65;
+          transform: scale(1);
         }
         50% {
           opacity: 1;
-          transform: scale(1.48);
+          transform: scale(1.12);
         }
       }
       @keyframes splash-spin {
@@ -117,9 +256,20 @@
           transform: rotate(360deg);
         }
       }
+      @keyframes splash-bar {
+        0% {
+          transform: translateX(-120%);
+        }
+        100% {
+          transform: translateX(320%);
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
         #app-splash .splash-halo,
-        #app-splash .splash-ring {
+        #app-splash .splash-ring,
+        #app-splash .splash-bar::after,
+        #app-splash .splash-stage,
+        #app-splash .splash-logo {
           animation: none !important;
         }
       }
@@ -127,14 +277,22 @@
   </head>
   <body class="dark antialiased bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
     <div id="app-splash" role="status" aria-live="polite" aria-label="Carregando Banda Marcial de Botucatu">
-      <div class="splash-crest">
-        <div class="splash-halo" aria-hidden="true"></div>
-        <div class="splash-ring splash-ring-outer" aria-hidden="true"></div>
-        <div class="splash-ring" aria-hidden="true"></div>
-        <img class="splash-logo" src="/brand-logo.png" width="800" height="800" alt="" />
+      <div class="splash-mesh" aria-hidden="true"></div>
+      <div class="splash-vignette" aria-hidden="true"></div>
+      <div class="splash-stage">
+        <div class="splash-crest">
+          <div class="splash-halo" aria-hidden="true"></div>
+          <div class="splash-ring splash-ring-outer" aria-hidden="true"></div>
+          <div class="splash-ring" aria-hidden="true"></div>
+          <div class="splash-ring splash-ring-inner" aria-hidden="true"></div>
+          <img class="splash-logo" src="/brand-logo.png" width="800" height="800" alt="" decoding="async" />
+        </div>
+        <div class="splash-rule" aria-hidden="true"></div>
+        <p class="splash-label">BMB</p>
+        <p class="splash-name">Banda Marcial de Botucatu</p>
+        <p class="splash-motto">Tradição, disciplina e honra pela música</p>
       </div>
-      <p class="splash-label">BMB</p>
-      <p class="splash-sub">Banda Marcial de Botucatu</p>
+      <div class="splash-bar" aria-hidden="true"></div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
