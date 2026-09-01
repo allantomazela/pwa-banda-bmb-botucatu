@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button'
 import { BrandCrest } from '@/components/BrandMark'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
+const MOBILE_BOTTOM_BAR_RESERVE = 'calc(4.75rem + env(safe-area-inset-bottom, 0px))'
+
 const ADMIN_NAV = [
   { name: 'Dashboard', shortName: 'Painel', path: '/admin', icon: LayoutDashboard },
   { name: 'Membros', shortName: 'Membros', path: '/admin/members', icon: Users },
@@ -93,14 +95,21 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:overflow-visible lg:pb-0">
-        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col lg:ml-64">
+        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site
           </Link>
         </div>
-        <Outlet />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          <Outlet />
+        </div>
+        <div
+          className="shrink-0 lg:hidden"
+          style={{ height: MOBILE_BOTTOM_BAR_RESERVE }}
+          aria-hidden
+        />
       </main>
 
       <AppBottomBar scrollable>

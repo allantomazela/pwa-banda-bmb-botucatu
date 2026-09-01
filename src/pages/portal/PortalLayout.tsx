@@ -18,12 +18,14 @@ import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 import { isMinor } from '@/lib/formatters'
 
 const PORTAL_NAV = [
-  { name: 'Dashboard', path: '/portal', icon: LayoutDashboard },
-  { name: 'Identidade', path: '/portal/id', icon: IdCard },
-  { name: 'Perfil', path: '/portal/perfil', icon: UserCog },
-  { name: 'Autorizações', path: '/portal/autorizacoes', icon: FilePenLine },
-  { name: 'Biblioteca', path: '/portal/biblioteca', icon: Library },
+  { name: 'Dashboard', shortName: 'Painel', path: '/portal', icon: LayoutDashboard },
+  { name: 'Identidade', shortName: 'Carteira', path: '/portal/id', icon: IdCard },
+  { name: 'Perfil', shortName: 'Perfil', path: '/portal/perfil', icon: UserCog },
+  { name: 'Autorizações', shortName: 'Autoriz.', path: '/portal/autorizacoes', icon: FilePenLine },
+  { name: 'Biblioteca', shortName: 'Materiais', path: '/portal/biblioteca', icon: Library },
 ]
+
+const MOBILE_BOTTOM_BAR_RESERVE = 'calc(4.25rem + env(safe-area-inset-bottom, 0px))'
 
 const GUARDIAN_NAV_PATHS = new Set(['/portal', '/portal/autorizacoes', '/portal/perfil'])
 
@@ -125,21 +127,28 @@ export default function PortalLayout() {
         </div>
       </aside>
 
-      <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:ml-64 lg:overflow-visible lg:pb-0">
-        <div className="sticky top-0 z-40 flex h-12 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
+      <main className="relative flex min-h-0 min-w-0 flex-1 flex-col lg:ml-64">
+        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
             <Home className="w-4 h-4" />
             Voltar ao site
           </Link>
         </div>
-        {profileLoading && !profile ? (
-          <div className="p-10 text-muted-foreground">Carregando perfil...</div>
-        ) : (
-          <Outlet />
-        )}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          {profileLoading && !profile ? (
+            <div className="p-10 text-muted-foreground">Carregando perfil...</div>
+          ) : (
+            <Outlet />
+          )}
+        </div>
+        <div
+          className="shrink-0 lg:hidden"
+          style={{ height: MOBILE_BOTTOM_BAR_RESERVE }}
+          aria-hidden
+        />
       </main>
 
-      <AppBottomBar>
+      <AppBottomBar scrollable={navItems.length + (isSystemAdmin(profile?.role) ? 1 : 0) > 4}>
         {isSystemAdmin(profile?.role) ? (
           <BottomBarItem
             to="/admin"
@@ -147,6 +156,7 @@ export default function PortalLayout() {
             label="Admin"
             active={location.pathname.startsWith('/admin')}
             tone="danger"
+            scrollable={navItems.length + 1 > 4}
           />
         ) : null}
         {navItems.map((item) => (
@@ -154,11 +164,12 @@ export default function PortalLayout() {
             key={item.path}
             to={item.path}
             icon={item.icon}
-            label={item.name}
+            label={item.shortName}
             active={
               location.pathname === item.path ||
               (item.path === '/portal/biblioteca' && location.pathname.startsWith('/portal/videos'))
             }
+            scrollable={navItems.length + (isSystemAdmin(profile?.role) ? 1 : 0) > 4}
           />
         ))}
       </AppBottomBar>
