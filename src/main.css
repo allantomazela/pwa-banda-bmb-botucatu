@@ -366,6 +366,40 @@
     display: none;
   }
 
+  /* —— Patrocinadores: apresentação cinematográfica —— */
+  .sponsors-moments-mesh {
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(251, 192, 45, 0.16), transparent 55%),
+      radial-gradient(circle at 8% 70%, rgba(125, 211, 252, 0.07), transparent 42%),
+      radial-gradient(circle at 92% 60%, rgba(251, 192, 45, 0.09), transparent 40%);
+  }
+
+  .sponsor-stage-glow {
+    box-shadow:
+      0 0 0 1px rgba(251, 192, 45, 0.35),
+      0 22px 60px rgba(0, 0, 0, 0.5),
+      0 0 80px rgba(251, 192, 45, 0.16);
+  }
+
+  .sponsor-logo-float {
+    animation: sponsor-logo-float 5.5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes sponsor-logo-float {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-6px) scale(1.03);
+    }
+  }
+
+  .sponsor-caption-in {
+    animation: gallery-caption-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   /* —— Patrocinadores: marquee infinito premium —— */
   .sponsor-marquee-mask {
     mask-image: linear-gradient(
@@ -405,14 +439,15 @@
 
   .sponsor-card-glow {
     transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s ease,
-      border-color 0.35s ease,
-      filter 0.35s ease;
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.45s ease,
+      border-color 0.45s ease,
+      opacity 0.45s ease,
+      filter 0.45s ease;
   }
 
   .sponsor-card-glow:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
     border-color: rgba(251, 192, 45, 0.45);
     box-shadow:
       0 0 0 1px rgba(251, 192, 45, 0.2),
@@ -463,8 +498,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .sponsor-marquee-track {
-      animation: none;
+    .sponsor-marquee-track,
+    .sponsor-logo-float,
+    .sponsor-caption-in {
+      animation: none !important;
     }
   }
 }
