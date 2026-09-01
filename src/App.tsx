@@ -44,10 +44,12 @@ import AdminTrips from '@/pages/admin/AdminTrips'
 import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 import { SitePagesProvider } from '@/hooks/use-site-pages'
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt'
+import { AppBootSplash } from '@/components/AppBootSplash'
 
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
+      <AppBootSplash />
       <SiteSettingsProvider>
         <SitePagesProvider>
           <TooltipProvider>

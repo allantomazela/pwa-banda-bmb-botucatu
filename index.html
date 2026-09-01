@@ -20,8 +20,122 @@
     <link rel="manifest" href="/manifest.json" />
     <meta property="og:title" content="Banda Marcial de Botucatu" />
     <meta property="og:image" content="/brand-logo.png" />
+    <style>
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background:
+          radial-gradient(ellipse 70% 50% at 50% 40%, rgba(251, 192, 45, 0.14), transparent 60%),
+          #1b263b;
+        color: #fff;
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+      }
+      #app-splash.app-splash-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #app-splash .splash-crest {
+        position: relative;
+        width: min(42vw, 11rem);
+        height: min(42vw, 11rem);
+      }
+      #app-splash .splash-halo {
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        background: radial-gradient(
+          circle,
+          rgba(251, 192, 45, 0.4) 0%,
+          rgba(251, 192, 45, 0.1) 45%,
+          transparent 70%
+        );
+        transform: scale(1.35);
+        animation: splash-breathe 4.5s ease-in-out infinite;
+      }
+      #app-splash .splash-ring {
+        position: absolute;
+        inset: -0.75rem;
+        border-radius: 9999px;
+        border: 1px dashed rgba(251, 192, 45, 0.4);
+        animation: splash-spin 28s linear infinite;
+      }
+      #app-splash .splash-ring-outer {
+        inset: -1.5rem;
+        border-style: solid;
+        border-width: 1px;
+        border-color: rgba(251, 192, 45, 0.18);
+        animation-duration: 40s;
+        animation-direction: reverse;
+      }
+      #app-splash .splash-logo {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 24px rgba(212, 175, 55, 0.4));
+      }
+      #app-splash .splash-label {
+        font-family: Cinzel, 'Times New Roman', serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: #fbc02d;
+        opacity: 0.95;
+      }
+      #app-splash .splash-sub {
+        margin-top: -0.5rem;
+        font-family: Montserrat, system-ui, sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.55);
+      }
+      @keyframes splash-breathe {
+        0%,
+        100% {
+          opacity: 0.7;
+          transform: scale(1.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.48);
+        }
+      }
+      @keyframes splash-spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash .splash-halo,
+        #app-splash .splash-ring {
+          animation: none !important;
+        }
+      }
+    </style>
   </head>
   <body class="dark antialiased bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+    <div id="app-splash" role="status" aria-live="polite" aria-label="Carregando Banda Marcial de Botucatu">
+      <div class="splash-crest">
+        <div class="splash-halo" aria-hidden="true"></div>
+        <div class="splash-ring splash-ring-outer" aria-hidden="true"></div>
+        <div class="splash-ring" aria-hidden="true"></div>
+        <img class="splash-logo" src="/brand-logo.png" width="800" height="800" alt="" />
+      </div>
+      <p class="splash-label">BMB</p>
+      <p class="splash-sub">Banda Marcial de Botucatu</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
