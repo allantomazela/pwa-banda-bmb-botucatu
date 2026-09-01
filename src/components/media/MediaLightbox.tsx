@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { toEmbedUrl } from '@/lib/video-embed'
 
@@ -28,15 +28,28 @@ export function MediaLightbox({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="w-[calc(100%-1rem)] max-w-5xl overflow-hidden border-white/10 bg-card p-0 sm:w-full">
-        <DialogHeader className="flex flex-row items-center justify-between gap-3 px-4 pb-2 pt-5 sm:px-6">
-          <div className="min-w-0 flex-1 pr-8">
-            <DialogTitle className="truncate text-left text-base sm:text-lg">
-              {title || 'Galeria'}
+      <DialogContent className="w-[calc(100%-0.75rem)] max-w-5xl overflow-hidden border-primary/20 bg-zinc-950 p-0 shadow-[0_0_80px_rgba(251,192,45,0.12)] sm:w-full">
+        <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4 sm:px-6">
+          <div className="min-w-0 flex-1 pr-2">
+            <p className="mb-1 font-crest text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+              Galeria BMB
+              {counter ? <span className="text-white/30"> · {counter}</span> : null}
+            </p>
+            <DialogTitle className="truncate text-left font-display text-base font-bold text-white sm:text-lg">
+              {title || 'Mídia'}
             </DialogTitle>
-            {counter ? <p className="mt-1 text-xs text-muted-foreground">{counter}</p> : null}
           </div>
-        </DialogHeader>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/5 text-white hover:bg-primary hover:text-primary-foreground"
+            aria-label="Fechar"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="relative bg-black">
           {open && videoUrl ? (
@@ -54,7 +67,7 @@ export function MediaLightbox({
             <img
               src={imageUrl}
               alt={title || 'Foto'}
-              className="mx-auto max-h-[78dvh] w-full object-contain"
+              className="mx-auto max-h-[min(78dvh,820px)] w-full object-contain"
             />
           ) : null}
 
@@ -64,7 +77,7 @@ export function MediaLightbox({
                 type="button"
                 variant="secondary"
                 size="icon"
-                className="absolute left-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/55 text-white hover:bg-primary hover:text-primary-foreground sm:left-4"
+                className="absolute left-2 top-1/2 h-11 w-11 -translate-y-1/2 rounded-full border border-primary/25 bg-black/60 text-white backdrop-blur-md hover:border-primary hover:bg-primary hover:text-primary-foreground sm:left-4"
                 onClick={onPrev}
                 aria-label="Foto anterior"
               >
@@ -74,7 +87,7 @@ export function MediaLightbox({
                 type="button"
                 variant="secondary"
                 size="icon"
-                className="absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/55 text-white hover:bg-primary hover:text-primary-foreground sm:right-4"
+                className="absolute right-2 top-1/2 h-11 w-11 -translate-y-1/2 rounded-full border border-primary/25 bg-black/60 text-white backdrop-blur-md hover:border-primary hover:bg-primary hover:text-primary-foreground sm:right-4"
                 onClick={onNext}
                 aria-label="Próxima foto"
               >
@@ -83,15 +96,6 @@ export function MediaLightbox({
             </>
           ) : null}
         </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-3 top-3 rounded-full bg-black/40 p-2 text-white hover:bg-primary hover:text-primary-foreground sm:right-4 sm:top-4"
-          aria-label="Fechar"
-        >
-          <X className="h-4 w-4" />
-        </button>
       </DialogContent>
     </Dialog>
   )

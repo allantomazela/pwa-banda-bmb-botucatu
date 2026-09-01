@@ -1,4 +1,4 @@
-import { ImageIcon, Loader2 } from 'lucide-react'
+import { ImageIcon } from 'lucide-react'
 import type { GalleryPhoto } from '@/services/gallery'
 import { cn } from '@/lib/utils'
 
@@ -10,11 +10,27 @@ type Props = {
   onSelect: (photo: GalleryPhoto, index: number) => void
 }
 
+function aspectFor(index: number): string {
+  const pattern = index % 7
+  if (pattern === 0 || pattern === 4) return 'aspect-[3/4]'
+  if (pattern === 2) return 'aspect-square'
+  if (pattern === 5) return 'aspect-[4/5]'
+  return 'aspect-[4/3]'
+}
+
 export function PhotoMasonryGrid({ loading, error, photos, emptyText, onSelect }: Props) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="columns-1 gap-3 sm:columns-2 md:columns-3 md:gap-4 lg:columns-4" aria-busy="true">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              'mb-3 break-inside-avoid animate-shimmer rounded-2xl border border-white/10 md:mb-4',
+              aspectFor(i),
+            )}
+          />
+        ))}
       </div>
     )
   }
@@ -27,44 +43,47 @@ export function PhotoMasonryGrid({ loading, error, photos, emptyText, onSelect }
 
   if (!photos?.length) {
     return (
-      <div className="py-16 text-center text-muted-foreground">
-        <ImageIcon className="mx-auto mb-4 h-12 w-12 opacity-20" />
-        <p>{emptyText}</p>
+      <div className="rounded-3xl border border-dashed border-primary/25 bg-card/30 px-6 py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
+          <ImageIcon className="h-6 w-6 text-primary/70" />
+        </div>
+        <p className="font-display text-lg font-semibold text-white">{emptyText}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Novas memórias da BMB aparecerão neste mosaico.
+        </p>
       </div>
     )
   }
 
   return (
-    /* 1 coluna em 320px; mais colunas conforme largura */
     <div className="columns-1 gap-3 sm:columns-2 md:columns-3 md:gap-4 lg:columns-4">
-      {photos.map((photo, index) => {
-        const tall = index % 5 === 1 || index % 7 === 3
-        return (
-          <button
-            key={photo.id}
-            type="button"
-            onClick={() => onSelect(photo, index)}
-            className={cn(
-              'group mb-3 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/8 bg-card text-left shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_12px_40px_rgba(251,192,45,0.12)] md:mb-4',
-            )}
-          >
-            <div className={cn('relative overflow-hidden', tall ? 'aspect-[3/4]' : 'aspect-[4/3]')}>
-              <img
-                src={photo.image_url}
-                alt={photo.title || 'Foto da galeria'}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-90 transition-opacity group-hover:opacity-100" />
-              <div className="absolute inset-x-0 bottom-0 p-3">
-                <span className="line-clamp-2 text-sm font-medium text-white">
-                  {photo.title || 'Ampliar foto'}
-                </span>
-              </div>
+      {photos.map((photo, index) => (
+        <button
+          key={photo.id}
+          type="button"
+          onClick={() => onSelect(photo, index)}
+          className="media-mosaic-tile group mb-3 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary md:mb-4"
+        >
+          <div className={cn('relative overflow-hidden', aspectFor(index))}>
+            <img
+              src={photo.image_url}
+              alt={photo.title || 'Foto da galeria'}
+              className="h-full w-full object-cover transition-transform duration-700 ease-out"
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="absolute inset-x-0 bottom-0 space-y-1 p-3.5 sm:p-4">
+              <p className="font-crest text-[9px] font-semibold uppercase tracking-[0.24em] text-primary/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                Ampliar
+              </p>
+              <span className="line-clamp-2 font-display text-sm font-semibold text-white sm:text-base">
+                {photo.title || 'Momento da Banda Marcial'}
+              </span>
             </div>
-          </button>
-        )
-      })}
+          </div>
+        </button>
+      ))}
     </div>
   )
 }
