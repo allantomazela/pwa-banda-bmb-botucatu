@@ -15,17 +15,15 @@ import { InviteCard, SponsorCard } from '@/components/sponsors/SponsorShowcaseCa
 import { cn } from '@/lib/utils'
 
 const AUTOPLAY_MS = 4200
-/** Na home, evita carrossel infinito quando a lista crescer */
-export const MAX_HOME_SPONSOR_SLIDES = 12
 
 type TrackItem =
   | { key: string; type: 'logo'; sponsor: Sponsor }
   | { key: string; type: 'invite' }
 
-function buildTrackItems(sponsors: Sponsor[], limit?: number): TrackItem[] {
+/** Todos os patrocinadores visíveis com logo entram no carrossel (nenhum fica de fora). */
+function buildTrackItems(sponsors: Sponsor[]): TrackItem[] {
   const logos = sponsors.filter((item) => item.logo_url)
-  const capped = typeof limit === 'number' ? logos.slice(0, limit) : logos
-  const items: TrackItem[] = capped.map((sponsor) => ({
+  const items: TrackItem[] = logos.map((sponsor) => ({
     key: sponsor.id,
     type: 'logo',
     sponsor,
@@ -61,16 +59,13 @@ export function SponsorLogos({ showCta = false }: Props) {
     () =>
       Autoplay({
         delay: AUTOPLAY_MS,
-        stopOnInteraction: true,
+        stopOnInteraction: false,
         stopOnMouseEnter: true,
       }),
     [],
   )
 
-  const trackItems = useMemo(
-    () => buildTrackItems(sponsors ?? [], showCta ? MAX_HOME_SPONSOR_SLIDES : undefined),
-    [sponsors, showCta],
-  )
+  const trackItems = useMemo(() => buildTrackItems(sponsors ?? []), [sponsors])
 
   const onSelect = useCallback((carouselApi: CarouselApi) => {
     if (!carouselApi) return
