@@ -247,8 +247,8 @@ export function GalleryManager() {
             Publique várias fotos de uma vez. O título é opcional.
           </p>
           <p className="text-xs text-muted-foreground">
-            Toque na estrela para escolher quais passam no card da home ({showcaseIds.length}/
-            {MAX_HOME_SHOWCASE}). Clique na foto da home abre a galeria completa.
+            Toque na estrela para destacar até {MAX_HOME_SHOWCASE} fotos no carrossel da home (
+            {showcaseIds.length}/{MAX_HOME_SHOWCASE}). O restante fica só na galeria completa.
           </p>
         </div>
         <Button

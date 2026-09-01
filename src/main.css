@@ -232,6 +232,103 @@
     animation: shimmer 1.5s infinite;
   }
 
+  /* —— Momentos da Banda: apresentação cinematográfica —— */
+  .gallery-moments-mesh {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(251, 192, 45, 0.14), transparent 55%),
+      radial-gradient(circle at 12% 80%, rgba(125, 211, 252, 0.06), transparent 40%),
+      radial-gradient(circle at 88% 70%, rgba(251, 192, 45, 0.08), transparent 38%);
+  }
+
+  .gallery-frame-glow {
+    box-shadow:
+      0 0 0 1px rgba(251, 192, 45, 0.28),
+      0 18px 50px rgba(0, 0, 0, 0.45),
+      0 0 60px rgba(251, 192, 45, 0.12);
+  }
+
+  .gallery-ken-burns {
+    animation: gallery-ken-burns 8s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  @keyframes gallery-ken-burns {
+    from {
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+    to {
+      transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+    }
+  }
+
+  .gallery-caption-in {
+    animation: gallery-caption-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes gallery-caption-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .gallery-progress-track {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .gallery-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #fbc02d, #f59e0b);
+    transform-origin: left center;
+  }
+
+  @keyframes gallery-progress-grow {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  .gallery-swipe-hint {
+    animation: gallery-swipe-hint 2.4s ease-in-out infinite;
+  }
+
+  @keyframes gallery-swipe-hint {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-ken-burns,
+    .gallery-caption-in,
+    .gallery-progress-fill,
+    .gallery-swipe-hint {
+      animation: none !important;
+    }
+
+    .gallery-progress-fill {
+      width: 100%;
+    }
+  }
+
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }

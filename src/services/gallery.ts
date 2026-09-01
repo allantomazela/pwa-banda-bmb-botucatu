@@ -25,7 +25,7 @@ export function parseShowcaseIds(raw?: string): string[] {
 
 export async function getShowcasePhotoIds(): Promise<string[]> {
   const settings = await getSiteSettings()
-  return parseShowcaseIds(settings[SHOWCASE_KEY])
+  return parseShowcaseIds(settings[SHOWCASE_KEY]).slice(0, MAX_HOME_SHOWCASE)
 }
 
 export async function setShowcasePhotoIds(
@@ -76,16 +76,34 @@ export async function getEventPhotos(): Promise<GalleryPhoto[]> {
   return data ?? []
 }
 
-/** Fotos escolhidas no admin para o card principal da home. */
+/**
+ * Fotos do carrossel da home — sempre no máximo MAX_HOME_SHOWCASE.
+ * Prioriza a curadoria do admin; se vazia, usa as mais recentes (com o mesmo teto).
+ */
 export async function getShowcasePhotos(): Promise<GalleryPhoto[]> {
-  const ids = await getShowcasePhotoIds()
-  if (ids.length === 0) return []
+  const curatedIds = await getShowcasePhotoIds()
 
-  const { data, error } = await supabase.from('gallery_photos').select('*').in('id', ids)
+  if (curatedIds.length > 0) {
+    const { data, error } = await supabase
+      .from('gallery_photos')
+      .select('id, title, image_url, category, created_at')
+      .in('id', curatedIds)
+    if (error) throw error
+
+    const byId = new Map((data ?? []).map((photo) => [photo.id, photo]))
+    return curatedIds
+      .map((id) => byId.get(id))
+      .filter((photo): photo is GalleryPhoto => Boolean(photo))
+      .slice(0, MAX_HOME_SHOWCASE)
+  }
+
+  const { data, error } = await supabase
+    .from('gallery_photos')
+    .select('id, title, image_url, category, created_at')
+    .order('created_at', { ascending: false })
+    .limit(MAX_HOME_SHOWCASE)
   if (error) throw error
-
-  const byId = new Map((data ?? []).map((photo) => [photo.id, photo]))
-  return ids.map((id) => byId.get(id)).filter((photo): photo is GalleryPhoto => Boolean(photo))
+  return data ?? []
 }
 
 export async function createGalleryPhoto(
