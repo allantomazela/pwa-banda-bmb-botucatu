@@ -122,7 +122,7 @@ export default function Agenda() {
                       <img
                         src={event.image_url}
                         alt=""
-                        className="h-14 w-11 shrink-0 rounded-lg border border-white/10 object-cover"
+                        className="h-14 w-11 shrink-0 rounded-lg border border-white/10 bg-zinc-950 object-contain"
                         loading="lazy"
                       />
                     ) : (
@@ -249,14 +249,13 @@ function FeaturedEvent({ event }: { event: EventItem }) {
         }
       >
         {hasFlyer ? (
-          <div className="relative min-h-[18rem] overflow-hidden bg-zinc-950 sm:min-h-[22rem] lg:min-h-full">
+          <div className="relative flex min-h-[18rem] items-center justify-center overflow-hidden bg-zinc-950 p-3 sm:min-h-[22rem] sm:p-4 lg:min-h-full">
             <img
               src={event.image_url}
               alt={`Flyer — ${event.title}`}
-              className="absolute inset-0 h-full w-full object-cover object-center"
+              className="max-h-[min(70vh,40rem)] w-full object-contain object-center"
               loading="eager"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-background/80" />
             <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border border-white/15 bg-black/55 px-3 py-2 backdrop-blur-md lg:left-5 lg:top-5">
               <div className="text-center">
                 <span className="block text-[10px] font-bold uppercase tracking-widest text-primary">
@@ -331,14 +330,13 @@ function EventCard({ event, delay }: { event: EventItem; delay: number }) {
       style={{ animationDelay: `${delay}ms` }}
     >
       {hasFlyer ? (
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-950 sm:aspect-[3/4]">
+        <div className="relative flex aspect-[3/4] w-full items-center justify-center overflow-hidden bg-zinc-950 p-2 sm:p-3">
           <img
             src={event.image_url}
             alt={`Flyer — ${event.title}`}
-            className="h-full w-full object-cover object-center"
+            className="max-h-full max-w-full object-contain object-center"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
           <div className="absolute left-3 top-3 min-w-[56px] rounded-lg border border-white/15 bg-black/55 px-2 py-1.5 text-center backdrop-blur-md">
             <span className="block text-[10px] font-bold text-primary">{parts.month}</span>
             <span className="block font-display text-xl font-bold leading-none text-white">

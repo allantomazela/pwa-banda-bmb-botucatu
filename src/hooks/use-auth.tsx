@@ -81,11 +81,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+
+    // getUser() valida o JWT no servidor; se estiver corrompido, limpa a sessão local
+    void (async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const localSession = sessionData.session
+
+      if (localSession) {
+        const { error } = await supabase.auth.getUser()
+        if (error) {
+          await supabase.auth.signOut({ scope: 'local' })
+          setSession(null)
+          setUser(null)
+          setLoading(false)
+          return
+        }
+      }
+
+      setSession(localSession)
+      setUser(localSession?.user ?? null)
       setLoading(false)
-    })
+    })()
+
     return () => subscription.unsubscribe()
   }, [])
 
