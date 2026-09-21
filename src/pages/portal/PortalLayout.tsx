@@ -25,7 +25,7 @@ const PORTAL_NAV = [
   { name: 'Biblioteca', shortName: 'Materiais', path: '/portal/biblioteca', icon: Library },
 ]
 
-const MOBILE_BOTTOM_BAR_RESERVE = 'calc(4.25rem + env(safe-area-inset-bottom, 0px))'
+const MOBILE_BOTTOM_BAR_RESERVE = 'calc(4.5rem + env(safe-area-inset-bottom, 0px))'
 
 const GUARDIAN_NAV_PATHS = new Set(['/portal', '/portal/autorizacoes', '/portal/perfil'])
 

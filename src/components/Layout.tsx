@@ -22,7 +22,7 @@ export default function Layout() {
 
       <Header />
       <MobileHeader />
-      <main className="flex min-w-0 flex-1 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      <main className="flex min-w-0 flex-1 flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <Outlet />
       </main>
       <Footer />

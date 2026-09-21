@@ -11,24 +11,21 @@ interface AppBottomBarProps {
 
 export function AppBottomBar({ children, scrollable = false }: AppBottomBarProps) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 glass pb-safe lg:hidden">
-      <div
-        className={cn(
-          'scrollbar-none flex items-stretch overflow-y-hidden px-safe',
-          scrollable
-            ? 'min-h-[4.75rem] touch-pan-x overflow-x-auto overscroll-x-contain gap-1 px-2 [-webkit-overflow-scrolling:touch]'
-            : 'min-h-[4.25rem] gap-0.5 overflow-x-auto overscroll-x-contain sm:gap-1 sm:px-1.5',
-        )}
-      >
-        <div
-          className={cn(
-            'flex items-stretch',
-            scrollable ? 'w-max min-w-full snap-x snap-mandatory gap-1' : 'w-full gap-0.5 sm:gap-1',
-          )}
-        >
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 glass pb-safe lg:hidden"
+      aria-label="Navegação principal"
+    >
+      {scrollable ? (
+        <div className="scrollbar-none flex min-h-[4.5rem] touch-pan-x items-stretch overflow-x-auto overscroll-x-contain px-1 px-safe [-webkit-overflow-scrolling:touch]">
+          <div className="mx-auto flex w-max min-w-full items-stretch justify-evenly">
+            {children}
+          </div>
+        </div>
+      ) : (
+        <div className="grid min-h-[4.5rem] w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] items-stretch px-1 px-safe">
           {children}
         </div>
-      </div>
+      )}
     </nav>
   )
 }
@@ -52,26 +49,23 @@ export function BottomBarItem({
   scrollable = false,
 }: BottomBarItemProps) {
   const activeClass = tone === 'danger' ? 'text-destructive' : 'text-primary'
+
   return (
     <Link
       to={to}
       className={cn(
-        'touch-target flex min-h-[4.25rem] flex-col items-center justify-center gap-1 text-muted-foreground transition-colors',
-        scrollable
-          ? 'min-w-[5.25rem] shrink-0 snap-start px-2 sm:min-w-[5.5rem]'
-          : 'min-w-[4.5rem] flex-1 px-1.5 sm:min-w-[4.75rem] sm:px-2',
+        'group flex h-full min-h-[4.5rem] min-w-0 flex-col items-center justify-center gap-1 px-1 py-1.5 text-muted-foreground transition-colors',
+        scrollable ? 'w-[4.85rem] shrink-0 sm:w-[5.25rem]' : 'w-full',
         active ? activeClass : 'hover:text-foreground',
       )}
     >
-      <Icon className={cn('h-5 w-5 shrink-0', active && tone !== 'danger' && 'fill-primary/20')} />
-      <span
-        className={cn(
-          'text-center font-medium',
-          scrollable
-            ? 'max-w-[5.25rem] text-[11px] leading-snug sm:max-w-[5.5rem]'
-            : 'max-w-[4.5rem] truncate text-[10px] leading-tight',
-        )}
-      >
+      <span className="flex h-6 w-6 items-center justify-center">
+        <Icon
+          className={cn('h-5 w-5', active && tone !== 'danger' && 'fill-primary/20')}
+          aria-hidden
+        />
+      </span>
+      <span className="w-full max-w-full truncate text-center text-[10px] font-medium leading-none tracking-wide">
         {label}
       </span>
     </Link>
