@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Profile } from '@/services/profiles'
-import { updateProfileAdmin } from '@/services/admin'
+import { countAdmins, updateProfileAdmin } from '@/services/admin'
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,7 @@ interface MemberEditDialogProps {
 export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: MemberEditDialogProps) {
   const { toast } = useToast()
   const [saving, setSaving] = useState(false)
+  const [isSoleAdmin, setIsSoleAdmin] = useState(false)
   const [form, setForm] = useState({
     full_name: '',
     instrument: '',
@@ -80,6 +81,26 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
     }
   }, [profile])
 
+  useEffect(() => {
+    let cancelled = false
+    async function checkSoleAdmin() {
+      if (!profile || profile.role !== 'admin' || !open) {
+        setIsSoleAdmin(false)
+        return
+      }
+      try {
+        const others = await countAdmins(profile.id)
+        if (!cancelled) setIsSoleAdmin(others < 1)
+      } catch {
+        if (!cancelled) setIsSoleAdmin(false)
+      }
+    }
+    void checkSoleAdmin()
+    return () => {
+      cancelled = true
+    }
+  }, [profile, open])
+
   const set = (f: string, v: string) => setForm((p) => ({ ...p, [f]: v }))
   const setHealth = (field: keyof HealthFormValues, value: string) => set(field, value)
 
@@ -94,6 +115,15 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
     if (!profile) return
     if (!form.full_name.trim()) {
       toast({ title: 'Erro', description: 'O nome é obrigatório.', variant: 'destructive' })
+      return
+    }
+    if (isSoleAdmin && form.role !== 'admin') {
+      toast({
+        title: 'Único administrador',
+        description:
+          'Promova outro membro a Administrador do Sistema antes de alterar esta função.',
+        variant: 'destructive',
+      })
       return
     }
     const guardianError = getGuardianValidationError(
@@ -235,16 +265,40 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
             </div>
             <div className="space-y-2">
               <Label>Função na carteirinha</Label>
-              <Select value={form.role} onValueChange={(v) => set('role', v)}>
+              <Select
+                value={form.role}
+                onValueChange={(v) => {
+                  if (isSoleAdmin && v !== 'admin') {
+                    toast({
+                      title: 'Único administrador',
+                      description:
+                        'Promova outro membro a Administrador do Sistema antes de alterar esta função.',
+                      variant: 'destructive',
+                    })
+                    return
+                  }
+                  set('role', v)
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Aluno</SelectItem>
-                  <SelectItem value="professor">Professor</SelectItem>
-                  <SelectItem value="support_group">Grupo de Apoio</SelectItem>
-                  <SelectItem value="honorary_member">Membro Honorário</SelectItem>
-                  <SelectItem value="guardian">Responsável Legal</SelectItem>
+                  <SelectItem value="member" disabled={isSoleAdmin}>
+                    Aluno
+                  </SelectItem>
+                  <SelectItem value="professor" disabled={isSoleAdmin}>
+                    Professor
+                  </SelectItem>
+                  <SelectItem value="support_group" disabled={isSoleAdmin}>
+                    Grupo de Apoio
+                  </SelectItem>
+                  <SelectItem value="honorary_member" disabled={isSoleAdmin}>
+                    Membro Honorário
+                  </SelectItem>
+                  <SelectItem value="guardian" disabled={isSoleAdmin}>
+                    Responsável Legal
+                  </SelectItem>
                   <SelectItem value="admin">Administrador do Sistema</SelectItem>
                 </SelectContent>
               </Select>
@@ -252,6 +306,12 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
                 Define o tipo da carteirinha. Responsável Legal acessa o portal para autorizações;
                 só o Administrador do Sistema acessa o painel admin.
               </p>
+              {isSoleAdmin && (
+                <p className="text-xs text-amber-200/90">
+                  Este é o único administrador. Para trocar a função, promova outro membro a
+                  Administrador do Sistema primeiro.
+                </p>
+              )}
             </div>
           </div>
           <HealthFields idPrefix="me-health" values={form} onChange={setHealth} />

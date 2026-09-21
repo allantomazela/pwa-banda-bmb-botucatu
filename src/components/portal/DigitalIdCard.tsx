@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
 import { ROLE_CARD_COPY, resolveCardVariant, type CardVariant } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
+import { VerifyQrCode } from '@/components/portal/VerifyQrCode'
 import './digital-id-card.css'
 
 export interface DigitalIdProfile {
@@ -255,7 +256,6 @@ export function DigitalIdCard({
   const BadgeIcon = theme.BadgeIcon
 
   const verifyUrl = `${window.location.origin}/verify?id=${profile.id}`
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(verifyUrl)}&size=200x200`
   const hasPhoto = hasProfilePhoto(profile.avatar_url)
   const avatarSrc = hasPhoto ? profile.avatar_url!.trim() : ''
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
@@ -576,11 +576,7 @@ export function DigitalIdCard({
               </div>
 
               <div className="shrink-0 rounded-2xl bg-white p-3.5 shadow-inner ring-1 ring-black/5">
-                <img
-                  src={qrCodeUrl}
-                  alt="QR Code de verificação"
-                  className="h-40 w-40 opacity-95 mix-blend-multiply"
-                />
+                <VerifyQrCode value={verifyUrl} size={160} />
               </div>
 
               <div className="w-full shrink-0 space-y-3">

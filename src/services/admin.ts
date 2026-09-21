@@ -28,12 +28,51 @@ export async function getAllEvents(): Promise<EventItem[]> {
   }))
 }
 
+export async function countAdmins(excludeUserId?: string): Promise<number> {
+  let query = supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('role', 'admin')
+  if (excludeUserId) {
+    query = query.neq('id', excludeUserId)
+  }
+  const { count, error } = await query
+  if (error) throw error
+  return count ?? 0
+}
+
+/** Mensagem amigável quando o banco bloqueia demoção do último admin. */
+function mapAdminGuardError(message: string): string {
+  if (/último Administrador/i.test(message) || /last admin/i.test(message)) {
+    return 'Não é permitido remover o último Administrador do Sistema. Promova outro membro a administrador antes.'
+  }
+  return message
+}
+
 export async function updateProfileAdmin(
   userId: string,
   data: Partial<Omit<Profile, 'id' | 'updated_at'>>,
 ): Promise<{ error: string | null }> {
+  if (data.role !== undefined && data.role !== 'admin') {
+    const { data: current, error: currentError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle()
+    if (currentError) return { error: currentError.message }
+    if (current?.role === 'admin') {
+      const others = await countAdmins(userId)
+      if (others < 1) {
+        return {
+          error:
+            'Não é permitido remover o último Administrador do Sistema. Promova outro membro a administrador antes.',
+        }
+      }
+    }
+  }
+
   const { error } = await supabase.from('profiles').update(data).eq('id', userId)
-  if (error) return { error: error.message }
+  if (error) return { error: mapAdminGuardError(error.message) }
   return { error: null }
 }
 

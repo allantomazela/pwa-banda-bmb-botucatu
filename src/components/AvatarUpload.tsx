@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Camera, Loader2, User } from 'lucide-react'
 import { useAvatarUpload } from '@/hooks/use-avatar-upload'
 import { useToast } from '@/hooks/use-toast'
 import { ImageAdjustDialog } from '@/components/media/ImageAdjustDialog'
 import { hasProfilePhoto } from '@/lib/profile-completion'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Camera, Loader2, User } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 interface AvatarUploadProps {
   userId: string
@@ -38,17 +38,19 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
 
   const handleAdjusted = async (file: File) => {
     setAdjustFile(null)
-    const url = await upload(userId, file)
+    const { url, error } = await upload(userId, file)
     if (url) {
       onUploaded(url)
       toast({ title: 'Avatar atualizado!', description: 'Sua foto foi atualizada com sucesso.' })
-    } else {
-      toast({
-        title: 'Erro no upload',
-        description: 'Não foi possível enviar a imagem.',
-        variant: 'destructive',
-      })
+      return
     }
+    toast({
+      title: 'Erro no upload',
+      description:
+        error ||
+        'Não foi possível enviar a imagem. Se estiver editando outro membro, confirme que sua sessão de administrador está ativa.',
+      variant: 'destructive',
+    })
   }
 
   return (
