@@ -3,6 +3,7 @@ import { useFetch } from '@/hooks/use-fetch'
 import { getPageBySlug, getVisibleSections, type SiteSection } from '@/services/site-cms'
 import { getGalleryPhotos, type GalleryPhoto } from '@/services/gallery'
 import { toEmbedUrl } from '@/lib/cms'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 export function CmsSections({ slug }: { slug: string }) {
