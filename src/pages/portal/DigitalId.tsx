@@ -15,6 +15,7 @@ const pageGlow: Record<string, string> = {
   admin: 'bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.14),transparent_55%)]',
   support: 'bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]',
   guardian: 'bg-[radial-gradient(ellipse_at_top,rgba(244,63,94,0.12),transparent_55%)]',
+  honorary: 'bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.16),transparent_55%)]',
 }
 
 const iconTone: Record<string, string> = {
@@ -23,6 +24,7 @@ const iconTone: Record<string, string> = {
   admin: 'bg-violet-500/15 text-violet-300',
   support: 'bg-emerald-500/15 text-emerald-300',
   guardian: 'bg-rose-500/15 text-rose-300',
+  honorary: 'bg-amber-400/15 text-amber-200',
 }
 
 export default function DigitalId() {

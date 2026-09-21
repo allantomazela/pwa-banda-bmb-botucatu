@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Save, AlertCircle, UserRound } from 'lucide-react'
+import { getProfileCompletion } from '@/lib/profile-completion'
 import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 import { formatCPF, getGuardianValidationError, isMinor, isValidCPF } from '@/lib/formatters'
@@ -146,24 +147,21 @@ export default function ProfileSettings() {
     )
   }
 
-  const MANDATORY_FIELDS: (keyof typeof form)[] = [
-    'full_name',
-    'instrument',
-    'registration_number',
-    'city',
-    'state',
-    'cpf',
-    'rg',
-    'birth_date',
-    'avatar_url',
-  ]
+  const completion = getProfileCompletion({
+    role: profile.role,
+    full_name: form.full_name,
+    instrument: form.instrument,
+    registration_number: form.registration_number,
+    city: form.city,
+    state: form.state,
+    cpf: form.cpf,
+    rg: form.rg,
+    birth_date: form.birth_date,
+    avatar_url: form.avatar_url,
+    guardian_name: form.guardian_name,
+    guardian_phone: form.guardian_phone,
+  })
   const minor = isMinor(form.birth_date)
-  const guardianFilled =
-    !minor || (form.guardian_name.trim() !== '' && form.guardian_phone.trim() !== '')
-  const filledCount =
-    MANDATORY_FIELDS.filter((f) => form[f] && String(form[f]).trim() !== '').length +
-    (guardianFilled ? 1 : 0)
-  const completion = Math.round((filledCount / (MANDATORY_FIELDS.length + (minor ? 1 : 0))) * 100)
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-4 sm:p-6 lg:p-10">
@@ -183,15 +181,19 @@ export default function ProfileSettings() {
       </header>
 
       <Card className="border-white/10 bg-card/50">
-        <CardContent className="space-y-2 p-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Completude do Perfil</span>
-            <span className="font-bold text-primary">{completion}%</span>
-          </div>
-          <Progress value={completion} className="h-2" />
-          {completion < 100 && (
-            <p className="text-xs text-muted-foreground">
-              Preencha todos os campos obrigatórios para ter um perfil completo.
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Completude do perfil</CardTitle>
+          <CardDescription>
+            Progresso: <span className="font-bold text-primary">{completion.percent}%</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Progress value={completion.percent} className="h-2" />
+          {!completion.isComplete && (
+            <p className="flex items-start gap-2 text-sm text-amber-200/90">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              Faltam: {completion.missingLabels.join(', ')}. Preencha para manter a carteirinha
+              completa.
             </p>
           )}
         </CardContent>

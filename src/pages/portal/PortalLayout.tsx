@@ -14,7 +14,9 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { isGuardian, isSystemAdmin, roleLabel } from '@/lib/roles'
+import { hasProfilePhoto } from '@/lib/profile-completion'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
+import { ProfileCompletionBanner } from '@/components/portal/ProfileCompletionBanner'
 import { isMinor } from '@/lib/formatters'
 
 const PORTAL_NAV = [
@@ -52,9 +54,7 @@ export default function PortalLayout() {
 
   const displayName = profile?.full_name || 'Usuario'
   const displayInstrument = profile?.instrument || ''
-  const displayAvatar =
-    profile?.avatar_url ||
-    `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
+  const displayAvatar = hasProfilePhoto(profile?.avatar_url) ? profile!.avatar_url : undefined
   const guardian = isGuardian(profile?.role)
   const navItems = PORTAL_NAV.filter((item) => {
     if (guardian) return GUARDIAN_NAV_PATHS.has(item.path)
@@ -150,7 +150,12 @@ export default function PortalLayout() {
           {profileLoading && !profile ? (
             <div className="p-10 text-muted-foreground">Carregando perfil...</div>
           ) : (
-            <Outlet />
+            <>
+              <div className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-10 lg:pt-8">
+                <ProfileCompletionBanner profile={profile} />
+              </div>
+              <Outlet />
+            </>
           )}
         </div>
         <div

@@ -4,16 +4,24 @@ export const PROFILE_ROLES = [
   'admin',
   'guardian',
   'support_group',
+  'honorary_member',
 ] as const
 export type ProfileRole = (typeof PROFILE_ROLES)[number]
-export type CardVariant = 'aluno' | 'professor' | 'admin' | 'support' | 'guardian'
+export type CardVariant =
+  | 'aluno'
+  | 'professor'
+  | 'admin'
+  | 'support'
+  | 'guardian'
+  | 'honorary'
 
 export function normalizeRole(role: string | null | undefined): ProfileRole {
   if (
     role === 'admin' ||
     role === 'professor' ||
     role === 'guardian' ||
-    role === 'support_group'
+    role === 'support_group' ||
+    role === 'honorary_member'
   ) {
     return role
   }
@@ -34,6 +42,7 @@ export function resolveCardVariant(role: string | null | undefined): CardVariant
   if (normalized === 'professor') return 'professor'
   if (normalized === 'support_group') return 'support'
   if (normalized === 'guardian') return 'guardian'
+  if (normalized === 'honorary_member') return 'honorary'
   return 'aluno'
 }
 
@@ -43,6 +52,7 @@ export const ROLE_LABELS: Record<ProfileRole, string> = {
   admin: 'Administrador do Sistema',
   guardian: 'Responsável Legal',
   support_group: 'Grupo de Apoio',
+  honorary_member: 'Membro Honorário',
 }
 
 export const ROLE_CARD_COPY: Record<
@@ -73,6 +83,11 @@ export const ROLE_CARD_COPY: Record<
     title: 'Carteira de Responsável',
     subtitle: 'Identificação do responsável legal',
     badge: 'Responsável Legal',
+  },
+  honorary: {
+    title: 'Carteira de Membro Honorário',
+    subtitle: 'Reconhecimento honorífico da Banda Marcial',
+    badge: 'Membro Honorário',
   },
 }
 

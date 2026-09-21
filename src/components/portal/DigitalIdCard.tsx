@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Accessibility,
@@ -16,11 +16,14 @@ import {
   Award,
   Phone,
   Users,
+  UserRound,
+  Crown,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
 import { ROLE_CARD_COPY, resolveCardVariant, type CardVariant } from '@/lib/roles'
+import { hasProfilePhoto } from '@/lib/profile-completion'
 import './digital-id-card.css'
 
 export interface DigitalIdProfile {
@@ -133,6 +136,21 @@ const cardTheme: Record<CardVariant, CardTheme> = {
     infoBox: 'border-rose-400/25 bg-rose-500/10',
     BadgeIcon: Users,
   },
+  honorary: {
+    variantClass: 'id-variant-honorary',
+    mesh: 'id-mesh-honorary',
+    accentText: 'text-amber-200',
+    accentSoft: 'text-amber-300',
+    faceBg: 'bg-gradient-to-br from-[#3a2e0f] via-[#2a2210] to-[#0f0c05]',
+    backBg: 'bg-gradient-to-br from-[#4a3a14] via-[#2a2210] to-[#120e06]',
+    header: 'bg-gradient-to-r from-yellow-700 via-amber-400 to-yellow-600',
+    glowA: 'bg-amber-300/25',
+    glowB: 'bg-yellow-500/15',
+    photoRing: 'bg-gradient-to-br from-yellow-200 via-amber-400 to-yellow-700',
+    chip: 'border-amber-300/45 bg-amber-400/15',
+    infoBox: 'border-amber-300/35 bg-amber-500/10',
+    BadgeIcon: Crown,
+  },
 }
 
 function formatDate(dateStr: string | null): string {
@@ -229,6 +247,7 @@ export function DigitalIdCard({
   className,
 }: DigitalIdCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
+  const [photoBroken, setPhotoBroken] = useState(false)
 
   const variant = resolveCardVariant(profile.role)
   const meta = ROLE_CARD_COPY[variant]
@@ -237,9 +256,8 @@ export function DigitalIdCard({
 
   const verifyUrl = `${window.location.origin}/verify?id=${profile.id}`
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(verifyUrl)}&size=200x200`
-  const avatarSrc =
-    profile.avatar_url ||
-    `https://img.usecurling.com/ppl/large?gender=male&seed=${profile.id}&dpr=2`
+  const hasPhoto = hasProfilePhoto(profile.avatar_url)
+  const avatarSrc = hasPhoto ? profile.avatar_url!.trim() : ''
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'
   const status = getStatus(profile.valid_until)
   const nameFontSize = useMemo(() => getNameFontSize(profile.full_name), [profile.full_name])
@@ -247,6 +265,11 @@ export function DigitalIdCard({
   const showLinkedStudents = variant === 'guardian' && linkedStudents.length > 0
   const primaryLinked = linkedStudents[0]
   const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
+  const showPhoto = hasPhoto && !photoBroken
+
+  useEffect(() => {
+    setPhotoBroken(false)
+  }, [profile.avatar_url])
 
   return (
     <div className={cn('flex w-full flex-col items-center', className)}>
@@ -335,14 +358,21 @@ export function DigitalIdCard({
                     )}
                   />
                   <div className="relative h-[5.5rem] w-[5.5rem] overflow-hidden rounded-[1rem] border border-white/25 bg-card shadow-xl">
-                    <img
-                      src={avatarSrc}
-                      alt={`Foto de ${profile.full_name}`}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = `https://img.usecurling.com/ppl/large?gender=male&seed=${profile.id}&dpr=2`
-                      }}
-                    />
+                    {showPhoto ? (
+                      <img
+                        src={avatarSrc}
+                        alt={`Foto de ${profile.full_name}`}
+                        className="h-full w-full object-cover"
+                        onError={() => setPhotoBroken(true)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-zinc-900/90 px-2 text-center">
+                        <UserRound className="h-8 w-8 text-white/35" aria-hidden />
+                        <span className="text-[8px] font-medium uppercase tracking-wide text-white/45">
+                          Sem foto
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

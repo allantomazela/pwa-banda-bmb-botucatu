@@ -243,6 +243,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
                   <SelectItem value="member">Aluno</SelectItem>
                   <SelectItem value="professor">Professor</SelectItem>
                   <SelectItem value="support_group">Grupo de Apoio</SelectItem>
+                  <SelectItem value="honorary_member">Membro Honorário</SelectItem>
                   <SelectItem value="guardian">Responsável Legal</SelectItem>
                   <SelectItem value="admin">Administrador do Sistema</SelectItem>
                 </SelectContent>

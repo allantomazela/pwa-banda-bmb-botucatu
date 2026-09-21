@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { isMinor } from '@/lib/formatters'
 import { isGuardian } from '@/lib/roles'
+import { hasProfilePhoto } from '@/lib/profile-completion'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -134,13 +135,12 @@ export default function Dashboard() {
           <CardContent>
             <div className="mb-4 flex items-center gap-4">
               <Avatar className="h-16 w-16 border-2 border-primary">
-                <AvatarImage
-                  src={
-                    profile?.avatar_url ||
-                    `https://img.usecurling.com/ppl/medium?gender=male&seed=${profile?.id || 'default'}&dpr=2`
-                  }
-                />
-                <AvatarFallback>{firstName.charAt(0).toUpperCase()}</AvatarFallback>
+                {hasProfilePhoto(profile?.avatar_url) ? (
+                  <AvatarImage src={profile!.avatar_url!} alt={profile?.full_name || 'Avatar'} />
+                ) : null}
+                <AvatarFallback className="bg-muted text-lg font-semibold text-muted-foreground">
+                  {firstName.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <p className="truncate font-semibold text-white">{profile?.full_name || '—'}</p>

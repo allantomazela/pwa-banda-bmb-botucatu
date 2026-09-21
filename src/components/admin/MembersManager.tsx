@@ -39,6 +39,7 @@ function RoleBadge({ role }: { role: string }) {
     admin: 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/15',
     guardian: 'bg-rose-500/15 text-rose-300 hover:bg-rose-500/15',
     support_group: 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/15',
+    honorary_member: 'bg-amber-500/15 text-amber-200 hover:bg-amber-500/15',
   }
   return <Badge className={styles[normalized] ?? styles.member}>{roleLabel(normalized)}</Badge>
 }

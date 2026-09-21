@@ -5,6 +5,7 @@ import { Camera, Loader2, User } from 'lucide-react'
 import { useAvatarUpload } from '@/hooks/use-avatar-upload'
 import { useToast } from '@/hooks/use-toast'
 import { ImageAdjustDialog } from '@/components/media/ImageAdjustDialog'
+import { hasProfilePhoto } from '@/lib/profile-completion'
 
 interface AvatarUploadProps {
   userId: string
@@ -53,14 +54,11 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
   return (
     <div className="flex items-center gap-4">
       <Avatar className="h-20 w-20 border-2 border-primary">
-        <AvatarImage
-          src={
-            currentUrl || `https://img.usecurling.com/ppl/medium?gender=male&seed=${userId}&dpr=2`
-          }
-          alt={name || 'Avatar'}
-        />
-        <AvatarFallback>
-          <User className="h-8 w-8 text-muted-foreground" />
+        {hasProfilePhoto(currentUrl) ? (
+          <AvatarImage src={currentUrl} alt={name || 'Avatar'} />
+        ) : null}
+        <AvatarFallback className="bg-muted">
+          <User className="h-8 w-8 text-muted-foreground" aria-label="Sem foto" />
         </AvatarFallback>
       </Avatar>
       <div>
