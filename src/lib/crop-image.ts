@@ -5,6 +5,14 @@ export type PixelCrop = {
   height: number
 }
 
+export type CropImageOptions = {
+  quality?: number
+  /** Limita o maior lado da saída (útil para avatar). */
+  maxSide?: number
+  /** Força canvas quadrado a partir do centro do recorte (foto de perfil). */
+  forceSquare?: boolean
+}
+
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image()
@@ -31,7 +39,7 @@ export async function cropImageToFile(
   imageSrc: string,
   crop: PixelCrop,
   originalFile: File,
-  options?: { quality?: number },
+  options?: CropImageOptions,
 ): Promise<File> {
   const image = await loadImage(imageSrc)
   const iw = image.naturalWidth
@@ -42,19 +50,39 @@ export async function cropImageToFile(
   const width = Math.max(1, Math.min(Math.round(crop.width), iw - x))
   const height = Math.max(1, Math.min(Math.round(crop.height), ih - y))
 
-  // Sem zoom/recorte efetivo: devolve o arquivo original intacto
-  if (isNearlyFullImage({ x, y, width, height }, iw, ih)) {
+  const forceSquare = Boolean(options?.forceSquare)
+
+  // Para usos gerais (galeria etc.): se o quadro cobre quase tudo, mantém o original
+  if (!forceSquare && isNearlyFullImage({ x, y, width, height }, iw, ih)) {
     return originalFile
   }
 
   const preferPng = originalFile.type === 'image/png'
   const preferWebp = originalFile.type === 'image/webp'
   const mimeType = preferPng ? 'image/png' : preferWebp ? 'image/webp' : 'image/jpeg'
-  const quality = options?.quality ?? (mimeType === 'image/jpeg' ? 0.97 : 0.98)
+  const quality = options?.quality ?? (mimeType === 'image/jpeg' ? 0.92 : 0.98)
 
-  // Mantém 1:1 os pixels do recorte (sem downscale)
-  const outW = width
-  const outH = height
+  let srcX = x
+  let srcY = y
+  let srcW = width
+  let srcH = height
+
+  if (forceSquare) {
+    const side = Math.max(1, Math.min(width, height))
+    srcX = x + Math.max(0, Math.floor((width - side) / 2))
+    srcY = y + Math.max(0, Math.floor((height - side) / 2))
+    srcW = side
+    srcH = side
+  }
+
+  let outW = srcW
+  let outH = srcH
+  const maxSide = options?.maxSide
+  if (maxSide && Math.max(outW, outH) > maxSide) {
+    const scale = maxSide / Math.max(outW, outH)
+    outW = Math.max(1, Math.round(outW * scale))
+    outH = Math.max(1, Math.round(outH * scale))
+  }
 
   const canvas = document.createElement('canvas')
   canvas.width = outW
@@ -64,7 +92,7 @@ export async function cropImageToFile(
 
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(image, x, y, width, height, 0, 0, outW, outH)
+  ctx.drawImage(image, srcX, srcY, srcW, srcH, 0, 0, outW, outH)
 
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(

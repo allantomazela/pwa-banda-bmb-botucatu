@@ -357,12 +357,12 @@ export function DigitalIdCard({
                       theme.photoRing,
                     )}
                   />
-                  <div className="relative h-[5.5rem] w-[5.5rem] overflow-hidden rounded-[1rem] border border-white/25 bg-card shadow-xl">
+                  <div className="relative aspect-square h-[5.5rem] w-[5.5rem] overflow-hidden rounded-[1rem] border border-white/25 bg-zinc-950 shadow-xl">
                     {showPhoto ? (
                       <img
                         src={avatarSrc}
                         alt={`Foto de ${profile.full_name}`}
-                        className="h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover object-[center_22%]"
                         onError={() => setPhotoBroken(true)}
                       />
                     ) : (

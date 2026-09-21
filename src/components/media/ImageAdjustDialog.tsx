@@ -34,6 +34,10 @@ type Props = {
   file: File | null
   title?: string
   defaultAspect?: ImageAdjustAspect
+  /** Quando false, esconde “Usar original” (recomendado para foto de perfil). */
+  allowOriginal?: boolean
+  /** Garante saída quadrada sem esticar (foto de perfil / carteirinha). */
+  forceSquareOutput?: boolean
   onCancel: () => void
   onConfirm: (file: File) => void
 }
@@ -114,6 +118,8 @@ export function ImageAdjustDialog({
   file,
   title = 'Ajustar imagem',
   defaultAspect = 'free',
+  allowOriginal = true,
+  forceSquareOutput = false,
   onCancel,
   onConfirm,
 }: Props) {
@@ -225,7 +231,10 @@ export function ImageAdjustDialog({
       const fw = el?.clientWidth || frame.width
       const fh = el?.clientHeight || frame.height
       const crop = visibleCrop(natural.w, natural.h, fw, fh, zoom, offset)
-      const cropped = await cropImageToFile(src, crop, file)
+      const cropped = await cropImageToFile(src, crop, file, {
+        forceSquare: forceSquareOutput || aspectId === '1:1',
+        maxSide: forceSquareOutput || aspectId === '1:1' ? 1024 : undefined,
+      })
       onConfirm(cropped)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao ajustar a imagem.')
@@ -316,9 +325,15 @@ export function ImageAdjustDialog({
         </div>
 
         <DialogFooter className="shrink-0 flex-col gap-2 sm:flex-row sm:justify-between">
-          <Button type="button" variant="ghost" onClick={handleUseOriginal} disabled={busy || !file}>
-            Usar original sem recorte
-          </Button>
+          {allowOriginal ? (
+            <Button type="button" variant="ghost" onClick={handleUseOriginal} disabled={busy || !file}>
+              Usar original sem recorte
+            </Button>
+          ) : (
+            <span className="text-xs text-muted-foreground sm:self-center">
+              Enquadre o rosto no quadro quadrado para a carteirinha.
+            </span>
+          )}
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
               Cancelar

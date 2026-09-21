@@ -94,6 +94,8 @@ export function AvatarUpload({ userId, currentUrl, name, onUploaded }: AvatarUpl
         file={adjustFile}
         title="Ajustar foto de perfil"
         defaultAspect="1:1"
+        allowOriginal={false}
+        forceSquareOutput
         onCancel={() => setAdjustFile(null)}
         onConfirm={handleAdjusted}
       />
