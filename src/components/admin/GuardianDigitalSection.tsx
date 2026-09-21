@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   inviteGuardianForStudent,
+  linkGuardianByRegistration,
   linkStatusLabel,
   listLinksForStudent,
   revokeGuardianLink,
@@ -10,19 +11,22 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, UserPlus } from 'lucide-react'
+import { Link2, Loader2, UserPlus } from 'lucide-react'
 
 interface GuardianDigitalSectionProps {
   studentId: string
+  onLinked?: () => void | Promise<void>
 }
 
-export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProps) {
+export function GuardianDigitalSection({ studentId, onLinked }: GuardianDigitalSectionProps) {
   const { toast } = useToast()
   const [links, setLinks] = useState<GuardianLink[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
-  const [relationship, setRelationship] = useState('Responsável')
+  const [registration, setRegistration] = useState('')
+  const [relationship, setRelationship] = useState('Responsável legal')
   const [inviting, setInviting] = useState(false)
+  const [linking, setLinking] = useState(false)
   const [revokingId, setRevokingId] = useState<string | null>(null)
 
   const refresh = async () => {
@@ -45,6 +49,11 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentId])
 
+  const afterLink = async () => {
+    await refresh()
+    await onLinked?.()
+  }
+
   const handleInvite = async () => {
     if (!email.trim()) {
       toast({ title: 'Informe o e-mail do responsável', variant: 'destructive' })
@@ -64,10 +73,34 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
     toast({
       title: 'Convite registrado',
       description:
-        'O responsável deve criar conta ou fazer login com este e-mail para ativar o vínculo.',
+        'Se o e-mail já tiver conta de responsável aprovada, o vínculo fica ativo e o nome entra na carteirinha. Caso contrário, o responsável deve se cadastrar com este e-mail.',
     })
     setEmail('')
-    refresh()
+    await afterLink()
+  }
+
+  const handleLinkByRegistration = async () => {
+    if (!registration.trim()) {
+      toast({ title: 'Informe a matrícula do responsável', variant: 'destructive' })
+      return
+    }
+    setLinking(true)
+    const { error } = await linkGuardianByRegistration({
+      studentId,
+      guardianRegistration: registration,
+      relationship,
+    })
+    setLinking(false)
+    if (error) {
+      toast({ title: 'Não foi possível vincular', description: error, variant: 'destructive' })
+      return
+    }
+    toast({
+      title: 'Responsável vinculado',
+      description: 'O nome do responsável legal foi atualizado na carteirinha do menor.',
+    })
+    setRegistration('')
+    await afterLink()
   }
 
   const handleRevoke = async (id: string) => {
@@ -79,16 +112,16 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
       return
     }
     toast({ title: 'Vínculo revogado' })
-    refresh()
+    await afterLink()
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
+    <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.03] p-4">
       <div>
-        <h3 className="text-sm font-semibold">Responsável digital</h3>
+        <h3 className="text-sm font-semibold">Responsável legal (carteirinha e autorizações)</h3>
         <p className="text-xs text-muted-foreground">
-          Conta com login próprio para assinar autorizações de viagem. O e-mail não pode ser o
-          mesmo de um aluno.
+          Vincule um responsável já cadastrado pela matrícula (ex.: BMB-0012) ou convide por
+          e-mail. O nome do vínculo ativo aparece na carteirinha do menor.
         </p>
       </div>
 
@@ -105,10 +138,16 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
               key={link.id}
               className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/10 bg-background/40 px-3 py-2 text-sm"
             >
-              <div>
-                <p className="font-medium">{link.invited_email}</p>
+              <div className="min-w-0">
+                <p className="font-medium break-words">
+                  {link.guardian?.full_name || link.invited_email}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {link.relationship} · {linkStatusLabel(link.status)}
+                  {link.guardian?.registration_number
+                    ? ` · ${link.guardian.registration_number}`
+                    : ''}
+                  {link.guardian?.full_name ? ` · ${link.invited_email}` : ''}
                 </p>
               </div>
               {link.status !== 'revoked' ? (
@@ -131,9 +170,47 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
         </ul>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="gd-email">E-mail do responsável</Label>
+      <div className="space-y-2">
+        <Label htmlFor="gd-rel">Parentesco / tipo</Label>
+        <Input
+          id="gd-rel"
+          value={relationship}
+          onChange={(e) => setRelationship(e.target.value)}
+          placeholder="Pai, Mãe, Responsável legal…"
+        />
+      </div>
+
+      <div className="grid gap-3 rounded-md border border-primary/20 bg-primary/5 p-3 sm:grid-cols-[1fr_auto]">
+        <div className="space-y-2">
+          <Label htmlFor="gd-reg">Matrícula do responsável já cadastrado</Label>
+          <Input
+            id="gd-reg"
+            value={registration}
+            onChange={(e) => setRegistration(e.target.value.toUpperCase())}
+            placeholder="BMB-0000"
+            autoCapitalize="characters"
+          />
+        </div>
+        <div className="flex items-end">
+          <Button
+            type="button"
+            className="w-full sm:w-auto"
+            onClick={handleLinkByRegistration}
+            disabled={linking}
+          >
+            {linking ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Link2 className="mr-2 h-4 w-4" />
+            )}
+            Vincular
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+        <div className="space-y-2">
+          <Label htmlFor="gd-email">Ou convidar por e-mail</Label>
           <Input
             id="gd-email"
             type="email"
@@ -142,23 +219,20 @@ export function GuardianDigitalSection({ studentId }: GuardianDigitalSectionProp
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="gd-rel">Parentesco</Label>
-          <Input
-            id="gd-rel"
-            value={relationship}
-            onChange={(e) => setRelationship(e.target.value)}
-            placeholder="Pai, Mãe, Responsável legal…"
-          />
-        </div>
         <div className="flex items-end">
-          <Button type="button" className="w-full" onClick={handleInvite} disabled={inviting}>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full sm:w-auto"
+            onClick={handleInvite}
+            disabled={inviting}
+          >
             {inviting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <UserPlus className="mr-2 h-4 w-4" />
             )}
-            Convidar responsável
+            Convidar
           </Button>
         </div>
       </div>

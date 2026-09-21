@@ -242,16 +242,19 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
                 <SelectContent>
                   <SelectItem value="member">Aluno</SelectItem>
                   <SelectItem value="professor">Professor</SelectItem>
+                  <SelectItem value="support_group">Grupo de Apoio</SelectItem>
+                  <SelectItem value="guardian">Responsável Legal</SelectItem>
                   <SelectItem value="admin">Administrador do Sistema</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Define o tipo da carteirinha. Só o Administrador do Sistema acessa o painel admin.
+                Define o tipo da carteirinha. Responsável Legal acessa o portal para autorizações;
+                só o Administrador do Sistema acessa o painel admin.
               </p>
             </div>
           </div>
           <HealthFields idPrefix="me-health" values={form} onChange={setHealth} />
-          {isMinor(form.birth_date) && (
+          {isMinor(form.birth_date) && form.role !== 'guardian' && (
             <>
               <GuardianFields
                 idPrefix="me-guardian"
@@ -260,7 +263,12 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
                 onNameChange={(v) => set('guardian_name', v)}
                 onPhoneChange={(v) => set('guardian_phone', v)}
               />
-              <GuardianDigitalSection studentId={profile.id} />
+              <GuardianDigitalSection
+                studentId={profile.id}
+                onLinked={async () => {
+                  await onSaved()
+                }}
+              />
             </>
           )}
         </div>

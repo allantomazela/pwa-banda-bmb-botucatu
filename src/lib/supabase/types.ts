@@ -593,6 +593,18 @@ export type Database = {
         }
         Returns: string
       }
+      link_guardian_by_registration: {
+        Args: {
+          p_student_id: string
+          p_guardian_registration: string
+          p_relationship?: string
+        }
+        Returns: string
+      }
+      sync_student_guardian_contact: {
+        Args: { p_student_id: string }
+        Returns: undefined
+      }
       is_active_guardian_of: {
         Args: { p_student_id: string }
         Returns: boolean

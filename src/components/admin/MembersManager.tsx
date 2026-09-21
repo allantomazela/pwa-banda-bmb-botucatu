@@ -29,12 +29,14 @@ const statusLabel: Record<string, string> = {
 
 function RoleBadge({ role }: { role: string }) {
   const normalized = normalizeRole(role)
-  const styles = {
+  const styles: Record<string, string> = {
     member: 'bg-sky-500/15 text-sky-300 hover:bg-sky-500/15',
     professor: 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/15',
     admin: 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/15',
+    guardian: 'bg-rose-500/15 text-rose-300 hover:bg-rose-500/15',
+    support_group: 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/15',
   }
-  return <Badge className={styles[normalized]}>{roleLabel(normalized)}</Badge>
+  return <Badge className={styles[normalized] ?? styles.member}>{roleLabel(normalized)}</Badge>
 }
 
 function StatusBadge({ status }: { status: string }) {

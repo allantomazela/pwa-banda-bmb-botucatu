@@ -1,7 +1,14 @@
 import { supabase } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/types'
 
-export type GuardianLink = Tables<'guardian_links'>
+export type GuardianLink = Tables<'guardian_links'> & {
+  guardian?: {
+    id: string
+    full_name: string
+    registration_number: string
+    email: string
+  } | null
+}
 
 export type GuardianLinkWithStudent = GuardianLink & {
   profiles: {
@@ -23,7 +30,21 @@ export async function inviteGuardianForStudent(input: {
   const { data, error } = await supabase.rpc('invite_guardian_for_student', {
     p_student_id: input.studentId,
     p_email: input.email.trim(),
-    p_relationship: input.relationship?.trim() || 'Responsável',
+    p_relationship: input.relationship?.trim() || 'Responsável legal',
+  })
+  if (error) return { error: error.message, id: null }
+  return { error: null, id: data as string }
+}
+
+export async function linkGuardianByRegistration(input: {
+  studentId: string
+  guardianRegistration: string
+  relationship?: string
+}): Promise<{ error: string | null; id: string | null }> {
+  const { data, error } = await supabase.rpc('link_guardian_by_registration', {
+    p_student_id: input.studentId,
+    p_guardian_registration: input.guardianRegistration.trim(),
+    p_relationship: input.relationship?.trim() || 'Responsável legal',
   })
   if (error) return { error: error.message, id: null }
   return { error: null, id: data as string }
@@ -38,11 +59,11 @@ export async function activateGuardianInvites(): Promise<{ error: string | null;
 export async function listLinksForStudent(studentId: string): Promise<GuardianLink[]> {
   const { data, error } = await supabase
     .from('guardian_links')
-    .select('*')
+    .select('*, guardian:guardian_id ( id, full_name, registration_number, email )')
     .eq('student_id', studentId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as GuardianLink[]
 }
 
 export async function revokeGuardianLink(id: string): Promise<{ error: string | null }> {
