@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
 import { ROLE_CARD_COPY, resolveCardVariant, type CardVariant } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
+import { buildVerifyCardUrl } from '@/lib/site-url'
 import { VerifyQrCode } from '@/components/portal/VerifyQrCode'
 import './digital-id-card.css'
 
@@ -255,7 +256,7 @@ export function DigitalIdCard({
   const theme = cardTheme[variant]
   const BadgeIcon = theme.BadgeIcon
 
-  const verifyUrl = `${window.location.origin}/verify?id=${profile.id}`
+  const verifyUrl = buildVerifyCardUrl(profile.id)
   const hasPhoto = hasProfilePhoto(profile.avatar_url)
   const avatarSrc = hasPhoto ? profile.avatar_url!.trim() : ''
   const cityUF = [profile.city, profile.state].filter(Boolean).join('/') || '—'

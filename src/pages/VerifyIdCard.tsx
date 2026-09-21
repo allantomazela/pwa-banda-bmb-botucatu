@@ -1,8 +1,17 @@
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useFetch } from '@/hooks/use-fetch'
 import { verifyIdCard } from '@/services/id-card'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
-import { Loader2, ShieldAlert } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  buildAndroidExternalBrowserIntent,
+  isAndroidDevice,
+  isInAppBrowser,
+} from '@/lib/site-url'
+import { ExternalLink, Loader2, ShieldAlert } from 'lucide-react'
+
+const EXTERNAL_REDIRECT_KEY = 'bmb-verify-external-attempt'
 
 export default function VerifyIdCard() {
   const [params] = useSearchParams()
@@ -11,10 +20,55 @@ export default function VerifyIdCard() {
     () => (id ? verifyIdCard(id) : Promise.resolve(null)),
     [id],
   )
+  const [inApp, setInApp] = useState(false)
+
+  useEffect(() => {
+    const embedded = isInAppBrowser()
+    setInApp(embedded)
+    if (!embedded || !id) return
+
+    // Android: tenta abrir no navegador padrão automaticamente (1 tentativa)
+    if (!isAndroidDevice()) return
+    try {
+      if (sessionStorage.getItem(EXTERNAL_REDIRECT_KEY) === id) return
+      sessionStorage.setItem(EXTERNAL_REDIRECT_KEY, id)
+    } catch {
+      /* private mode */
+    }
+    const current = window.location.href
+    window.location.replace(buildAndroidExternalBrowserIntent(current))
+  }, [id])
+
+  const openExternal = () => {
+    const current = window.location.href
+    if (isAndroidDevice()) {
+      window.location.href = buildAndroidExternalBrowserIntent(current)
+      return
+    }
+    // iOS / outros: abre em nova janela; o usuário pode usar “Abrir no Safari”
+    window.open(current, '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-3 py-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12),transparent_55%)]" />
+
+      {inApp && (
+        <div className="relative z-10 mb-4 w-full max-w-[360px] rounded-xl border border-amber-400/35 bg-amber-500/10 p-4 text-center">
+          <p className="text-sm text-amber-50">
+            Você está em um navegador interno do aplicativo. Para ver a carteirinha completa, abra no
+            navegador do celular.
+          </p>
+          <Button
+            type="button"
+            className="mt-3 h-11 w-full min-h-11 gap-2"
+            onClick={openExternal}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Abrir no navegador
+          </Button>
+        </div>
+      )}
 
       {loading ? (
         <Loader2 className="relative h-10 w-10 animate-spin text-primary" />

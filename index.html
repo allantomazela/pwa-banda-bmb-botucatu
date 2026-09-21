@@ -49,6 +49,12 @@
       media="(device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
     />
     <link rel="manifest" href="/manifest.json" />
+    <script>
+      /* Marca a rota de verificação o quanto antes (splash some no body). */
+      try {
+        if (location.pathname === '/verify') document.documentElement.classList.add('bmb-verify')
+      } catch (e) {}
+    </script>
     <link rel="preload" href="/brand-logo.png" as="image" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -294,6 +300,12 @@
       </div>
       <div class="splash-bar" aria-hidden="true"></div>
     </div>
+    <script>
+      if (document.documentElement.classList.contains('bmb-verify')) {
+        var splash = document.getElementById('app-splash')
+        if (splash) splash.classList.add('app-splash-out')
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
