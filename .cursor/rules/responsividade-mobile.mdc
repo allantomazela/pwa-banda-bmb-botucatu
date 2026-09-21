@@ -1,0 +1,18 @@
+---
+description: Sempre garantir responsividade mobile-first (celular, tablet e desktop)
+alwaysApply: true
+---
+
+# Responsividade em qualquer tela
+
+Em **toda** alteração de UI/layout (páginas, componentes, dialogs, admin, portal):
+
+1. **Mobile-first** — desenhar primeiro para ~360px; depois `sm` (640+), `md`/`lg` (tablet), `xl` (desktop).
+2. **Sem overflow horizontal** — use `min-w-0`, `max-w-full`, `break-words` / `truncate` em textos longos; imagens com `max-w-full` + `object-contain` ou `object-cover` consciente.
+3. **Touch targets** — controles clicáveis ≥ 44px no mobile (botões, links de ação, setas).
+4. **Safe area / bottom nav** — respeitar padding do `Layout` (`pb` da bottom bar); não colar conteúdo no rodapé em telas pequenas.
+5. **Grids** — preferir `grid-cols-1` → `sm:`/`md:`/`lg:`; evitar colunas lado a lado apertadas em tablet portrait (muitas vezes empilhar até `lg:`).
+6. **Tipografia fluida** — títulos que não estourem em 320–390px; evitar tracking extremo em mobile.
+7. **Validar mentalmente** 360px, 768px e 1280px antes de concluir a tarefa.
+
+Não ignore tablet: layout “só mobile ou só desktop” é insuficiente.
