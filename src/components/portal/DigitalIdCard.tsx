@@ -216,11 +216,18 @@ function InfoCell({
 
 interface DigitalIdCardProps {
   profile: DigitalIdProfile
+  /** Alunos vinculados — exibidos na carteirinha do responsável legal */
+  linkedStudents?: Array<{ full_name: string; registration_number: string }>
   showActions?: boolean
   className?: string
 }
 
-export function DigitalIdCard({ profile, showActions = true, className }: DigitalIdCardProps) {
+export function DigitalIdCard({
+  profile,
+  linkedStudents = [],
+  showActions = true,
+  className,
+}: DigitalIdCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
 
   const variant = resolveCardVariant(profile.role)
@@ -237,6 +244,9 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
   const status = getStatus(profile.valid_until)
   const nameFontSize = useMemo(() => getNameFontSize(profile.full_name), [profile.full_name])
   const showGuardian = isMinor(profile.birth_date)
+  const showLinkedStudents = variant === 'guardian' && linkedStudents.length > 0
+  const primaryLinked = linkedStudents[0]
+  const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
 
   return (
     <div className={cn('flex w-full flex-col items-center', className)}>
@@ -444,6 +454,38 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                   </div>
                 )}
 
+                {showLinkedStudents && primaryLinked ? (
+                  <div
+                    className={cn(
+                      'mt-2 w-full rounded-xl border px-2.5 py-2 backdrop-blur-sm',
+                      theme.infoBox,
+                    )}
+                  >
+                    <div className="mb-0.5 flex items-center gap-1">
+                      <GraduationCap className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
+                      <span
+                        className={cn(
+                          'text-[8px] font-semibold uppercase tracking-wide',
+                          theme.accentText,
+                        )}
+                      >
+                        {linkedStudents.length > 1 ? 'Alunos vinculados' : 'Aluno vinculado'}
+                      </span>
+                    </div>
+                    <p className="break-words text-[10px] font-medium leading-tight text-white">
+                      {primaryLinked.full_name}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[10px] text-white/85">
+                      Matrícula {displayOrDash(primaryLinked.registration_number)}
+                    </p>
+                    {extraLinkedCount > 0 ? (
+                      <p className="mt-1 text-[9px] text-white/60">
+                        +{extraLinkedCount} outro{extraLinkedCount > 1 ? 's' : ''} no verso
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 <div className="mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10 pt-3">
                   <div className="min-w-0">
                     <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
@@ -528,6 +570,30 @@ export function DigitalIdCard({ profile, showActions = true, className }: Digita
                     </p>
                   </div>
                 )}
+                {showLinkedStudents ? (
+                  <div className={cn('rounded-xl border px-3 py-2 text-center', theme.infoBox)}>
+                    <p
+                      className={cn(
+                        'text-[8px] font-semibold uppercase tracking-wide',
+                        theme.accentText,
+                      )}
+                    >
+                      {linkedStudents.length > 1 ? 'Alunos vinculados' : 'Aluno vinculado'}
+                    </p>
+                    <ul className="mt-1.5 space-y-1.5">
+                      {linkedStudents.map((student) => (
+                        <li key={`${student.registration_number}-${student.full_name}`}>
+                          <p className="text-[11px] font-medium leading-tight text-white">
+                            {student.full_name}
+                          </p>
+                          <p className="font-mono text-[10px] text-white/80">
+                            {displayOrDash(student.registration_number)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <div className="border-t border-white/10 pt-3 text-center">
                   <p className="text-[9px] leading-relaxed text-white/45">
                     Identificação institucional da Banda Marcial de Botucatu.

@@ -75,6 +75,11 @@ export async function revokeGuardianLink(id: string): Promise<{ error: string | 
   return { error: null }
 }
 
+export type LinkedStudentSummary = {
+  full_name: string
+  registration_number: string
+}
+
 export async function listMyLinkedStudents(): Promise<GuardianLinkWithStudent[]> {
   const {
     data: { user },
@@ -91,6 +96,34 @@ export async function listMyLinkedStudents(): Promise<GuardianLinkWithStudent[]>
     .order('created_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as GuardianLinkWithStudent[]
+}
+
+/** Alunos ativos vinculados a um responsável (admin preview / carteirinha) */
+export async function listLinkedStudentsForGuardian(
+  guardianId: string,
+): Promise<LinkedStudentSummary[]> {
+  const { data, error } = await supabase
+    .from('guardian_links')
+    .select('profiles:student_id ( full_name, registration_number )')
+    .eq('guardian_id', guardianId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+
+  return (data ?? [])
+    .map((row) => {
+      const student = row.profiles as
+        | { full_name: string; registration_number: string }
+        | { full_name: string; registration_number: string }[]
+        | null
+      const profile = Array.isArray(student) ? student[0] : student
+      if (!profile) return null
+      return {
+        full_name: profile.full_name || '',
+        registration_number: profile.registration_number || '',
+      }
+    })
+    .filter((item): item is LinkedStudentSummary => Boolean(item?.full_name))
 }
 
 export function linkStatusLabel(status: string) {

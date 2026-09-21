@@ -27,7 +27,12 @@ const PORTAL_NAV = [
 
 const MOBILE_BOTTOM_BAR_RESERVE = 'calc(4.5rem + env(safe-area-inset-bottom, 0px))'
 
-const GUARDIAN_NAV_PATHS = new Set(['/portal', '/portal/autorizacoes', '/portal/perfil'])
+const GUARDIAN_NAV_PATHS = new Set([
+  '/portal',
+  '/portal/id',
+  '/portal/autorizacoes',
+  '/portal/perfil',
+])
 
 export default function PortalLayout() {
   const { user, profile, loading, profileLoading, signOut } = useAuth()
@@ -59,8 +64,7 @@ export default function PortalLayout() {
 
   if (
     guardian &&
-    (location.pathname.startsWith('/portal/id') ||
-      location.pathname.startsWith('/portal/biblioteca') ||
+    (location.pathname.startsWith('/portal/biblioteca') ||
       location.pathname.startsWith('/portal/videos'))
   ) {
     return <Navigate to="/portal" replace />

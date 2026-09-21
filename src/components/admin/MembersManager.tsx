@@ -19,7 +19,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Pencil, Search, Loader2, Eye, CheckCircle2, XCircle, Clock3 } from 'lucide-react'
 import { MemberEditDialog } from '@/components/admin/MemberEditDialog'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
-import { normalizeRole, roleLabel } from '@/lib/roles'
+import { isGuardian, normalizeRole, roleLabel } from '@/lib/roles'
+import {
+  listLinkedStudentsForGuardian,
+  type LinkedStudentSummary,
+} from '@/services/guardian-links'
 
 const statusLabel: Record<string, string> = {
   pending: 'Pendente',
@@ -70,6 +74,7 @@ export function MembersManager() {
   const [editProfile, setEditProfile] = useState<Profile | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [cardProfile, setCardProfile] = useState<Profile | null>(null)
+  const [cardLinkedStudents, setCardLinkedStudents] = useState<LinkedStudentSummary[]>([])
   const [actingId, setActingId] = useState<string | null>(null)
 
   const fetchProfiles = async () => {
@@ -85,6 +90,26 @@ export function MembersManager() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadLinked() {
+      if (!cardProfile || !isGuardian(cardProfile.role)) {
+        setCardLinkedStudents([])
+        return
+      }
+      try {
+        const linked = await listLinkedStudentsForGuardian(cardProfile.id)
+        if (!cancelled) setCardLinkedStudents(linked)
+      } catch {
+        if (!cancelled) setCardLinkedStudents([])
+      }
+    }
+    void loadLinked()
+    return () => {
+      cancelled = true
+    }
+  }, [cardProfile])
 
   useEffect(() => {
     fetchProfiles()
@@ -291,7 +316,11 @@ export function MembersManager() {
           </DialogHeader>
           {cardProfile && (
             <div className="flex max-h-[70vh] justify-center overflow-y-auto py-4">
-              <DigitalIdCard profile={cardProfile} showActions={false} />
+              <DigitalIdCard
+                profile={cardProfile}
+                linkedStudents={cardLinkedStudents}
+                showActions={false}
+              />
             </div>
           )}
         </DialogContent>

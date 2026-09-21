@@ -2,22 +2,43 @@ import { useAuth } from '@/hooks/use-auth'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
 import { IdCard } from 'lucide-react'
 import { useEffect } from 'react'
-import { ROLE_CARD_COPY, resolveCardVariant } from '@/lib/roles'
+import { ROLE_CARD_COPY, isGuardian, resolveCardVariant } from '@/lib/roles'
+import { useFetch } from '@/hooks/use-fetch'
+import {
+  listMyLinkedStudents,
+  type LinkedStudentSummary,
+} from '@/services/guardian-links'
 
 const pageGlow: Record<string, string> = {
   aluno: 'bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12),transparent_55%)]',
   professor: 'bg-[radial-gradient(ellipse_at_top,rgba(251,192,45,0.12),transparent_55%)]',
   admin: 'bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.14),transparent_55%)]',
+  support: 'bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]',
+  guardian: 'bg-[radial-gradient(ellipse_at_top,rgba(244,63,94,0.12),transparent_55%)]',
 }
 
 const iconTone: Record<string, string> = {
   aluno: 'bg-sky-500/15 text-sky-300',
   professor: 'bg-amber-500/15 text-amber-300',
   admin: 'bg-violet-500/15 text-violet-300',
+  support: 'bg-emerald-500/15 text-emerald-300',
+  guardian: 'bg-rose-500/15 text-rose-300',
 }
 
 export default function DigitalId() {
   const { profile, refreshProfile } = useAuth()
+  const guardian = isGuardian(profile?.role)
+  const { data: linkedRows } = useFetch(
+    () => (guardian ? listMyLinkedStudents() : Promise.resolve([])),
+    [guardian, profile?.id],
+  )
+
+  const linkedStudents: LinkedStudentSummary[] = (linkedRows ?? [])
+    .map((row) => ({
+      full_name: row.profiles?.full_name || '',
+      registration_number: row.profiles?.registration_number || '',
+    }))
+    .filter((s) => Boolean(s.full_name))
 
   useEffect(() => {
     void refreshProfile()
@@ -51,7 +72,7 @@ export default function DigitalId() {
         <p className="mt-2 text-xs text-muted-foreground/80">Toque no cartão para ver o verso</p>
       </div>
       <div className="relative flex w-full max-w-[360px] justify-center">
-        <DigitalIdCard profile={profile} />
+        <DigitalIdCard profile={profile} linkedStudents={linkedStudents} />
       </div>
     </div>
   )
