@@ -13,6 +13,11 @@ export function buildVerifyCardUrl(memberId: string): string {
   return `${getPublicSiteOrigin()}/verify?id=${encodeURIComponent(id)}`
 }
 
+export function buildVerifyTravelAuthUrl(authorizationId: string): string {
+  const id = authorizationId.trim()
+  return `${getPublicSiteOrigin()}/verify-auth?id=${encodeURIComponent(id)}`
+}
+
 /** WebViews embutidos (WhatsApp, Instagram, etc.) — pedem “abrir no navegador”. */
 export function isInAppBrowser(): boolean {
   if (typeof navigator === 'undefined') return false

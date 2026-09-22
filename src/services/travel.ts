@@ -12,6 +12,9 @@ export type TravelAuthorizationWithTrip = TravelAuthorization & {
   > | null
   profiles?: {
     full_name: string
+    registration_number?: string | null
+    birth_date?: string | null
+    cpf?: string | null
   } | null
 }
 
@@ -21,6 +24,7 @@ export type TravelAuthorizationWithMember = TravelAuthorization & {
     full_name: string
     registration_number: string
     birth_date: string | null
+    cpf?: string | null
   } | null
 }
 
@@ -80,7 +84,7 @@ export async function listAuthorizationsForTrip(
   const { data, error } = await supabase
     .from('travel_authorizations')
     .select(
-      '*, profiles:member_id ( id, full_name, registration_number, birth_date )',
+      '*, profiles:member_id ( id, full_name, registration_number, birth_date, cpf )',
     )
     .eq('trip_id', tripId)
     .order('created_at', { ascending: true })
@@ -155,7 +159,7 @@ export async function listMyAuthorizations(): Promise<TravelAuthorizationWithTri
   const { data, error } = await supabase
     .from('travel_authorizations')
     .select(
-      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active )',
+      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name, registration_number, birth_date, cpf )',
     )
     .eq('member_id', user.id)
     .order('created_at', { ascending: false })
@@ -183,7 +187,7 @@ export async function listGuardianAuthorizations(): Promise<TravelAuthorizationW
   const { data, error } = await supabase
     .from('travel_authorizations')
     .select(
-      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name )',
+      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name, registration_number, birth_date, cpf )',
     )
     .in('member_id', studentIds)
     .order('created_at', { ascending: false })
@@ -228,12 +232,40 @@ export async function listSignedAuthorizations(): Promise<TravelAuthorizationWit
   const { data, error } = await supabase
     .from('travel_authorizations')
     .select(
-      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name )',
+      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name, registration_number, birth_date, cpf )',
     )
     .eq('status', 'signed')
     .order('signed_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as TravelAuthorizationWithTrip[]
+}
+
+export type TravelAuthVerification = {
+  authorization_id: string
+  status: string
+  is_valid: boolean
+  student_name: string
+  registration_number: string
+  trip_title: string
+  destination: string
+  departure_at: string | null
+  return_at: string | null
+  guardian_name: string
+  signature_method: string
+  signed_at: string | null
+  govbr_name: string | null
+  govbr_assurance: string | null
+}
+
+export async function verifyTravelAuthorization(
+  authorizationId: string,
+): Promise<TravelAuthVerification | null> {
+  const { data, error } = await supabase.rpc('verify_travel_authorization', {
+    authorization_id: authorizationId,
+  })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : null
+  return (row as TravelAuthVerification | null) ?? null
 }
 
 export function authorizationStatusLabel(status: string) {

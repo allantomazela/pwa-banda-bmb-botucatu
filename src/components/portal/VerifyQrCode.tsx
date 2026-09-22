@@ -6,6 +6,7 @@ type VerifyQrCodeProps = {
   size?: number
   className?: string
   logoSrc?: string
+  title?: string
 }
 
 /** QR gerado no cliente, com brasão central e ECC alto para leitura estável. */
@@ -14,6 +15,7 @@ export function VerifyQrCode({
   size = 160,
   className,
   logoSrc = '/brand-logo.png',
+  title = 'QR Code de verificação',
 }: VerifyQrCodeProps) {
   const logoBox = Math.round(size * 0.28)
   const logoPad = Math.max(4, Math.round(logoBox * 0.12))
@@ -29,7 +31,7 @@ export function VerifyQrCode({
         level="H"
         bgColor="#FFFFFF"
         fgColor="#0B1220"
-        title="QR Code de verificação da carteirinha"
+        title={title}
         style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
       />
       <div

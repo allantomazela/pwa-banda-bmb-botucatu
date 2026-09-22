@@ -12,6 +12,7 @@ import {
 } from '@/services/travel'
 import { listMyLinkedStudents } from '@/services/guardian-links'
 import { SignaturePad, type SignaturePadHandle } from '@/components/portal/SignaturePad'
+import { TravelAuthorizationPrintDoc } from '@/components/portal/TravelAuthorizationPrintDoc'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -25,7 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { BadgeCheck, Bus, FilePenLine, Loader2, ShieldCheck } from 'lucide-react'
+import { BadgeCheck, Bus, FilePenLine, Loader2, Printer, ShieldCheck } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 const GOVBR_ERROR_MESSAGES: Record<string, string> = {
@@ -56,6 +57,7 @@ export default function PortalAuthorizations() {
   const [accepted, setAccepted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [startingGovbr, setStartingGovbr] = useState(false)
+  const [printAuth, setPrintAuth] = useState<TravelAuthorizationWithTrip | null>(null)
   const padRef = useRef<SignaturePadHandle>(null)
   const callbackHandled = useRef(false)
 
@@ -326,7 +328,7 @@ export default function PortalAuthorizations() {
                     </p>
                   ) : null}
                   {item.status === 'signed' ? (
-                    <div className="space-y-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+                    <div className="space-y-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
                       <div className="flex items-start gap-2">
                         <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                         <div className="min-w-0 space-y-1">
@@ -362,6 +364,16 @@ export default function PortalAuthorizations() {
                           className="max-h-28 rounded-md border border-white/10 bg-black"
                         />
                       ) : null}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 w-full sm:w-auto"
+                        onClick={() => setPrintAuth(item)}
+                      >
+                        <Printer className="mr-2 h-4 w-4" />
+                        Imprimir documento
+                      </Button>
                     </div>
                   ) : null}
                   {item.status === 'revoked' ? (
@@ -375,6 +387,22 @@ export default function PortalAuthorizations() {
           })}
         </div>
       )}
+
+      <TravelAuthorizationPrintDoc
+        open={!!printAuth}
+        onOpenChange={(v) => !v && setPrintAuth(null)}
+        auth={printAuth}
+        student={
+          asGuardian
+            ? printAuth?.profiles
+            : {
+                full_name: profile?.full_name,
+                registration_number: profile?.registration_number,
+                birth_date: profile?.birth_date,
+                cpf: profile?.cpf,
+              }
+        }
+      />
 
       <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
         <DialogContent className="max-h-[92dvh] max-w-lg overflow-y-auto">

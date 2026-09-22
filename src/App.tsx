@@ -21,6 +21,7 @@ import Login from '@/pages/Login'
 import ResetPassword from '@/pages/ResetPassword'
 import CmsPage from '@/pages/CmsPage'
 import VerifyIdCard from '@/pages/VerifyIdCard'
+import VerifyTravelAuth from '@/pages/VerifyTravelAuth'
 
 // Restricted Pages
 import Dashboard from '@/pages/portal/Dashboard'
@@ -70,6 +71,7 @@ const App = () => (
                 <Route path="/pagina/:slug" element={<CmsPage />} />
               </Route>
               <Route path="/verify" element={<VerifyIdCard />} />
+              <Route path="/verify-auth" element={<VerifyTravelAuth />} />
 
               {/* Restricted Routes with Portal Layout */}
               <Route path="/portal" element={<PortalLayout />}>

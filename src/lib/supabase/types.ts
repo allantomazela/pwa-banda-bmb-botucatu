@@ -634,6 +634,25 @@ export type Database = {
           valid_until: string | null
         }[]
       }
+      verify_travel_authorization: {
+        Args: { authorization_id: string }
+        Returns: {
+          authorization_id: string
+          departure_at: string | null
+          destination: string
+          govbr_assurance: string | null
+          govbr_name: string | null
+          guardian_name: string
+          is_valid: boolean
+          registration_number: string
+          return_at: string | null
+          signature_method: string
+          signed_at: string | null
+          status: string
+          student_name: string
+          trip_title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -13,6 +13,7 @@ import {
   type TravelAuthorizationWithTrip,
   type TravelTrip,
 } from '@/services/travel'
+import { TravelAuthorizationPrintDoc } from '@/components/portal/TravelAuthorizationPrintDoc'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,7 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
-import { BadgeCheck, Bus, Loader2, Plus, Trash2, Users } from 'lucide-react'
+import { BadgeCheck, Bus, Loader2, Plus, Printer, Trash2, Users } from 'lucide-react'
 
 function toLocalInput(iso: string | null | undefined) {
   if (!iso) return ''
@@ -66,6 +67,28 @@ export default function AdminTrips() {
   const [generating, setGenerating] = useState(false)
   const [signedAuths, setSignedAuths] = useState<TravelAuthorizationWithTrip[]>([])
   const [signedLoading, setSignedLoading] = useState(true)
+  const [printAuth, setPrintAuth] = useState<TravelAuthorizationWithTrip | null>(null)
+
+  function toPrintableAuth(
+    auth: TravelAuthorizationWithMember,
+    trip: TravelTrip | null,
+  ): TravelAuthorizationWithTrip {
+    return {
+      ...auth,
+      travel_trips: trip
+        ? {
+            id: trip.id,
+            title: trip.title,
+            destination: trip.destination,
+            departure_at: trip.departure_at,
+            return_at: trip.return_at,
+            description: trip.description,
+            is_active: trip.is_active,
+          }
+        : null,
+      profiles: auth.profiles,
+    }
+  }
 
   const refreshSigned = async () => {
     setSignedLoading(true)
@@ -260,15 +283,27 @@ export default function AdminTrips() {
                             : ''}
                         </p>
                       </div>
-                      <div className="shrink-0 text-left sm:text-right">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
-                          Assinada
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {auth.signed_at
-                            ? new Date(auth.signed_at).toLocaleString('pt-BR')
-                            : '—'}
-                        </p>
+                      <div className="flex shrink-0 flex-col gap-2 text-left sm:items-end sm:text-right">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                            Assinada
+                          </p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {auth.signed_at
+                              ? new Date(auth.signed_at).toLocaleString('pt-BR')
+                              : '—'}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="min-h-11 w-full sm:w-auto"
+                          onClick={() => setPrintAuth(auth)}
+                        >
+                          <Printer className="mr-2 h-4 w-4" />
+                          Imprimir
+                        </Button>
                       </div>
                     </div>
                   </li>
@@ -451,9 +486,22 @@ export default function AdminTrips() {
                       />
                     ) : null}
                     {auth.status === 'signed' ? (
-                      <Button size="sm" variant="outline" onClick={() => handleRevoke(auth.id)}>
-                        Revogar
-                      </Button>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="min-h-11"
+                          onClick={() =>
+                            setPrintAuth(toPrintableAuth(auth, detailTrip))
+                          }
+                        >
+                          <Printer className="mr-2 h-4 w-4" />
+                          Imprimir documento
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRevoke(auth.id)}>
+                          Revogar
+                        </Button>
+                      </div>
                     ) : null}
                   </CardContent>
                 </Card>
@@ -462,6 +510,13 @@ export default function AdminTrips() {
           )}
         </DialogContent>
       </Dialog>
+
+      <TravelAuthorizationPrintDoc
+        open={!!printAuth}
+        onOpenChange={(v) => !v && setPrintAuth(null)}
+        auth={printAuth}
+        student={printAuth?.profiles}
+      />
     </div>
   )
 }
