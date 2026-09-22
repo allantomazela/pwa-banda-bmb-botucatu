@@ -9,8 +9,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertCircle, KeyRound } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import type { AuthError } from '@supabase/supabase-js'
-import { GuardianFields } from '@/components/GuardianFields'
-import { getGuardianValidationError, isMinor } from '@/lib/formatters'
+import { EmergencyContactsFields } from '@/components/EmergencyContactsFields'
+import { ImageConsentFields } from '@/components/ImageConsentFields'
+import { getEmergencyContactsValidationError, isMinor } from '@/lib/formatters'
+import {
+  IMAGE_CONSENT_VERSION,
+  buildImageConsentText,
+  type EmergencyContact,
+} from '@/lib/image-consent'
 import { BrandMark } from '@/components/BrandMark'
 
 type AuthMode = 'login' | 'register' | 'register-guardian' | 'forgot'
@@ -24,6 +30,11 @@ export default function Login() {
   const [birthDate, setBirthDate] = useState('')
   const [guardianName, setGuardianName] = useState('')
   const [guardianPhone, setGuardianPhone] = useState('')
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
+    { name: '', phone: '', relationship: 'Responsável legal' },
+  ])
+  const [imageConsentChecked, setImageConsentChecked] = useState(false)
+  const [imageConsentActor, setImageConsentActor] = useState('')
   const { signIn, signUp, signUpGuardian, resetPassword, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -91,9 +102,19 @@ export default function Login() {
         setErrorMessage('Informe a data de nascimento.')
         return
       }
-      const guardianError = getGuardianValidationError(birthDate, guardianName, guardianPhone)
-      if (guardianError) {
-        setErrorMessage(guardianError)
+      if (isMinor(birthDate)) {
+        const contactsError = getEmergencyContactsValidationError(birthDate, emergencyContacts)
+        if (contactsError) {
+          setErrorMessage(contactsError)
+          return
+        }
+      }
+      if (!imageConsentChecked) {
+        setErrorMessage('É necessário ler e autorizar o uso de imagem (LGPD) para concluir o cadastro.')
+        return
+      }
+      if (isMinor(birthDate) && !imageConsentActor.trim()) {
+        setErrorMessage('Informe o nome do responsável que autoriza o uso de imagem.')
         return
       }
     }
@@ -168,12 +189,23 @@ export default function Login() {
         return
       }
 
+      const primary = emergencyContacts[0]
+      const secondary = emergencyContacts[1]
       const { error } = await signUp(email, password, {
         full_name: fullName,
         instrument,
         birth_date: birthDate,
-        guardian_name: guardianName.trim(),
-        guardian_phone: guardianPhone.trim(),
+        guardian_name: (primary?.name || guardianName).trim(),
+        guardian_phone: (primary?.phone || guardianPhone).trim(),
+        guardian_relationship: (primary?.relationship || 'Responsável legal').trim(),
+        guardian2_name: (secondary?.name || '').trim(),
+        guardian2_phone: (secondary?.phone || '').trim(),
+        guardian2_relationship: (secondary?.relationship || 'Responsável legal').trim(),
+        image_consent: 'granted',
+        image_consent_by_name: (imageConsentActor.trim() || fullName).trim(),
+        image_consent_by_role: isMinor(birthDate) ? 'guardian' : 'self',
+        image_consent_version: IMAGE_CONSENT_VERSION,
+        image_consent_text: buildImageConsentText(),
       })
       if (error) {
         const msg = getErrorMessage(error)
@@ -274,13 +306,19 @@ export default function Login() {
                   />
                 </div>
                 {isMinor(birthDate) && (
-                  <GuardianFields
-                    name={guardianName}
-                    phone={guardianPhone}
-                    onNameChange={setGuardianName}
-                    onPhoneChange={setGuardianPhone}
+                  <EmergencyContactsFields
+                    contacts={emergencyContacts}
+                    onChange={setEmergencyContacts}
+                    max={3}
                   />
                 )}
+                <ImageConsentFields
+                  birthDate={birthDate}
+                  checked={imageConsentChecked}
+                  onCheckedChange={setImageConsentChecked}
+                  actorName={imageConsentActor}
+                  onActorNameChange={setImageConsentActor}
+                />
               </>
             )}
             <div className="space-y-2">

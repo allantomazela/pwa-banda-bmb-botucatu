@@ -17,9 +17,11 @@ import { Loader2, Save, AlertCircle, UserRound } from 'lucide-react'
 import { getProfileCompletion } from '@/lib/profile-completion'
 import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { formatCPF, getGuardianValidationError, isMinor, isValidCPF } from '@/lib/formatters'
+import { formatCPF, getEmergencyContactsValidationError, isMinor, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
-import { GuardianFields } from '@/components/GuardianFields'
+import { EmergencyContactsFields } from '@/components/EmergencyContactsFields'
+import { ImageConsentCard } from '@/components/portal/ImageConsentCard'
+import { normalizeEmergencyContacts, type EmergencyContact } from '@/lib/image-consent'
 import {
   HealthFields,
   healthFormFromProfile,
@@ -47,6 +49,9 @@ export default function ProfileSettings() {
     guardian_phone: '',
     ...healthFormFromProfile({}),
   })
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
+    { name: '', phone: '', relationship: 'Responsável legal' },
+  ])
 
   useEffect(() => {
     if (profile) {
@@ -64,6 +69,15 @@ export default function ProfileSettings() {
         guardian_phone: profile.guardian_phone || '',
         ...healthFormFromProfile(profile),
       })
+      const contacts = normalizeEmergencyContacts(profile.emergency_contacts, {
+        name: profile.guardian_name,
+        phone: profile.guardian_phone,
+      })
+      setEmergencyContacts(
+        contacts.length > 0
+          ? contacts
+          : [{ name: '', phone: '', relationship: 'Responsável legal' }],
+      )
     }
   }, [profile])
 
@@ -104,15 +118,12 @@ export default function ProfileSettings() {
       })
       return
     }
-    const guardianError = getGuardianValidationError(
-      form.birth_date,
-      form.guardian_name,
-      form.guardian_phone,
-    )
-    if (guardianError) {
-      toast({ title: 'Dados do responsável', description: guardianError, variant: 'destructive' })
+    const contactsError = getEmergencyContactsValidationError(form.birth_date, emergencyContacts)
+    if (contactsError) {
+      toast({ title: 'Dados do responsável', description: contactsError, variant: 'destructive' })
       return
     }
+    const primary = emergencyContacts[0]
     setSaving(true)
     const { error } = await updateProfile(user.id, {
       full_name: form.full_name,
@@ -123,8 +134,15 @@ export default function ProfileSettings() {
       rg: form.rg,
       birth_date: form.birth_date || null,
       avatar_url: form.avatar_url,
-      guardian_name: form.guardian_name.trim() || null,
-      guardian_phone: form.guardian_phone.trim() || null,
+      guardian_name: primary?.name?.trim() || null,
+      guardian_phone: primary?.phone?.trim() || null,
+      emergency_contacts: emergencyContacts
+        .filter((c) => c.name.trim())
+        .map((c) => ({
+          name: c.name.trim(),
+          phone: c.phone.trim(),
+          relationship: (c.relationship || 'Responsável').trim(),
+        })),
       ...healthPayloadFromForm(form),
     })
     setSaving(false)
@@ -158,8 +176,9 @@ export default function ProfileSettings() {
     rg: form.rg,
     birth_date: form.birth_date,
     avatar_url: form.avatar_url,
-    guardian_name: form.guardian_name,
-    guardian_phone: form.guardian_phone,
+    guardian_name: emergencyContacts[0]?.name || form.guardian_name,
+    guardian_phone: emergencyContacts[0]?.phone || form.guardian_phone,
+    image_consent_status: profile.image_consent_status,
   })
   const minor = isMinor(form.birth_date)
 
@@ -317,11 +336,10 @@ export default function ProfileSettings() {
           </div>
           <HealthFields values={form} onChange={handleHealthChange} />
           {minor && (
-            <GuardianFields
-              name={form.guardian_name}
-              phone={form.guardian_phone}
-              onNameChange={(v) => handleChange('guardian_name', v)}
-              onPhoneChange={(v) => handleChange('guardian_phone', v)}
+            <EmergencyContactsFields
+              contacts={emergencyContacts}
+              onChange={setEmergencyContacts}
+              max={3}
             />
           )}
 
@@ -335,6 +353,15 @@ export default function ProfileSettings() {
           </Button>
         </CardContent>
       </Card>
+
+      <ImageConsentCard
+        profileId={profile.id}
+        birthDate={form.birth_date || null}
+        fullName={form.full_name}
+        status={profile.image_consent_status}
+        consentByName={profile.image_consent_by_name}
+        onUpdated={refreshProfile}
+      />
 
       <ChangePasswordCard />
     </div>

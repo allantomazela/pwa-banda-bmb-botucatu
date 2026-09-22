@@ -25,6 +25,7 @@ import { formatDateBR, isDateOnOrAfterToday, isMinor } from '@/lib/formatters'
 import { ROLE_CARD_COPY, resolveCardVariant, type CardVariant } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
 import { buildVerifyCardUrl } from '@/lib/site-url'
+import { imageConsentLabel, normalizeEmergencyContacts } from '@/lib/image-consent'
 import { VerifyQrCode } from '@/components/portal/VerifyQrCode'
 import './digital-id-card.css'
 
@@ -44,6 +45,8 @@ export interface DigitalIdProfile {
   role: string
   guardian_name: string | null
   guardian_phone: string | null
+  emergency_contacts?: Array<{ name: string; phone: string; relationship?: string }> | null
+  image_consent_status?: string | null
 }
 
 type CardTheme = {
@@ -263,6 +266,14 @@ export function DigitalIdCard({
   const status = getStatus(profile.valid_until)
   const nameFontSize = useMemo(() => getNameFontSize(profile.full_name), [profile.full_name])
   const showGuardian = isMinor(profile.birth_date)
+  const emergencyContacts = normalizeEmergencyContacts(profile.emergency_contacts, {
+    name: profile.guardian_name,
+    phone: profile.guardian_phone,
+  })
+  const frontGuardians = emergencyContacts.slice(0, 2)
+  const extraGuardians = Math.max(0, emergencyContacts.length - frontGuardians.length)
+  const imageConsent = profile.image_consent_status || 'pending'
+  const imageConsentOk = imageConsent === 'granted'
   const showLinkedStudents = variant === 'guardian' && linkedStudents.length > 0
   const primaryLinked = linkedStudents[0]
   const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
@@ -467,23 +478,49 @@ export function DigitalIdCard({
                   </div>
                 )}
 
-                {showGuardian && (
+                {showGuardian && frontGuardians.length > 0 && (
                   <div className="mt-2 w-full rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-2 backdrop-blur-sm">
-                    <div className="mb-0.5 flex items-center gap-1">
+                    <div className="mb-1 flex items-center gap-1">
                       <Users className="h-2.5 w-2.5 shrink-0 text-amber-300" />
                       <span className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
-                        Responsável
+                        {frontGuardians.length > 1 ? 'Responsáveis' : 'Responsável'}
                       </span>
                     </div>
-                    <p className="break-words text-[10px] font-medium leading-tight text-white">
-                      {displayOrDash(profile.guardian_name)}
-                    </p>
-                    <p className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-white/85">
-                      <Phone className="h-2.5 w-2.5 shrink-0 text-amber-300" />
-                      {displayOrDash(profile.guardian_phone)}
-                    </p>
+                    <ul className="space-y-1.5">
+                      {frontGuardians.map((contact) => (
+                        <li key={`${contact.name}-${contact.phone}`}>
+                          <p className="break-words text-[10px] font-medium leading-tight text-white">
+                            {contact.name}
+                            {contact.relationship ? (
+                              <span className="font-normal text-white/55">
+                                {' '}
+                                · {contact.relationship}
+                              </span>
+                            ) : null}
+                          </p>
+                          <p className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-white/85">
+                            <Phone className="h-2.5 w-2.5 shrink-0 text-amber-300" />
+                            {displayOrDash(contact.phone)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                    {extraGuardians > 0 ? (
+                      <p className="mt-1 text-[9px] text-white/60">+{extraGuardians} no verso</p>
+                    ) : null}
                   </div>
                 )}
+
+                <div
+                  className={cn(
+                    'mt-2 w-full rounded-lg border px-2 py-1.5 text-[9px] font-medium',
+                    imageConsentOk
+                      ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
+                      : 'border-white/15 bg-white/5 text-white/60',
+                  )}
+                >
+                  LGPD · {imageConsentLabel(imageConsent)}
+                </div>
 
                 {showLinkedStudents && primaryLinked ? (
                   <div
@@ -584,19 +621,41 @@ export function DigitalIdCard({
                 <p className="text-center text-[11px] leading-relaxed text-white/70">
                   Escaneie o QR Code para validar a autenticidade desta carteirinha.
                 </p>
-                {showGuardian && (
+                {showGuardian && emergencyContacts.length > 0 && (
                   <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-center">
                     <p className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
-                      Contato de emergência
+                      Contatos de emergência
                     </p>
-                    <p className="mt-0.5 text-[11px] font-medium text-white">
-                      {displayOrDash(profile.guardian_name)}
-                    </p>
-                    <p className="font-mono text-[11px] text-white/85">
-                      {displayOrDash(profile.guardian_phone)}
-                    </p>
+                    <ul className="mt-1.5 space-y-1.5">
+                      {emergencyContacts.map((contact) => (
+                        <li key={`back-${contact.name}-${contact.phone}`}>
+                          <p className="text-[11px] font-medium text-white">{contact.name}</p>
+                          {contact.relationship ? (
+                            <p className="text-[9px] text-white/55">{contact.relationship}</p>
+                          ) : null}
+                          <p className="font-mono text-[11px] text-white/85">
+                            {displayOrDash(contact.phone)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
+                <div
+                  className={cn(
+                    'rounded-xl border px-3 py-2 text-center text-[10px]',
+                    imageConsentOk
+                      ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100'
+                      : 'border-white/15 bg-white/5 text-white/65',
+                  )}
+                >
+                  <p className="font-semibold uppercase tracking-wide">
+                    {imageConsentLabel(imageConsent)}
+                  </p>
+                  <p className="mt-1 text-[9px] leading-relaxed opacity-80">
+                    Uso de imagem/voz conforme LGPD (Lei 13.709/2018). Revogável no portal.
+                  </p>
+                </div>
                 {showLinkedStudents ? (
                   <div className={cn('rounded-xl border px-3 py-2 text-center', theme.infoBox)}>
                     <p

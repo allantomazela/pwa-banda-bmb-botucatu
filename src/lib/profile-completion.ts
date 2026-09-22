@@ -14,6 +14,7 @@ export type ProfileCompletionInput = {
   avatar_url?: string | null
   guardian_name?: string | null
   guardian_phone?: string | null
+  image_consent_status?: string | null
 }
 
 /** Foto real — ignora vazio e placeholders mocados (usecurling etc.) */
@@ -64,6 +65,13 @@ export function getProfileCompletion(profile: ProfileCompletionInput | null | un
     checks.push({
       ok: filled(profile.guardian_name) && filled(profile.guardian_phone),
       label: 'Responsável',
+    })
+  }
+
+  if (!guardianRole) {
+    checks.push({
+      ok: profile.image_consent_status === 'granted',
+      label: 'Autorização de imagem',
     })
   }
 

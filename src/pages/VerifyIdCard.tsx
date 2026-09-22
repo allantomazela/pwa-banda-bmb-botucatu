@@ -97,6 +97,8 @@ export default function VerifyIdCard() {
               guardian_name: data.guardian_name,
               guardian_phone: data.guardian_phone,
               role: data.role,
+              emergency_contacts: data.emergency_contacts,
+              image_consent_status: data.image_consent_status,
             }}
           />
           <p className="mt-4 text-center text-xs text-muted-foreground">

@@ -84,3 +84,24 @@ export function getGuardianValidationError(
   if (!isValidPhoneBR(phone)) return 'Informe um telefone válido do responsável.'
   return null
 }
+
+export function getEmergencyContactsValidationError(
+  birthDate: string | null | undefined,
+  contacts: Array<{ name?: string; phone?: string }>,
+): string | null {
+  if (!isMinor(birthDate)) return null
+  const filled = contacts.filter((c) => (c.name || '').trim())
+  if (filled.length === 0) {
+    return 'Informe ao menos um responsável para o menor de idade.'
+  }
+  for (let i = 0; i < filled.length; i++) {
+    const c = filled[i]
+    if (!(c.name || '').trim()) {
+      return `Informe o nome do responsável ${i + 1}.`
+    }
+    if (!isValidPhoneBR(c.phone || '')) {
+      return `Informe um telefone válido do responsável ${i + 1}.`
+    }
+  }
+  return null
+}
