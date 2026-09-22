@@ -5,74 +5,9 @@ import {
 
 export type { TravelAuthPdfInput }
 
-async function deliverPdfFile(input: {
-  blob: Blob
-  fileName: string
-  title: string
-  text: string
-  verifyUrl: string
-}): Promise<'shared' | 'downloaded'> {
-  const file = new File([input.blob], input.fileName, { type: 'application/pdf' })
-
-  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-    const payload: ShareData = {
-      title: input.title,
-      text: input.text,
-      files: [file],
-    }
-    const canShareFiles =
-      typeof navigator.canShare !== 'function' || navigator.canShare(payload)
-    if (canShareFiles) {
-      try {
-        await navigator.share(payload)
-        return 'shared'
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') throw err
-      }
-    }
-
-    try {
-      await navigator.share({
-        title: input.title,
-        text: input.text,
-        url: input.verifyUrl,
-      })
-      return 'shared'
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') throw err
-    }
-  }
-
-  const url = URL.createObjectURL(input.blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = input.fileName
-  a.rel = 'noopener'
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-  return 'downloaded'
-}
-
-export async function shareOrDownloadTravelAuthPdf(input: {
-  fileName: string
-  title: string
-  text: string
-  pdfInput: TravelAuthPdfInput
-  element?: HTMLElement | null
-}): Promise<'shared' | 'downloaded'> {
-  const blob = await buildTravelAuthPdfBlob({
-    element: input.element,
-    pdfInput: input.pdfInput,
-  })
-  return deliverPdfFile({
-    blob,
-    fileName: input.fileName,
-    title: input.title,
-    text: input.text,
-    verifyUrl: input.pdfInput.verifyUrl,
-  })
+export function travelAuthPdfFileName(protocol: string): string {
+  const safe = protocol.replace(/[^a-zA-Z0-9-_]/g, '_')
+  return `autorizacao-${safe}.pdf`
 }
 
 export async function copyTextToClipboard(text: string): Promise<boolean> {
@@ -100,29 +35,137 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export async function shareVerifyLink(input: {
-  url: string
-  title: string
-  text: string
-}): Promise<'shared' | 'copied'> {
-  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-    try {
-      await navigator.share({
-        title: input.title,
-        text: input.text,
-        url: input.url,
-      })
-      return 'shared'
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') throw err
-    }
+/** Abre WhatsApp (app ou web) com texto pré-preenchido. */
+export function openWhatsAppShare(text: string): void {
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
+  const opened = window.open(url, '_blank', 'noopener,noreferrer')
+  if (!opened) {
+    window.location.href = url
   }
-  const ok = await copyTextToClipboard(input.url)
-  if (!ok) throw new Error('Não foi possível copiar o link.')
-  return 'copied'
 }
 
-export function travelAuthPdfFileName(protocol: string): string {
-  const safe = protocol.replace(/[^a-zA-Z0-9-_]/g, '_')
-  return `autorizacao-${safe}.pdf`
+/** Abre o cliente de e-mail com assunto e corpo. */
+export function openEmailShare(input: { subject: string; body: string }): void {
+  const url = `mailto:?subject=${encodeURIComponent(input.subject)}&body=${encodeURIComponent(input.body)}`
+  const opened = window.open(url, '_blank', 'noopener,noreferrer')
+  if (!opened) {
+    window.location.href = url
+  }
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+}
+
+function buildLinkShareText(input: {
+  protocol: string
+  studentName: string
+  verifyUrl: string
+}): string {
+  return [
+    `Autorização BMB — ${input.protocol}`,
+    `Aluno(a): ${input.studentName}`,
+    '',
+    'Confira a validade online:',
+    input.verifyUrl,
+  ].join('\n')
+}
+
+function buildPdfShareText(input: {
+  protocol: string
+  studentName: string
+  verifyUrl: string
+  fileName: string
+}): string {
+  return [
+    `Autorização de viagem BMB — ${input.protocol}`,
+    `Aluno(a): ${input.studentName}`,
+    '',
+    `Arquivo PDF: ${input.fileName}`,
+    '(anexe o PDF baixado nesta conversa/e-mail)',
+    '',
+    'Validação online do protocolo:',
+    input.verifyUrl,
+  ].join('\n')
+}
+
+/** Compartilha o link de validação via WhatsApp (abre de imediato). */
+export function shareVerifyLinkWhatsApp(input: {
+  protocol: string
+  studentName: string
+  verifyUrl: string
+}): void {
+  openWhatsAppShare(buildLinkShareText(input))
+}
+
+/** Compartilha o link de validação via e-mail. */
+export function shareVerifyLinkEmail(input: {
+  protocol: string
+  studentName: string
+  verifyUrl: string
+}): void {
+  openEmailShare({
+    subject: `Validação autorização BMB — ${input.protocol}`,
+    body: buildLinkShareText(input),
+  })
+}
+
+/**
+ * Gera o PDF, baixa no aparelho e abre WhatsApp/e-mail.
+ * (Navegadores não anexam arquivo automaticamente — o download permite anexar.)
+ */
+export async function shareTravelAuthPdfVia(input: {
+  channel: 'whatsapp' | 'email'
+  fileName: string
+  pdfInput: TravelAuthPdfInput
+  element?: HTMLElement | null
+  protocol: string
+  studentName: string
+}): Promise<'opened'> {
+  // Mantém a janela “vincular” ao gesto do usuário (evita bloqueio de popup após await)
+  const bridge = window.open('about:blank', '_blank')
+
+  try {
+    const blob = await buildTravelAuthPdfBlob({
+      element: input.element,
+      pdfInput: input.pdfInput,
+    })
+    downloadBlob(blob, input.fileName)
+
+    const message = buildPdfShareText({
+      protocol: input.protocol,
+      studentName: input.studentName,
+      verifyUrl: input.pdfInput.verifyUrl,
+      fileName: input.fileName,
+    })
+
+    if (input.channel === 'whatsapp') {
+      const wa = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`
+      if (bridge) {
+        bridge.location.href = wa
+      } else {
+        openWhatsAppShare(message)
+      }
+    } else {
+      // mailto em about:blank costuma falhar — fecha o bridge e abre o cliente de e-mail
+      bridge?.close()
+      openEmailShare({
+        subject: `Autorização BMB — ${input.protocol}`,
+        body: message,
+      })
+    }
+
+    return 'opened'
+  } catch (err) {
+    bridge?.close()
+    throw err
+  }
 }
