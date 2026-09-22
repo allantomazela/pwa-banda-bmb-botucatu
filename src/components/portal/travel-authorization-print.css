@@ -188,6 +188,11 @@
   color: #334155;
 }
 
+.travel-auth-doc__verify-url a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .travel-auth-doc__footer p + p {
   margin-top: 0.35rem;
   font-weight: 600;

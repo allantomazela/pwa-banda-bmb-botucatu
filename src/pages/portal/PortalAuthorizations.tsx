@@ -364,16 +364,18 @@ export default function PortalAuthorizations() {
                           className="max-h-28 rounded-md border border-white/10 bg-black"
                         />
                       ) : null}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="min-h-11 w-full sm:w-auto"
-                        onClick={() => setPrintAuth(item)}
-                      >
-                        <Printer className="mr-2 h-4 w-4" />
-                        Imprimir documento
-                      </Button>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="min-h-11 w-full sm:w-auto"
+                          onClick={() => setPrintAuth(item)}
+                        >
+                          <Printer className="mr-2 h-4 w-4" />
+                          Documento / PDF
+                        </Button>
+                      </div>
                     </div>
                   ) : null}
                   {item.status === 'revoked' ? (

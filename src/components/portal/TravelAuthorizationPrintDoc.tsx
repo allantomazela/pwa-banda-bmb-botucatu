@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,9 +16,16 @@ import {
   formatAuthProtocol,
   signatureMethodDocLabel,
 } from '@/lib/travel-authorization-doc'
+import {
+  copyTextToClipboard,
+  shareOrDownloadTravelAuthPdf,
+  shareVerifyLink,
+  travelAuthPdfFileName,
+} from '@/lib/travel-auth-share'
 import { signatureMethodLabel } from '@/services/govbr'
 import type { TravelAuthorizationWithTrip } from '@/services/travel'
-import { Printer } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { Check, Copy, ExternalLink, Loader2, Printer, Share2 } from 'lucide-react'
 import './travel-authorization-print.css'
 
 export type TravelAuthPrintStudent = {
@@ -51,6 +58,9 @@ function formatDateOnly(value: string | null | undefined) {
 
 export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student }: Props) {
   const printRef = useRef<HTMLDivElement>(null)
+  const { toast } = useToast()
+  const [busy, setBusy] = useState<'copy' | 'share-link' | 'share-pdf' | null>(null)
+  const [copied, setCopied] = useState(false)
 
   if (!auth) return null
 
@@ -97,12 +107,154 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
     window.setTimeout(restore, 1500)
   }
 
+  const handleCopyLink = async () => {
+    setBusy('copy')
+    const ok = await copyTextToClipboard(verifyUrl)
+    setBusy(null)
+    if (!ok) {
+      toast({
+        title: 'Não foi possível copiar',
+        description: 'Copie o link manualmente.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 2000)
+    toast({ title: 'Link de validação copiado' })
+  }
+
+  const handleShareLink = async () => {
+    setBusy('share-link')
+    try {
+      const result = await shareVerifyLink({
+        url: verifyUrl,
+        title: `Autorização BMB — ${protocol}`,
+        text: `Confira a validade da autorização ${protocol} (${studentName}).`,
+      })
+      if (result === 'copied') {
+        setCopied(true)
+        window.setTimeout(() => setCopied(false), 2000)
+        toast({ title: 'Link copiado', description: 'Compartilhamento nativo indisponível neste aparelho.' })
+      }
+    } catch (err) {
+      if (!(err instanceof DOMException && err.name === 'AbortError')) {
+        toast({
+          title: 'Falha ao compartilhar link',
+          description: err instanceof Error ? err.message : undefined,
+          variant: 'destructive',
+        })
+      }
+    }
+    setBusy(null)
+  }
+
+  const handleSharePdf = async () => {
+    setBusy('share-pdf')
+    const el = printRef.current
+    try {
+      const result = await shareOrDownloadTravelAuthPdf({
+        fileName: travelAuthPdfFileName(protocol),
+        title: `Autorização BMB — ${protocol}`,
+        text: `Autorização de viagem ${protocol} — ${studentName}. Validação: ${verifyUrl}`,
+        element: el,
+        pdfInput: {
+          protocol,
+          studentName,
+          registration,
+          tripTitle: trip?.title || 'Viagem institucional',
+          destination: trip?.destination || 'a definir',
+          departureLabel: formatDateTime(trip?.departure_at),
+          returnLabel: formatDateTime(trip?.return_at),
+          guardianName: auth.guardian_name || auth.govbr_name || '—',
+          guardianDocument: auth.guardian_document || '—',
+          signatureMethod: signatureMethodDocLabel(auth.signature_method),
+          signedAt: formatDateTime(auth.signed_at),
+          verifyUrl,
+          body,
+        },
+      })
+      toast({
+        title: result === 'shared' ? 'PDF compartilhado' : 'PDF baixado',
+        description:
+          result === 'downloaded'
+            ? 'Arquivo salvo neste dispositivo. Envie pelo WhatsApp, e-mail ou outro app.'
+            : undefined,
+      })
+    } catch (err) {
+      if (!(err instanceof DOMException && err.name === 'AbortError')) {
+        toast({
+          title: 'Não foi possível compartilhar o PDF',
+          description: 'Tente Imprimir / Salvar PDF pelo navegador.',
+          variant: 'destructive',
+        })
+      }
+    }
+    setBusy(null)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92dvh] max-w-3xl overflow-y-auto print:max-h-none print:max-w-none print:overflow-visible">
         <DialogHeader className="no-print">
           <DialogTitle>Documento de autorização</DialogTitle>
         </DialogHeader>
+
+        <div className="no-print mb-4 space-y-3 rounded-xl border border-primary/25 bg-primary/5 p-3 sm:p-4">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Link de validação do QR Code
+            </p>
+            <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{verifyUrl}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Protocolo <span className="font-mono text-foreground">{protocol}</span> — qualquer
+              pessoa com o link confere a validade online.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11 w-full sm:w-auto"
+              onClick={handleCopyLink}
+              disabled={busy !== null}
+            >
+              {busy === 'copy' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : copied ? (
+                <Check className="mr-2 h-4 w-4" />
+              ) : (
+                <Copy className="mr-2 h-4 w-4" />
+              )}
+              {copied ? 'Copiado' : 'Copiar link'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 w-full sm:w-auto"
+              onClick={handleShareLink}
+              disabled={busy !== null}
+            >
+              {busy === 'share-link' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Share2 className="mr-2 h-4 w-4" />
+              )}
+              Compartilhar link
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 w-full sm:w-auto"
+              asChild
+            >
+              <a href={verifyUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Abrir validação
+              </a>
+            </Button>
+          </div>
+        </div>
 
         <div ref={printRef} className="printable-auth travel-auth-doc">
           <header className="travel-auth-doc__header">
@@ -231,7 +383,9 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
                   Escaneie o QR Code para conferir a validade deste protocolo no portal da BMB.
                   Documento gerado eletronicamente — protocolo <strong>{protocol}</strong>.
                 </p>
-                <p className="travel-auth-doc__verify-url">{verifyUrl}</p>
+                <p className="travel-auth-doc__verify-url">
+                  <a href={verifyUrl}>{verifyUrl}</a>
+                </p>
               </div>
             </div>
             <p>
@@ -243,14 +397,35 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           </footer>
         </div>
 
-        <DialogFooter className="no-print gap-2 sm:justify-between">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="no-print flex-col gap-2 sm:flex-row sm:justify-between">
+          <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
-          <Button type="button" onClick={handlePrint} className="min-h-11">
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir / Salvar PDF
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11 w-full sm:w-auto"
+              onClick={handleSharePdf}
+              disabled={busy !== null}
+            >
+              {busy === 'share-pdf' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Share2 className="mr-2 h-4 w-4" />
+              )}
+              Compartilhar PDF
+            </Button>
+            <Button
+              type="button"
+              onClick={handlePrint}
+              className="min-h-11 w-full sm:w-auto"
+              disabled={busy !== null}
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              Imprimir / Salvar PDF
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

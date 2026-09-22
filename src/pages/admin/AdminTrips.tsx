@@ -302,7 +302,7 @@ export default function AdminTrips() {
                           onClick={() => setPrintAuth(auth)}
                         >
                           <Printer className="mr-2 h-4 w-4" />
-                          Imprimir
+                          Documento / PDF
                         </Button>
                       </div>
                     </div>
@@ -496,7 +496,7 @@ export default function AdminTrips() {
                           }
                         >
                           <Printer className="mr-2 h-4 w-4" />
-                          Imprimir documento
+                          Documento / PDF
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => handleRevoke(auth.id)}>
                           Revogar
