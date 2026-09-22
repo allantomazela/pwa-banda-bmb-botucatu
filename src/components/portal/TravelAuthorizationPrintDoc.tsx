@@ -182,7 +182,7 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
   const handleSharePdf = async (channel: 'whatsapp' | 'email') => {
     setBusy(channel === 'whatsapp' ? 'pdf-wa' : 'pdf-mail')
     try {
-      await shareTravelAuthPdfVia({
+      const result = await shareTravelAuthPdfVia({
         channel,
         fileName: travelAuthPdfFileName(protocol),
         element: printRef.current,
@@ -190,11 +190,23 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
         protocol,
         studentName,
       })
-      toast({
-        title: channel === 'whatsapp' ? 'PDF pronto para o WhatsApp' : 'PDF pronto para o e-mail',
-        description:
-          'O PDF foi baixado neste aparelho. Anexe o arquivo na conversa ou no e-mail que acabou de abrir.',
-      })
+      if (result === 'shared-file') {
+        toast({
+          title: 'PDF enviado',
+          description:
+            channel === 'whatsapp'
+              ? 'Escolha o WhatsApp na lista para enviar o arquivo PDF.'
+              : 'Escolha o e-mail na lista para enviar o arquivo PDF.',
+        })
+      } else {
+        toast({
+          title: 'PDF baixado',
+          description:
+            channel === 'whatsapp'
+              ? 'Anexe o arquivo PDF na conversa do WhatsApp (ícone 📎). O link de cima envia só a validação; estes botões são do documento.'
+              : 'Anexe o arquivo PDF no e-mail que abriu. O navegador não anexa sozinho.',
+        })
+      }
     } catch (err) {
       if (!(err instanceof DOMException && err.name === 'AbortError')) {
         toast({
@@ -217,12 +229,12 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
         <div className="no-print mb-4 space-y-3 rounded-xl border border-primary/25 bg-primary/5 p-3 sm:p-4">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Link de validação do QR Code
+              Só o link de validação (QR)
             </p>
             <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{verifyUrl}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Protocolo <span className="font-mono text-foreground">{protocol}</span> — qualquer
-              pessoa com o link confere a validade online.
+              Protocolo <span className="font-mono text-foreground">{protocol}</span> — envia apenas a
+              URL para conferir online (sem o PDF).
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -425,7 +437,7 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           </footer>
         </div>
 
-        <DialogFooter className="no-print flex-col gap-2 sm:flex-row sm:justify-between">
+        <DialogFooter className="no-print flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <Button
             type="button"
             variant="outline"
@@ -434,44 +446,49 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           >
             Fechar
           </Button>
-          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => handleSharePdf('whatsapp')}
-              disabled={busy !== null}
-            >
-              {busy === 'pdf-wa' ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <WhatsAppIcon className="mr-2 h-4 w-4" />
-              )}
-              PDF no WhatsApp
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className="min-h-11 w-full sm:w-auto"
-              onClick={() => handleSharePdf('email')}
-              disabled={busy !== null}
-            >
-              {busy === 'pdf-mail' ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="mr-2 h-4 w-4" />
-              )}
-              PDF por e-mail
-            </Button>
-            <Button
-              type="button"
-              onClick={handlePrint}
-              className="min-h-11 w-full sm:w-auto"
-              disabled={busy !== null}
-            >
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimir / Salvar PDF
-            </Button>
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
+            <p className="text-center text-xs text-muted-foreground sm:text-right">
+              Documento PDF (arquivo) — diferente do link de validação acima
+            </p>
+            <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11 w-full sm:w-auto"
+                onClick={() => handleSharePdf('whatsapp')}
+                disabled={busy !== null}
+              >
+                {busy === 'pdf-wa' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <WhatsAppIcon className="mr-2 h-4 w-4" />
+                )}
+                Enviar PDF no WhatsApp
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11 w-full sm:w-auto"
+                onClick={() => handleSharePdf('email')}
+                disabled={busy !== null}
+              >
+                {busy === 'pdf-mail' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="mr-2 h-4 w-4" />
+                )}
+                Enviar PDF por e-mail
+              </Button>
+              <Button
+                type="button"
+                onClick={handlePrint}
+                className="min-h-11 w-full sm:w-auto"
+                disabled={busy !== null}
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                Imprimir / Salvar PDF
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
