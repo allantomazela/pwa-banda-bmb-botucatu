@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -18,15 +18,22 @@ import {
 } from '@/lib/travel-authorization-doc'
 import {
   copyTextToClipboard,
-  shareTravelAuthPdfVia,
-  shareVerifyLinkEmail,
-  shareVerifyLinkWhatsApp,
+  saveTravelAuthPdf,
+  shareTravelAuthPdf,
   travelAuthPdfFileName,
 } from '@/lib/travel-auth-share'
 import { signatureMethodLabel } from '@/services/govbr'
 import type { TravelAuthorizationWithTrip } from '@/services/travel'
 import { useToast } from '@/hooks/use-toast'
-import { Check, Copy, ExternalLink, Loader2, Mail, Printer } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Download,
+  ExternalLink,
+  Loader2,
+  Printer,
+  Share2,
+} from 'lucide-react'
 import './travel-authorization-print.css'
 
 export type TravelAuthPrintStudent = {
@@ -60,10 +67,21 @@ function formatDateOnly(value: string | null | undefined) {
 export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student }: Props) {
   const printRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
-  const [busy, setBusy] = useState<
-    'copy' | 'link-wa' | 'link-mail' | 'pdf-wa' | 'pdf-mail' | null
-  >(null)
+  const [busy, setBusy] = useState<'save' | 'share' | 'copy' | null>(null)
   const [copied, setCopied] = useState(false)
+  const [savedPdf, setSavedPdf] = useState<File | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      setSavedPdf(null)
+      setBusy(null)
+      setCopied(false)
+    }
+  }, [open])
+
+  useEffect(() => {
+    setSavedPdf(null)
+  }, [auth?.id])
 
   if (!auth) return null
 
@@ -75,12 +93,29 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
   const cpf = profile?.cpf
   const protocol = formatAuthProtocol(auth.id)
   const verifyUrl = buildVerifyTravelAuthUrl(auth.id)
+  const fileName = travelAuthPdfFileName(protocol)
   const body = buildTravelAuthorizationBody({
     studentName,
     tripTitle: trip?.title || 'Viagem institucional',
     destination: trip?.destination || 'a definir',
     departureLabel: formatDateTime(trip?.departure_at),
     returnLabel: trip?.return_at ? formatDateTime(trip.return_at) : null,
+  })
+
+  const pdfPayload = () => ({
+    protocol,
+    studentName,
+    registration,
+    tripTitle: trip?.title || 'Viagem institucional',
+    destination: trip?.destination || 'a definir',
+    departureLabel: formatDateTime(trip?.departure_at),
+    returnLabel: formatDateTime(trip?.return_at),
+    guardianName: auth.guardian_name || auth.govbr_name || '—',
+    guardianDocument: auth.guardian_document || '—',
+    signatureMethod: signatureMethodDocLabel(auth.signature_method),
+    signedAt: formatDateTime(auth.signed_at),
+    verifyUrl,
+    body,
   })
 
   const handlePrint = () => {
@@ -110,22 +145,6 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
     window.setTimeout(restore, 1500)
   }
 
-  const pdfPayload = () => ({
-    protocol,
-    studentName,
-    registration,
-    tripTitle: trip?.title || 'Viagem institucional',
-    destination: trip?.destination || 'a definir',
-    departureLabel: formatDateTime(trip?.departure_at),
-    returnLabel: formatDateTime(trip?.return_at),
-    guardianName: auth.guardian_name || auth.govbr_name || '—',
-    guardianDocument: auth.guardian_document || '—',
-    signatureMethod: signatureMethodDocLabel(auth.signature_method),
-    signedAt: formatDateTime(auth.signed_at),
-    verifyUrl,
-    body,
-  })
-
   const handleCopyLink = async () => {
     setBusy('copy')
     const ok = await copyTextToClipboard(verifyUrl)
@@ -143,75 +162,61 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
     toast({ title: 'Link de validação copiado' })
   }
 
-  const handleShareLinkWhatsApp = () => {
-    setBusy('link-wa')
+  const handleSavePdf = async () => {
+    setBusy('save')
     try {
-      shareVerifyLinkWhatsApp({ protocol, studentName, verifyUrl })
-      toast({
-        title: 'Abrindo WhatsApp',
-        description: 'O link de validação já vai na mensagem.',
-      })
-    } catch {
-      toast({
-        title: 'Não foi possível abrir o WhatsApp',
-        description: 'Use Copiar link e cole manualmente.',
-        variant: 'destructive',
-      })
-    }
-    setBusy(null)
-  }
-
-  const handleShareLinkEmail = () => {
-    setBusy('link-mail')
-    try {
-      shareVerifyLinkEmail({ protocol, studentName, verifyUrl })
-      toast({
-        title: 'Abrindo e-mail',
-        description: 'O link de validação já vai no corpo da mensagem.',
-      })
-    } catch {
-      toast({
-        title: 'Não foi possível abrir o e-mail',
-        description: 'Use Copiar link e cole manualmente.',
-        variant: 'destructive',
-      })
-    }
-    setBusy(null)
-  }
-
-  const handleSharePdf = async (channel: 'whatsapp' | 'email') => {
-    setBusy(channel === 'whatsapp' ? 'pdf-wa' : 'pdf-mail')
-    try {
-      const result = await shareTravelAuthPdfVia({
-        channel,
-        fileName: travelAuthPdfFileName(protocol),
+      const file = await saveTravelAuthPdf({
+        fileName,
         element: printRef.current,
         pdfInput: pdfPayload(),
+      })
+      setSavedPdf(file)
+      toast({
+        title: 'PDF salvo',
+        description: 'Arquivo baixado. Agora você pode compartilhar.',
+      })
+    } catch {
+      toast({
+        title: 'Não foi possível gerar o PDF',
+        description: 'Tente Imprimir e use “Salvar como PDF” no navegador.',
+        variant: 'destructive',
+      })
+    }
+    setBusy(null)
+  }
+
+  const handleShare = async () => {
+    setBusy('share')
+    try {
+      let file = savedPdf
+      if (!file) {
+        file = await saveTravelAuthPdf({
+          fileName,
+          element: printRef.current,
+          pdfInput: pdfPayload(),
+        })
+        setSavedPdf(file)
+      }
+
+      const result = await shareTravelAuthPdf({
+        file,
         protocol,
         studentName,
+        verifyUrl,
       })
-      if (result === 'shared-file') {
-        toast({
-          title: 'PDF enviado',
-          description:
-            channel === 'whatsapp'
-              ? 'Escolha o WhatsApp na lista para enviar o arquivo PDF.'
-              : 'Escolha o e-mail na lista para enviar o arquivo PDF.',
-        })
-      } else {
-        toast({
-          title: 'PDF baixado',
-          description:
-            channel === 'whatsapp'
-              ? 'Anexe o arquivo PDF na conversa do WhatsApp (ícone 📎). O link de cima envia só a validação; estes botões são do documento.'
-              : 'Anexe o arquivo PDF no e-mail que abriu. O navegador não anexa sozinho.',
-        })
-      }
+
+      toast({
+        title: result === 'shared' ? 'Compartilhar' : 'PDF pronto',
+        description:
+          result === 'shared'
+            ? 'Escolha WhatsApp, e-mail ou outro app na lista.'
+            : 'O PDF foi salvo nos Downloads. Envie pelo app desejado.',
+      })
     } catch (err) {
       if (!(err instanceof DOMException && err.name === 'AbortError')) {
         toast({
-          title: 'Não foi possível preparar o PDF',
-          description: 'Tente Imprimir / Salvar PDF pelo navegador.',
+          title: 'Não foi possível compartilhar',
+          description: 'Salve o PDF e envie pelo WhatsApp ou e-mail do aparelho.',
           variant: 'destructive',
         })
       }
@@ -226,22 +231,33 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           <DialogTitle>Documento de autorização</DialogTitle>
         </DialogHeader>
 
-        <div className="no-print mb-4 space-y-3 rounded-xl border border-primary/25 bg-primary/5 p-3 sm:p-4">
+        <div className="no-print mb-4 space-y-3 rounded-xl border border-white/10 bg-card/60 p-3 sm:p-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Só o link de validação (QR)
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Protocolo {protocol}
             </p>
-            <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{verifyUrl}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Protocolo <span className="font-mono text-foreground">{protocol}</span> — envia apenas a
-              URL para conferir online (sem o PDF).
+            <p className="mt-1 text-sm text-muted-foreground">
+              Valide online, salve o PDF e depois compartilhe pelo aparelho.
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <Button
               type="button"
-              variant="secondary"
-              className="min-h-11 w-full sm:w-auto"
+              variant="outline"
+              className="min-h-11 w-full"
+              asChild
+            >
+              <a href={verifyUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Validar online
+              </a>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 w-full"
               onClick={handleCopyLink}
               disabled={busy !== null}
             >
@@ -252,48 +268,48 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
               ) : (
                 <Copy className="mr-2 h-4 w-4" />
               )}
-              {copied ? 'Copiado' : 'Copiar link'}
+              {copied ? 'Link copiado' : 'Copiar link'}
             </Button>
+
             <Button
               type="button"
-              variant="outline"
-              className="min-h-11 w-full sm:w-auto"
-              onClick={handleShareLinkWhatsApp}
+              className="min-h-11 w-full"
+              onClick={handleSavePdf}
               disabled={busy !== null}
             >
-              {busy === 'link-wa' ? (
+              {busy === 'save' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <WhatsAppIcon className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" />
               )}
-              WhatsApp
+              {savedPdf ? 'Salvar PDF de novo' : 'Salvar PDF'}
             </Button>
+
             <Button
               type="button"
-              variant="outline"
-              className="min-h-11 w-full sm:w-auto"
-              onClick={handleShareLinkEmail}
+              variant="secondary"
+              className="min-h-11 w-full"
+              onClick={handleShare}
               disabled={busy !== null}
             >
-              {busy === 'link-mail' ? (
+              {busy === 'share' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <Mail className="mr-2 h-4 w-4" />
+                <Share2 className="mr-2 h-4 w-4" />
               )}
-              E-mail
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11 w-full sm:w-auto"
-              asChild
-            >
-              <a href={verifyUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Abrir validação
-              </a>
+              Compartilhar
             </Button>
           </div>
+
+          {savedPdf ? (
+            <p className="text-xs text-emerald-400">
+              PDF pronto: <span className="font-mono">{savedPdf.name}</span>
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Dica: toque em Salvar PDF antes de compartilhar, quando possível.
+            </p>
+          )}
         </div>
 
         <div ref={printRef} className="printable-auth travel-auth-doc">
@@ -437,7 +453,7 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           </footer>
         </div>
 
-        <DialogFooter className="no-print flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <DialogFooter className="no-print gap-2 sm:justify-between">
           <Button
             type="button"
             variant="outline"
@@ -446,65 +462,18 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
           >
             Fechar
           </Button>
-          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
-            <p className="text-center text-xs text-muted-foreground sm:text-right">
-              Documento PDF (arquivo) — diferente do link de validação acima
-            </p>
-            <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
-              <Button
-                type="button"
-                variant="secondary"
-                className="min-h-11 w-full sm:w-auto"
-                onClick={() => handleSharePdf('whatsapp')}
-                disabled={busy !== null}
-              >
-                {busy === 'pdf-wa' ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <WhatsAppIcon className="mr-2 h-4 w-4" />
-                )}
-                Enviar PDF no WhatsApp
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className="min-h-11 w-full sm:w-auto"
-                onClick={() => handleSharePdf('email')}
-                disabled={busy !== null}
-              >
-                {busy === 'pdf-mail' ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Mail className="mr-2 h-4 w-4" />
-                )}
-                Enviar PDF por e-mail
-              </Button>
-              <Button
-                type="button"
-                onClick={handlePrint}
-                className="min-h-11 w-full sm:w-auto"
-                disabled={busy !== null}
-              >
-                <Printer className="mr-2 h-4 w-4" />
-                Imprimir / Salvar PDF
-              </Button>
-            </div>
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            className="min-h-11 w-full sm:w-auto"
+            onClick={handlePrint}
+            disabled={busy !== null}
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function WhatsAppIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden
-    >
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
   )
 }
