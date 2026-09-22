@@ -17,7 +17,7 @@ import { Loader2, Save, AlertCircle, UserRound } from 'lucide-react'
 import { getProfileCompletion } from '@/lib/profile-completion'
 import { Progress } from '@/components/ui/progress'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { formatCPF, getEmergencyContactsValidationError, isMinor, isValidCPF } from '@/lib/formatters'
+import { formatCPF, formatPhoneBR, getEmergencyContactsValidationError, isMinor, isValidCPF } from '@/lib/formatters'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { EmergencyContactsFields } from '@/components/EmergencyContactsFields'
 import { ImageConsentCard } from '@/components/portal/ImageConsentCard'
@@ -47,6 +47,7 @@ export default function ProfileSettings() {
     avatar_url: '',
     guardian_name: '',
     guardian_phone: '',
+    phone: '',
     ...healthFormFromProfile({}),
   })
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
@@ -67,6 +68,7 @@ export default function ProfileSettings() {
         avatar_url: profile.avatar_url || '',
         guardian_name: profile.guardian_name || '',
         guardian_phone: profile.guardian_phone || '',
+        phone: profile.phone || '',
         ...healthFormFromProfile(profile),
       })
       const contacts = normalizeEmergencyContacts(profile.emergency_contacts, {
@@ -136,6 +138,7 @@ export default function ProfileSettings() {
       avatar_url: form.avatar_url,
       guardian_name: primary?.name?.trim() || null,
       guardian_phone: primary?.phone?.trim() || null,
+      phone: form.phone.trim() || '',
       emergency_contacts: emergencyContacts
         .filter((c) => c.name.trim())
         .map((c) => ({
@@ -268,6 +271,18 @@ export default function ProfileSettings() {
                 placeholder="Ex: Botucatu"
                 value={form.city}
                 onChange={(e) => handleChange('city', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone de contato</Label>
+              <Input
+                id="phone"
+                type="tel"
+                inputMode="tel"
+                value={form.phone}
+                onChange={(e) => handleChange('phone', formatPhoneBR(e.target.value))}
+                placeholder="(14) 99999-0000"
+                className="h-11"
               />
             </div>
             <div className="space-y-2">

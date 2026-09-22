@@ -16,6 +16,7 @@ export type IdCardVerification = {
   disability_info: string | null
   guardian_name: string | null
   guardian_phone: string | null
+  phone?: string | null
   emergency_contacts?: Array<{ name: string; phone: string; relationship?: string }> | null
   image_consent_status?: string | null
 }

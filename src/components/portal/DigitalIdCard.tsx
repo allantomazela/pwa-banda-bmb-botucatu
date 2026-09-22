@@ -43,6 +43,7 @@ export interface DigitalIdProfile {
   disability_info: string | null
   rg: string
   role: string
+  phone?: string | null
   guardian_name: string | null
   guardian_phone: string | null
   emergency_contacts?: Array<{ name: string; phone: string; relationship?: string }> | null
@@ -274,7 +275,7 @@ export function DigitalIdCard({
   const extraGuardians = Math.max(0, emergencyContacts.length - frontGuardians.length)
   const imageConsent = profile.image_consent_status || 'pending'
   const imageConsentOk = imageConsent === 'granted'
-  const showLinkedStudents = variant === 'guardian' && linkedStudents.length > 0
+  const showLinkedStudents = linkedStudents.length > 0
   const primaryLinked = linkedStudents[0]
   const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
   const showPhoto = hasPhoto && !photoBroken
@@ -452,6 +453,14 @@ export function DigitalIdCard({
                     value={displayOrDash(profile.rg)}
                     accentClass={theme.accentSoft}
                   />
+                  {!showGuardian ? (
+                    <InfoCell
+                      icon={Phone}
+                      label="Telefone"
+                      value={displayOrDash(profile.phone)}
+                      accentClass={theme.accentSoft}
+                    />
+                  ) : null}
                 </div>
 
                 {profile.disability_info && profile.disability_info.trim() !== '' && (

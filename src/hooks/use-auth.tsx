@@ -30,6 +30,7 @@ export interface Profile {
   updated_at: string
   guardian_name: string | null
   guardian_phone: string | null
+  phone?: string | null
   emergency_contacts?: Array<{ name: string; phone: string; relationship?: string }> | null
   image_consent_status?: string | null
   image_consent_at?: string | null

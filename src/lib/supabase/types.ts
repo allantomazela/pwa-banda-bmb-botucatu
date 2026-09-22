@@ -136,6 +136,7 @@ export type Database = {
           full_name: string
           guardian_name: string | null
           guardian_phone: string | null
+          phone: string
           id: string
           instrument: string
           registration_number: string
@@ -163,6 +164,7 @@ export type Database = {
           full_name?: string
           guardian_name?: string | null
           guardian_phone?: string | null
+          phone?: string
           id: string
           instrument?: string
           registration_number?: string
@@ -190,6 +192,7 @@ export type Database = {
           full_name?: string
           guardian_name?: string | null
           guardian_phone?: string | null
+          phone?: string
           id?: string
           instrument?: string
           registration_number?: string

@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Pencil, Search, Loader2, Eye, CheckCircle2, XCircle, Clock3 } from 'lucide-react'
 import { MemberEditDialog } from '@/components/admin/MemberEditDialog'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
-import { isGuardian, normalizeRole, roleLabel } from '@/lib/roles'
+import { normalizeRole, roleLabel } from '@/lib/roles'
 import {
   listLinkedStudentsForGuardian,
   type LinkedStudentSummary,
@@ -95,7 +95,7 @@ export function MembersManager() {
   useEffect(() => {
     let cancelled = false
     async function loadLinked() {
-      if (!cardProfile || !isGuardian(cardProfile.role)) {
+      if (!cardProfile) {
         setCardLinkedStudents([])
         return
       }

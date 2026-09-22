@@ -30,7 +30,7 @@ import {
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
-import { addYearsToDate, formatCPF, getGuardianValidationError, isMinor } from '@/lib/formatters'
+import { addYearsToDate, formatCPF, formatPhoneBR, getGuardianValidationError, isMinor } from '@/lib/formatters'
 
 interface MemberEditDialogProps {
   profile: Profile | null
@@ -57,6 +57,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
     avatar_url: '',
     guardian_name: '',
     guardian_phone: '',
+    phone: '',
     ...healthFormFromProfile({}),
   })
 
@@ -76,6 +77,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
         avatar_url: profile.avatar_url || '',
         guardian_name: profile.guardian_name || '',
         guardian_phone: profile.guardian_phone || '',
+        phone: profile.phone || '',
         ...healthFormFromProfile(profile),
       })
     }
@@ -149,6 +151,7 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
       role: form.role,
       guardian_name: form.guardian_name.trim() || null,
       guardian_phone: form.guardian_phone.trim() || null,
+      phone: form.phone.trim() || '',
       ...healthPayloadFromForm(form),
     })
     setSaving(false)
@@ -203,6 +206,21 @@ export function MemberEditDialog({ profile, open, onOpenChange, onSaved }: Membe
             <div className="space-y-2">
               <Label htmlFor="me-city">Cidade</Label>
               <Input id="me-city" value={form.city} onChange={(e) => set('city', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="me-phone">Telefone de contato</Label>
+              <Input
+                id="me-phone"
+                type="tel"
+                inputMode="tel"
+                value={form.phone}
+                onChange={(e) => set('phone', formatPhoneBR(e.target.value))}
+                placeholder="(14) 99999-0000"
+                className="h-11"
+              />
+              <p className="text-xs text-muted-foreground">
+                Aparece na carteirinha e nos contatos dos alunos vinculados.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Estado (UF)</Label>

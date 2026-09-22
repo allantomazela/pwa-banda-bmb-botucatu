@@ -96,6 +96,7 @@ export default function VerifyIdCard() {
               disability_info: data.disability_info,
               guardian_name: data.guardian_name,
               guardian_phone: data.guardian_phone,
+              phone: data.phone,
               role: data.role,
               emergency_contacts: data.emergency_contacts,
               image_consent_status: data.image_consent_status,
