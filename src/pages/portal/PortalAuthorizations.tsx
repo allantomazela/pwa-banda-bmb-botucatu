@@ -46,7 +46,8 @@ export default function PortalAuthorizations() {
   const [searchParams] = useSearchParams()
   const [items, setItems] = useState<TravelAuthorizationWithTrip[]>([])
   const [loading, setLoading] = useState(true)
-  const [asGuardian, setAsGuardian] = useState(isGuardian(profile?.role))
+  const [modeReady, setModeReady] = useState(false)
+  const [asGuardian, setAsGuardian] = useState(false)
   const [govbrEnabled, setGovbrEnabled] = useState(false)
   const [selected, setSelected] = useState<TravelAuthorizationWithTrip | null>(null)
   const [guardianName, setGuardianName] = useState('')
@@ -64,27 +65,41 @@ export default function PortalAuthorizations() {
   useEffect(() => {
     let cancelled = false
     async function resolveGuardianMode() {
-      if (isGuardian(profile?.role)) {
-        if (!cancelled) setAsGuardian(true)
+      if (!profile) return
+      if (isGuardian(profile.role)) {
+        if (!cancelled) {
+          setAsGuardian(true)
+          setModeReady(true)
+        }
         return
       }
       try {
         const links = await listMyLinkedStudents()
-        if (!cancelled) setAsGuardian(links.length > 0)
+        if (!cancelled) {
+          setAsGuardian(links.length > 0)
+          setModeReady(true)
+        }
       } catch {
-        if (!cancelled) setAsGuardian(false)
+        if (!cancelled) {
+          setAsGuardian(false)
+          setModeReady(true)
+        }
       }
     }
-    if (profile) void resolveGuardianMode()
+    setModeReady(false)
+    void resolveGuardianMode()
     return () => {
       cancelled = true
     }
   }, [profile?.id, profile?.role])
 
-  const refresh = async () => {
+  const refresh = async (guardianMode = asGuardian) => {
     setLoading(true)
     try {
-      setItems(asGuardian ? await listGuardianAuthorizations() : await listMyAuthorizations())
+      const rows = guardianMode
+        ? await listGuardianAuthorizations()
+        : await listMyAuthorizations()
+      setItems(rows)
     } catch {
       setItems([])
       toast({
@@ -97,9 +112,9 @@ export default function PortalAuthorizations() {
   }
 
   useEffect(() => {
-    if (profile) refresh()
+    if (profile && modeReady) void refresh(asGuardian)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id, asGuardian])
+  }, [profile?.id, asGuardian, modeReady])
 
   useEffect(() => {
     isGovBrSigningEnabled()
@@ -117,7 +132,7 @@ export default function PortalAuthorizations() {
         title: 'Autorização assinada via Gov.br',
         description: 'Identidade verificada pelo Login Único.',
       })
-      refresh()
+      if (modeReady) void refresh(asGuardian)
     } else {
       const reason = searchParams.get('reason') || 'unknown'
       toast({
@@ -129,12 +144,12 @@ export default function PortalAuthorizations() {
 
     navigate('/portal/autorizacoes', { replace: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+  }, [searchParams, modeReady, asGuardian])
 
   const openSign = (item: TravelAuthorizationWithTrip) => {
     setSelected(item)
-    setGuardianName(item.guardian_name || profile?.full_name || '')
-    setGuardianPhone(item.guardian_phone || profile?.guardian_phone || '')
+    setGuardianName(profile?.full_name || item.guardian_name || '')
+    setGuardianPhone(profile?.phone || item.guardian_phone || profile?.guardian_phone || '')
     setGuardianDocument(item.guardian_document || profile?.cpf || '')
     setAccepted(false)
     padRef.current?.clear()
@@ -203,6 +218,14 @@ export default function PortalAuthorizations() {
     refresh()
   }
 
+  if (!modeReady || loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   if (!asGuardian && !minor) {
     return (
       <div className="mx-auto max-w-2xl animate-fade-in space-y-4 p-4 sm:p-6 lg:p-10">
@@ -255,9 +278,15 @@ export default function PortalAuthorizations() {
         </div>
       ) : items.length === 0 ? (
         <Card className="border-dashed border-white/15 bg-card/40">
-          <CardContent className="py-14 text-center text-muted-foreground">
+          <CardContent className="space-y-2 py-14 text-center text-muted-foreground">
             <Bus className="mx-auto mb-3 h-10 w-10 opacity-40" />
-            Nenhuma autorização disponível no momento.
+            <p>Nenhuma autorização disponível no momento.</p>
+            {asGuardian ? (
+              <p className="text-xs">
+                No painel admin, abra a viagem e use &quot;Gerar para menores aprovados&quot; para
+                criar as pendências de assinatura.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       ) : (
