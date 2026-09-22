@@ -1,8 +1,10 @@
 import { useAuth } from '@/hooks/use-auth'
 import { useFetch } from '@/hooks/use-fetch'
+import { useState } from 'react'
 import { getNextEvent, type EventItem } from '@/services/events'
 import { getMaterials, type Material } from '@/services/materials'
 import { listMyLinkedStudents } from '@/services/guardian-links'
+import { GuardianImageConsentPanel } from '@/components/portal/GuardianImageConsentPanel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, FileText, ChevronRight, FilePenLine, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -13,21 +15,26 @@ import { isGuardian } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
 
 export default function Dashboard() {
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
   const guardian = isGuardian(profile?.role)
   const { data: nextEvent } = useFetch<EventItem | null>(getNextEvent, [guardian])
   const { data: materials } = useFetch<Material[]>(
     () => (guardian ? Promise.resolve([]) : getMaterials().then((m) => m.slice(0, 3))),
     [guardian],
   )
+  const [linkedRefresh, setLinkedRefresh] = useState(0)
   const { data: linkedStudents } = useFetch(
     () => listMyLinkedStudents(),
-    [profile?.id],
+    [profile?.id, linkedRefresh],
   )
 
   const firstName = profile?.full_name?.split(' ')[0] || (guardian ? 'responsável' : 'membro')
   const showTravel = !guardian && isMinor(profile?.birth_date)
   const linkedAsGuardian = !guardian && (linkedStudents?.length ?? 0) > 0
+  const refreshLinkedConsent = async () => {
+    setLinkedRefresh((n) => n + 1)
+    await refreshProfile()
+  }
 
   if (guardian) {
     return (
@@ -89,6 +96,14 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {linkedStudents && linkedStudents.length > 0 ? (
+          <GuardianImageConsentPanel
+            links={linkedStudents}
+            actorName={profile?.full_name || 'Responsável legal'}
+            onUpdated={refreshLinkedConsent}
+          />
+        ) : null}
 
         <Card className="border-white/5 bg-card">
           <CardHeader className="pb-3">
@@ -156,6 +171,14 @@ export default function Dashboard() {
             </Button>
           </CardContent>
         </Card>
+      ) : null}
+
+      {linkedAsGuardian && linkedStudents && linkedStudents.length > 0 ? (
+        <GuardianImageConsentPanel
+          links={linkedStudents}
+          actorName={profile?.full_name || 'Responsável legal'}
+          onUpdated={refreshLinkedConsent}
+        />
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

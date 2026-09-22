@@ -68,7 +68,7 @@ export function getProfileCompletion(profile: ProfileCompletionInput | null | un
     })
   }
 
-  if (!guardianRole) {
+  if (!guardianRole && !isMinor(profile.birth_date ? String(profile.birth_date).split('T')[0] : null)) {
     checks.push({
       ok: profile.image_consent_status === 'granted',
       label: 'Autorização de imagem',

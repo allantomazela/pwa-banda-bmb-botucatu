@@ -19,6 +19,9 @@ export type GuardianLinkWithStudent = GuardianLink & {
     guardian_name: string | null
     guardian_phone: string | null
     email: string
+    image_consent_status?: string | null
+    image_consent_by_name?: string | null
+    image_consent_at?: string | null
   } | null
 }
 
@@ -89,7 +92,7 @@ export async function listMyLinkedStudents(): Promise<GuardianLinkWithStudent[]>
   const { data, error } = await supabase
     .from('guardian_links')
     .select(
-      '*, profiles:student_id ( id, full_name, registration_number, birth_date, guardian_name, guardian_phone, email )',
+      '*, profiles:student_id ( id, full_name, registration_number, birth_date, guardian_name, guardian_phone, email, image_consent_status, image_consent_by_name, image_consent_at )',
     )
     .eq('guardian_id', user.id)
     .eq('status', 'active')

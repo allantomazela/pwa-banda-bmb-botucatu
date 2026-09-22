@@ -224,6 +224,18 @@ export async function signTravelAuthorization(input: {
   return { error: null }
 }
 
+export async function listSignedAuthorizations(): Promise<TravelAuthorizationWithTrip[]> {
+  const { data, error } = await supabase
+    .from('travel_authorizations')
+    .select(
+      '*, travel_trips ( id, title, destination, departure_at, return_at, description, is_active ), profiles:member_id ( full_name )',
+    )
+    .eq('status', 'signed')
+    .order('signed_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as TravelAuthorizationWithTrip[]
+}
+
 export function authorizationStatusLabel(status: string) {
   if (status === 'signed') return 'Assinada'
   if (status === 'revoked') return 'Revogada'

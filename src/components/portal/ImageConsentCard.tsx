@@ -18,6 +18,9 @@ type Props = {
   fullName: string
   status: string | null | undefined
   consentByName?: string | null
+  consentAt?: string | null
+  /** Quando false, o usuário só visualiza (ex.: menor aguardando responsável). */
+  canManage?: boolean
   onUpdated: () => void | Promise<void>
 }
 
@@ -27,6 +30,8 @@ export function ImageConsentCard({
   fullName,
   status,
   consentByName,
+  consentAt,
+  canManage = true,
   onUpdated,
 }: Props) {
   const { toast } = useToast()
@@ -35,8 +40,10 @@ export function ImageConsentCard({
   const [actorName, setActorName] = useState(consentByName || fullName || '')
   const minor = isMinor(birthDate)
   const granted = status === 'granted'
+  const manage = canManage && !minor
 
   const submit = async (action: 'granted' | 'revoked' | 'denied') => {
+    if (!manage) return
     if (action === 'granted') {
       if (!checked) {
         toast({
@@ -46,10 +53,10 @@ export function ImageConsentCard({
         })
         return
       }
-      if (minor && !actorName.trim()) {
+      if (!actorName.trim()) {
         toast({
-          title: 'Responsável obrigatório',
-          description: 'Informe o nome de quem autoriza (pai, mãe ou responsável legal).',
+          title: 'Nome obrigatório',
+          description: 'Informe o nome de quem autoriza.',
           variant: 'destructive',
         })
         return
@@ -61,7 +68,7 @@ export function ImageConsentCard({
       profileId,
       action,
       actorName: actorName.trim() || fullName,
-      actorRole: minor ? 'guardian' : 'self',
+      actorRole: 'self',
     })
     setBusy(false)
 
@@ -81,6 +88,45 @@ export function ImageConsentCard({
     await onUpdated()
   }
 
+  if (minor) {
+    return (
+      <Card className="border-sky-500/20 bg-card/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-5 w-5 text-sky-300" />
+            Autorização de imagem (LGPD)
+          </CardTitle>
+          <CardDescription>
+            Status: <span className="font-semibold text-foreground">{imageConsentLabel(status)}</span>
+            {consentByName ? ` · autorizado por ${consentByName}` : ''}
+            {consentAt ? ` · ${new Date(consentAt).toLocaleString('pt-BR')}` : ''}. Versão do termo:{' '}
+            {IMAGE_CONSENT_VERSION}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {granted ? (
+            <p className="text-sm text-muted-foreground">
+              O uso de imagem/voz foi autorizado pelo responsável legal vinculado. Em caso de
+              dúvidas, fale com a administração ou com seu responsável no portal.
+            </p>
+          ) : (
+            <p className="text-sm text-amber-100/90">
+              Como você é menor de idade, a autorização de imagem deve ser feita pelo responsável
+              legal vinculado à sua matrícula. Você continua com acesso normal a materiais e ao
+              portal.
+            </p>
+          )}
+          <details className="rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-muted-foreground">
+            <summary className="cursor-pointer font-medium text-sky-100/90">Ver termo vigente</summary>
+            <pre className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans">
+              {buildImageConsentText()}
+            </pre>
+          </details>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="border-sky-500/20 bg-card/50">
       <CardHeader>
@@ -89,7 +135,8 @@ export function ImageConsentCard({
           Autorização de imagem (LGPD)
         </CardTitle>
         <CardDescription>
-          Status atual: <span className="font-semibold text-foreground">{imageConsentLabel(status)}</span>
+          Status atual:{' '}
+          <span className="font-semibold text-foreground">{imageConsentLabel(status)}</span>
           {consentByName ? ` · por ${consentByName}` : ''}. Versão do termo: {IMAGE_CONSENT_VERSION}.
         </CardDescription>
       </CardHeader>

@@ -375,6 +375,7 @@ export default function ProfileSettings() {
         fullName={form.full_name}
         status={profile.image_consent_status}
         consentByName={profile.image_consent_by_name}
+        consentAt={profile.image_consent_at}
         onUpdated={refreshProfile}
       />
 

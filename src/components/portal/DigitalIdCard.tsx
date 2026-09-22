@@ -214,14 +214,21 @@ function InfoCell({
   label,
   value,
   accentClass,
+  compact = false,
 }: {
   icon: LucideIcon
   label: string
   value: string
   accentClass: string
+  compact?: boolean
 }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-black/20 px-2.5 py-2 backdrop-blur-sm">
+    <div
+      className={cn(
+        'min-w-0 overflow-hidden rounded-xl border border-white/10 bg-black/20 backdrop-blur-sm',
+        compact ? 'px-2 py-1.5' : 'px-2.5 py-2',
+      )}
+    >
       <div className="mb-0.5 flex items-center gap-1">
         <Icon className={cn('h-2.5 w-2.5 shrink-0', accentClass)} />
         <span className="truncate text-[8px] uppercase tracking-[0.12em] text-white/50">
@@ -229,7 +236,10 @@ function InfoCell({
         </span>
       </div>
       <p
-        className="break-words font-mono text-[10px] font-medium leading-tight text-white"
+        className={cn(
+          'break-words font-mono font-medium leading-tight text-white',
+          compact ? 'text-[9px]' : 'text-[10px]',
+        )}
         style={{ textWrap: 'balance' as const }}
       >
         {value}
@@ -271,7 +281,11 @@ export function DigitalIdCard({
     name: profile.guardian_name,
     phone: profile.guardian_phone,
   })
-  const frontGuardians = emergencyContacts.slice(0, 2)
+  // Frente: só o principal quando há vários — detalhes completos no verso
+  const multiGuardians = showGuardian && emergencyContacts.length > 1
+  const frontGuardians = multiGuardians
+    ? emergencyContacts.slice(0, 1)
+    : emergencyContacts.slice(0, 2)
   const extraGuardians = Math.max(0, emergencyContacts.length - frontGuardians.length)
   const imageConsent = profile.image_consent_status || 'pending'
   const imageConsentOk = imageConsent === 'granted'
@@ -279,6 +293,13 @@ export function DigitalIdCard({
   const primaryLinked = linkedStudents[0]
   const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
   const showPhoto = hasPhoto && !photoBroken
+  const isDense =
+    multiGuardians ||
+    (showLinkedStudents && linkedStudents.length > 1) ||
+    Boolean(profile.disability_info?.trim())
+  const cardHeightClass = isDense
+    ? 'min-h-[clamp(32rem,88dvh,38rem)]'
+    : 'min-h-[clamp(30rem,85dvh,35rem)]'
 
   useEffect(() => {
     setPhotoBroken(false)
@@ -288,7 +309,8 @@ export function DigitalIdCard({
     <div className={cn('flex w-full flex-col items-center', className)}>
       <div
         className={cn(
-          'printable-id id-card-perspective relative w-full max-w-[360px] min-h-[clamp(30rem,85dvh,35rem)] cursor-pointer select-none',
+          'printable-id id-card-perspective relative w-full max-w-[360px] cursor-pointer select-none',
+          cardHeightClass,
           theme.variantClass,
         )}
         onClick={() => setIsFlipped(!isFlipped)}
@@ -304,7 +326,8 @@ export function DigitalIdCard({
       >
         <div
           className={cn(
-            'id-card-inner relative h-full min-h-[clamp(30rem,85dvh,35rem)] w-full',
+            'id-card-inner relative h-full w-full',
+            cardHeightClass,
             isFlipped && 'flipped',
           )}
         >
@@ -334,10 +357,11 @@ export function DigitalIdCard({
               )}
             />
 
-            <div className="relative z-10 flex h-full min-h-[clamp(30rem,85dvh,35rem)] flex-col">
+            <div className={cn('relative z-10 flex h-full flex-col', cardHeightClass)}>
               <div
                 className={cn(
-                  'relative flex h-16 shrink-0 items-center justify-between overflow-hidden px-4',
+                  'relative flex shrink-0 items-center justify-between overflow-hidden px-4',
+                  isDense ? 'h-14' : 'h-16',
                   theme.header,
                 )}
               >
@@ -362,15 +386,25 @@ export function DigitalIdCard({
                 <BadgeIcon className="relative z-10 h-6 w-6 text-[#1B263B]/70" />
               </div>
 
-              <div className="flex flex-1 flex-col items-center overflow-hidden px-3.5 pb-3 pt-4">
-                <div className="relative mb-3 shrink-0">
+              <div
+                className={cn(
+                  'flex min-h-0 flex-1 flex-col items-center overflow-y-auto overscroll-contain px-3.5 pb-3',
+                  isDense ? 'pt-3' : 'pt-4',
+                )}
+              >
+                <div className={cn('relative shrink-0', isDense ? 'mb-2' : 'mb-3')}>
                   <div
                     className={cn(
                       'absolute -inset-[3px] rounded-[1.15rem] opacity-90 blur-[1px]',
                       theme.photoRing,
                     )}
                   />
-                  <div className="relative aspect-square h-[5.5rem] w-[5.5rem] overflow-hidden rounded-[1rem] border border-white/25 bg-zinc-950 shadow-xl">
+                  <div
+                    className={cn(
+                      'relative aspect-square overflow-hidden rounded-[1rem] border border-white/25 bg-zinc-950 shadow-xl',
+                      isDense ? 'h-[4.75rem] w-[4.75rem]' : 'h-[5.5rem] w-[5.5rem]',
+                    )}
+                  >
                     {showPhoto ? (
                       <img
                         src={avatarSrc}
@@ -401,7 +435,8 @@ export function DigitalIdCard({
 
                 <div
                   className={cn(
-                    'mb-3 inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full border px-3 py-1',
+                    'inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full border px-3 py-1',
+                    isDense ? 'mb-2' : 'mb-3',
                     theme.chip,
                   )}
                 >
@@ -416,42 +451,53 @@ export function DigitalIdCard({
                   </span>
                 </div>
 
-                <div className="grid w-full grid-cols-2 gap-2">
+                <div
+                  className={cn(
+                    'grid w-full grid-cols-2',
+                    isDense ? 'gap-1.5' : 'gap-2',
+                  )}
+                >
                   <InfoCell
                     icon={Music2}
                     label="Instrumento"
                     value={displayOrDash(profile.instrument)}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   <InfoCell
                     icon={Hash}
                     label="Matrícula"
                     value={displayOrDash(profile.registration_number)}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   <InfoCell
                     icon={MapPin}
                     label="Cidade/UF"
                     value={cityUF}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   <InfoCell
                     icon={CalendarDays}
                     label="Nascimento"
                     value={formatDate(profile.birth_date)}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   <InfoCell
                     icon={CreditCard}
                     label="CPF"
                     value={displayOrDash(profile.cpf)}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   <InfoCell
                     icon={IdCard}
                     label="RG"
                     value={displayOrDash(profile.rg)}
                     accentClass={theme.accentSoft}
+                    compact={isDense}
                   />
                   {!showGuardian ? (
                     <InfoCell
@@ -459,6 +505,7 @@ export function DigitalIdCard({
                       label="Telefone"
                       value={displayOrDash(profile.phone)}
                       accentClass={theme.accentSoft}
+                      compact={isDense}
                     />
                   ) : null}
                 </div>
@@ -488,41 +535,65 @@ export function DigitalIdCard({
                 )}
 
                 {showGuardian && frontGuardians.length > 0 && (
-                  <div className="mt-2 w-full rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-2 backdrop-blur-sm">
-                    <div className="mb-1 flex items-center gap-1">
-                      <Users className="h-2.5 w-2.5 shrink-0 text-amber-300" />
-                      <span className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
-                        {frontGuardians.length > 1 ? 'Responsáveis' : 'Responsável'}
-                      </span>
+                  <div
+                    className={cn(
+                      'w-full rounded-xl border border-amber-400/30 bg-amber-500/10 backdrop-blur-sm',
+                      isDense ? 'mt-2 px-2.5 py-2' : 'mt-2 px-2.5 py-2.5',
+                    )}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1">
+                        <Users className="h-2.5 w-2.5 shrink-0 text-amber-300" />
+                        <span className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                          {multiGuardians
+                            ? `${emergencyContacts.length} responsáveis`
+                            : 'Responsável'}
+                        </span>
+                      </div>
+                      {extraGuardians > 0 ? (
+                        <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[8px] font-medium text-amber-100/90">
+                          +{extraGuardians} no verso
+                        </span>
+                      ) : null}
                     </div>
-                    <ul className="space-y-1.5">
+                    <ul className={cn(multiGuardians ? 'space-y-0' : 'space-y-2')}>
                       {frontGuardians.map((contact) => (
-                        <li key={`${contact.name}-${contact.phone}`}>
-                          <p className="break-words text-[10px] font-medium leading-tight text-white">
+                        <li
+                          key={`${contact.name}-${contact.phone}`}
+                          className="min-w-0 rounded-lg bg-black/15 px-2 py-1.5"
+                        >
+                          <p className="truncate text-[10px] font-medium leading-snug text-white">
                             {contact.name}
+                          </p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                             {contact.relationship ? (
-                              <span className="font-normal text-white/55">
-                                {' '}
-                                · {contact.relationship}
+                              <span className="truncate text-[9px] text-white/55">
+                                {contact.relationship}
+                                {multiGuardians ? ' · principal' : ''}
                               </span>
+                            ) : multiGuardians ? (
+                              <span className="text-[9px] text-white/55">Principal</span>
                             ) : null}
-                          </p>
-                          <p className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-white/85">
-                            <Phone className="h-2.5 w-2.5 shrink-0 text-amber-300" />
-                            {displayOrDash(contact.phone)}
-                          </p>
+                            <span className="inline-flex items-center gap-1 font-mono text-[10px] text-white/85">
+                              <Phone className="h-2.5 w-2.5 shrink-0 text-amber-300" />
+                              {displayOrDash(contact.phone)}
+                            </span>
+                          </div>
                         </li>
                       ))}
                     </ul>
-                    {extraGuardians > 0 ? (
-                      <p className="mt-1 text-[9px] text-white/60">+{extraGuardians} no verso</p>
+                    {multiGuardians ? (
+                      <p className="mt-1.5 text-center text-[9px] leading-snug text-white/55">
+                        Demais contatos e telefones no verso da carteirinha
+                      </p>
                     ) : null}
                   </div>
                 )}
 
                 <div
                   className={cn(
-                    'mt-2 w-full rounded-lg border px-2 py-1.5 text-[9px] font-medium',
+                    'mt-2 w-full rounded-lg border px-2 font-medium',
+                    isDense ? 'py-1 text-[8px]' : 'py-1.5 text-[9px]',
                     imageConsentOk
                       ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
                       : 'border-white/15 bg-white/5 text-white/60',
@@ -534,36 +605,46 @@ export function DigitalIdCard({
                 {showLinkedStudents && primaryLinked ? (
                   <div
                     className={cn(
-                      'mt-2 w-full rounded-xl border px-2.5 py-2 backdrop-blur-sm',
+                      'mt-2 w-full rounded-xl border backdrop-blur-sm',
+                      isDense ? 'px-2.5 py-1.5' : 'px-2.5 py-2',
                       theme.infoBox,
                     )}
                   >
-                    <div className="mb-0.5 flex items-center gap-1">
-                      <GraduationCap className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
-                      <span
-                        className={cn(
-                          'text-[8px] font-semibold uppercase tracking-wide',
-                          theme.accentText,
-                        )}
-                      >
-                        {linkedStudents.length > 1 ? 'Alunos vinculados' : 'Aluno vinculado'}
-                      </span>
+                    <div className="mb-0.5 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1">
+                        <GraduationCap className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
+                        <span
+                          className={cn(
+                            'text-[8px] font-semibold uppercase tracking-wide',
+                            theme.accentText,
+                          )}
+                        >
+                          {linkedStudents.length > 1
+                            ? `${linkedStudents.length} alunos`
+                            : 'Aluno vinculado'}
+                        </span>
+                      </div>
+                      {extraLinkedCount > 0 ? (
+                        <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[8px] text-white/70">
+                          +{extraLinkedCount} no verso
+                        </span>
+                      ) : null}
                     </div>
-                    <p className="break-words text-[10px] font-medium leading-tight text-white">
+                    <p className="truncate text-[10px] font-medium leading-snug text-white">
                       {primaryLinked.full_name}
                     </p>
                     <p className="mt-0.5 font-mono text-[10px] text-white/85">
                       Matrícula {displayOrDash(primaryLinked.registration_number)}
                     </p>
-                    {extraLinkedCount > 0 ? (
-                      <p className="mt-1 text-[9px] text-white/60">
-                        +{extraLinkedCount} outro{extraLinkedCount > 1 ? 's' : ''} no verso
-                      </p>
-                    ) : null}
                   </div>
                 ) : null}
 
-                <div className="mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10 pt-3">
+                <div
+                  className={cn(
+                    'mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10',
+                    isDense ? 'pt-2' : 'pt-3',
+                  )}
+                >
                   <div className="min-w-0">
                     <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
                       Validade — território brasileiro
@@ -594,7 +675,7 @@ export function DigitalIdCard({
 
           {/* Verso */}
           <div
-            className="id-card-face id-card-back absolute inset-0 h-full min-h-[clamp(30rem,85dvh,35rem)] w-full overflow-hidden rounded-[1.35rem] shadow-2xl"
+            className="id-card-face id-card-back absolute inset-0 h-full w-full overflow-hidden rounded-[1.35rem] shadow-2xl"
             style={
               { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
             }
@@ -603,8 +684,13 @@ export function DigitalIdCard({
             <div className="absolute inset-0 id-holo-pattern" />
             <div className={cn('absolute inset-0 opacity-35', theme.mesh)} />
 
-            <div className="relative z-10 flex h-full min-h-[clamp(30rem,85dvh,35rem)] flex-col items-center justify-between p-6">
-              <div className="w-full shrink-0 pt-1 text-center">
+            <div
+              className={cn(
+                'relative z-10 flex h-full flex-col items-center overflow-y-auto overscroll-contain p-5 sm:p-6',
+                cardHeightClass,
+              )}
+            >
+              <div className="w-full shrink-0 pt-0.5 text-center">
                 <div className="mb-1 flex items-center justify-center gap-2">
                   <img src="/brand-logo.png" alt="" className="h-7 w-7 object-contain" />
                   <span
@@ -622,27 +708,50 @@ export function DigitalIdCard({
                 <p className="mt-1 text-[10px] text-white/40">{meta.subtitle}</p>
               </div>
 
-              <div className="shrink-0 rounded-2xl bg-white p-3.5 shadow-inner ring-1 ring-black/5">
-                <VerifyQrCode value={verifyUrl} size={160} />
+              <div
+                className={cn(
+                  'shrink-0 rounded-2xl bg-white shadow-inner ring-1 ring-black/5',
+                  multiGuardians || linkedStudents.length > 1 ? 'my-3 p-2.5' : 'my-4 p-3.5',
+                )}
+              >
+                <VerifyQrCode
+                  value={verifyUrl}
+                  size={multiGuardians || linkedStudents.length > 1 ? 132 : 160}
+                />
               </div>
 
-              <div className="w-full shrink-0 space-y-3">
-                <p className="text-center text-[11px] leading-relaxed text-white/70">
+              <div className="mt-auto w-full shrink-0 space-y-2.5 pb-1">
+                <p className="text-center text-[10px] leading-relaxed text-white/65 sm:text-[11px]">
                   Escaneie o QR Code para validar a autenticidade desta carteirinha.
                 </p>
                 {showGuardian && emergencyContacts.length > 0 && (
-                  <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-center">
-                    <p className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
-                      Contatos de emergência
+                  <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2.5">
+                    <p className="text-center text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                      {emergencyContacts.length > 1
+                        ? `Contatos de emergência (${emergencyContacts.length})`
+                        : 'Contato de emergência'}
                     </p>
-                    <ul className="mt-1.5 space-y-1.5">
-                      {emergencyContacts.map((contact) => (
-                        <li key={`back-${contact.name}-${contact.phone}`}>
-                          <p className="text-[11px] font-medium text-white">{contact.name}</p>
+                    <ul className="mt-2 space-y-2">
+                      {emergencyContacts.map((contact, index) => (
+                        <li
+                          key={`back-${contact.name}-${contact.phone}-${index}`}
+                          className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-left"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="min-w-0 break-words text-[11px] font-medium leading-snug text-white">
+                              {contact.name}
+                            </p>
+                            {index === 0 ? (
+                              <span className="shrink-0 rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-wide text-amber-100">
+                                Principal
+                              </span>
+                            ) : null}
+                          </div>
                           {contact.relationship ? (
-                            <p className="text-[9px] text-white/55">{contact.relationship}</p>
+                            <p className="mt-0.5 text-[9px] text-white/55">{contact.relationship}</p>
                           ) : null}
-                          <p className="font-mono text-[11px] text-white/85">
+                          <p className="mt-1 flex items-center gap-1.5 font-mono text-[11px] text-white/90">
+                            <Phone className="h-3 w-3 shrink-0 text-amber-300" />
                             {displayOrDash(contact.phone)}
                           </p>
                         </li>
@@ -666,43 +775,45 @@ export function DigitalIdCard({
                   </p>
                 </div>
                 {showLinkedStudents ? (
-                  <div className={cn('rounded-xl border px-3 py-2 text-center', theme.infoBox)}>
+                  <div className={cn('rounded-xl border px-3 py-2.5', theme.infoBox)}>
                     <p
                       className={cn(
-                        'text-[8px] font-semibold uppercase tracking-wide',
+                        'text-center text-[8px] font-semibold uppercase tracking-wide',
                         theme.accentText,
                       )}
                     >
-                      {linkedStudents.length > 1 ? 'Alunos vinculados' : 'Aluno vinculado'}
+                      {linkedStudents.length > 1
+                        ? `Alunos vinculados (${linkedStudents.length})`
+                        : 'Aluno vinculado'}
                     </p>
-                    <ul className="mt-1.5 space-y-1.5">
+                    <ul className="mt-2 space-y-2">
                       {linkedStudents.map((student) => (
-                        <li key={`${student.registration_number}-${student.full_name}`}>
-                          <p className="text-[11px] font-medium leading-tight text-white">
+                        <li
+                          key={`${student.registration_number}-${student.full_name}`}
+                          className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-2 text-left"
+                        >
+                          <p className="break-words text-[11px] font-medium leading-snug text-white">
                             {student.full_name}
                           </p>
-                          <p className="font-mono text-[10px] text-white/80">
-                            {displayOrDash(student.registration_number)}
+                          <p className="mt-0.5 font-mono text-[10px] text-white/80">
+                            Matrícula {displayOrDash(student.registration_number)}
                           </p>
                         </li>
                       ))}
                     </ul>
                   </div>
                 ) : null}
-                <div className="border-t border-white/10 pt-3 text-center">
-                  <p className="text-[9px] leading-relaxed text-white/45">
+                <div className="border-t border-white/10 pt-2.5 text-center">
+                  <p className="text-[8px] leading-relaxed text-white/45 sm:text-[9px]">
                     Identificação institucional da Banda Marcial de Botucatu.
                     <br />
-                    Válida em todo o território brasileiro para reconhecimento do integrante junto à
-                    associação, até a data de validade.
-                    <br />
-                    Documento pessoal e intransferível. Não substitui RG, CIN ou outro documento
-                    oficial de identidade.
+                    Válida em todo o território brasileiro. Documento pessoal e intransferível.
+                    Não substitui RG, CIN ou documento oficial de identidade.
                   </p>
                 </div>
-                <div className="flex items-center justify-center gap-2 pt-1 text-white/35">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span className="text-[9px] uppercase tracking-widest">Verificação digital</span>
+                <div className="flex items-center justify-center gap-2 text-white/35">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span className="text-[8px] uppercase tracking-widest">Verificação digital</span>
                 </div>
               </div>
             </div>

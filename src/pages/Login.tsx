@@ -109,12 +109,10 @@ export default function Login() {
           return
         }
       }
-      if (!imageConsentChecked) {
+      if (isMinor(birthDate)) {
+        // Menor: LGPD fica pendente — só o responsável vinculado autoriza depois
+      } else if (!imageConsentChecked) {
         setErrorMessage('É necessário ler e autorizar o uso de imagem (LGPD) para concluir o cadastro.')
-        return
-      }
-      if (isMinor(birthDate) && !imageConsentActor.trim()) {
-        setErrorMessage('Informe o nome do responsável que autoriza o uso de imagem.')
         return
       }
     }
@@ -201,11 +199,13 @@ export default function Login() {
         guardian2_name: (secondary?.name || '').trim(),
         guardian2_phone: (secondary?.phone || '').trim(),
         guardian2_relationship: (secondary?.relationship || 'Responsável legal').trim(),
-        image_consent: 'granted',
-        image_consent_by_name: (imageConsentActor.trim() || fullName).trim(),
-        image_consent_by_role: isMinor(birthDate) ? 'guardian' : 'self',
-        image_consent_version: IMAGE_CONSENT_VERSION,
-        image_consent_text: buildImageConsentText(),
+        image_consent: isMinor(birthDate) ? 'pending' : 'granted',
+        image_consent_by_name: isMinor(birthDate)
+          ? ''
+          : (imageConsentActor.trim() || fullName).trim(),
+        image_consent_by_role: isMinor(birthDate) ? '' : 'self',
+        image_consent_version: isMinor(birthDate) ? '' : IMAGE_CONSENT_VERSION,
+        image_consent_text: isMinor(birthDate) ? '' : buildImageConsentText(),
       })
       if (error) {
         const msg = getErrorMessage(error)
@@ -312,13 +312,24 @@ export default function Login() {
                     max={3}
                   />
                 )}
-                <ImageConsentFields
-                  birthDate={birthDate}
-                  checked={imageConsentChecked}
-                  onCheckedChange={setImageConsentChecked}
-                  actorName={imageConsentActor}
-                  onActorNameChange={setImageConsentActor}
-                />
+                {isMinor(birthDate) ? (
+                  <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-50/90">
+                    <p className="font-medium text-amber-100">Autorização de imagem (LGPD)</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      Como menor de idade, você pode criar sua conta e acessar materiais normalmente.
+                      O uso de imagem/voz será autorizado depois pelo responsável legal vinculado à
+                      sua matrícula.
+                    </p>
+                  </div>
+                ) : (
+                  <ImageConsentFields
+                    birthDate={birthDate}
+                    checked={imageConsentChecked}
+                    onCheckedChange={setImageConsentChecked}
+                    actorName={imageConsentActor}
+                    onActorNameChange={setImageConsentActor}
+                  />
+                )}
               </>
             )}
             <div className="space-y-2">

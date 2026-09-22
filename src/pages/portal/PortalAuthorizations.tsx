@@ -296,30 +296,44 @@ export default function PortalAuthorizations() {
                       Pendente — aguardando assinatura do responsável.
                     </p>
                   ) : null}
-                  {item.status === 'signed' && item.signature_method === 'govbr' ? (
-                    <div className="flex items-start gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
-                      <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-                      <div>
-                        <p className="font-medium text-foreground">
-                          Assinada via {signatureMethodLabel(item.signature_method)}
-                        </p>
-                        {item.govbr_name ? (
-                          <p className="text-muted-foreground">{item.govbr_name}</p>
-                        ) : null}
-                        {item.signed_at ? (
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(item.signed_at).toLocaleString('pt-BR')}
+                  {item.status === 'signed' ? (
+                    <div className="space-y-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+                      <div className="flex items-start gap-2">
+                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                        <div className="min-w-0 space-y-1">
+                          <p className="font-medium text-foreground">
+                            {asGuardian
+                              ? `Assinada${item.signature_method === 'govbr' ? ` via ${signatureMethodLabel(item.signature_method)}` : ''}`
+                              : 'Autorizado pelo responsável legal'}
                           </p>
-                        ) : null}
+                          {!asGuardian && item.guardian_name ? (
+                            <p className="text-foreground">
+                              Responsável: <strong>{item.guardian_name}</strong>
+                            </p>
+                          ) : null}
+                          {asGuardian && item.govbr_name ? (
+                            <p className="text-muted-foreground">{item.govbr_name}</p>
+                          ) : null}
+                          {item.signed_at ? (
+                            <p className="text-xs text-muted-foreground">
+                              Assinado em {new Date(item.signed_at).toLocaleString('pt-BR')}
+                            </p>
+                          ) : null}
+                          {trip?.destination ? (
+                            <p className="text-xs text-muted-foreground">
+                              Local da viagem: {trip.destination}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
+                      {item.signature_data ? (
+                        <img
+                          src={item.signature_data}
+                          alt="Assinatura registrada"
+                          className="max-h-28 rounded-md border border-white/10 bg-black"
+                        />
+                      ) : null}
                     </div>
-                  ) : null}
-                  {item.status === 'signed' && item.signature_data ? (
-                    <img
-                      src={item.signature_data}
-                      alt="Assinatura registrada"
-                      className="max-h-28 rounded-md border border-white/10 bg-black"
-                    />
                   ) : null}
                   {item.status === 'revoked' ? (
                     <p className="text-sm text-destructive">

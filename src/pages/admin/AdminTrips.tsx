@@ -5,10 +5,12 @@ import {
   deleteTravelTrip,
   generateAuthorizationsForMinors,
   listAuthorizationsForTrip,
+  listSignedAuthorizations,
   listTravelTrips,
   revokeAuthorization,
   updateTravelTrip,
   type TravelAuthorizationWithMember,
+  type TravelAuthorizationWithTrip,
   type TravelTrip,
 } from '@/services/travel'
 import { Button } from '@/components/ui/button'
@@ -25,7 +27,7 @@ import {
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
-import { Bus, Loader2, Plus, Trash2, Users } from 'lucide-react'
+import { BadgeCheck, Bus, Loader2, Plus, Trash2, Users } from 'lucide-react'
 
 function toLocalInput(iso: string | null | undefined) {
   if (!iso) return ''
@@ -62,6 +64,18 @@ export default function AdminTrips() {
   const [auths, setAuths] = useState<TravelAuthorizationWithMember[]>([])
   const [authsLoading, setAuthsLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [signedAuths, setSignedAuths] = useState<TravelAuthorizationWithTrip[]>([])
+  const [signedLoading, setSignedLoading] = useState(true)
+
+  const refreshSigned = async () => {
+    setSignedLoading(true)
+    try {
+      setSignedAuths(await listSignedAuthorizations())
+    } catch {
+      setSignedAuths([])
+    }
+    setSignedLoading(false)
+  }
 
   const refresh = async () => {
     setLoading(true)
@@ -72,6 +86,7 @@ export default function AdminTrips() {
       toast({ title: 'Erro', description: 'Não foi possível carregar as viagens.', variant: 'destructive' })
     }
     setLoading(false)
+    await refreshSigned()
   }
 
   useEffect(() => {
@@ -172,6 +187,7 @@ export default function AdminTrips() {
         : 'Todos os menores já tinham autorização ou não há menores.',
     })
     openDetail(detailTrip)
+    await refreshSigned()
   }
 
   const handleRevoke = async (id: string) => {
@@ -182,6 +198,7 @@ export default function AdminTrips() {
     }
     toast({ title: 'Autorização revogada' })
     if (detailTrip) openDetail(detailTrip)
+    await refreshSigned()
   }
 
   return (
@@ -190,13 +207,77 @@ export default function AdminTrips() {
         <div>
           <h1 className="font-display text-3xl font-bold">Viagens e autorizações</h1>
           <p className="mt-1 text-muted-foreground">
-            Crie viagens e gere autorizações para alunos menores assinarem no portal.
+            Crie viagens, gere autorizações para menores e acompanhe as assinaturas dos responsáveis
+            vinculados.
           </p>
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} className="min-h-11">
           <Plus className="mr-2 h-4 w-4" /> Nova viagem
         </Button>
       </header>
+
+      <Card className="border-emerald-500/20 bg-emerald-500/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BadgeCheck className="h-5 w-5 text-emerald-400" />
+            Autorizações assinadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {signedLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : signedAuths.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">
+              Nenhuma autorização assinada ainda. Quando o responsável vincular e assinar, a lista
+              aparece aqui.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {signedAuths.map((auth) => {
+                const trip = auth.travel_trips
+                return (
+                  <li
+                    key={auth.id}
+                    className="rounded-xl border border-white/10 bg-background/40 p-3 sm:p-4"
+                  >
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-semibold text-foreground break-words">
+                          {auth.profiles?.full_name || 'Aluno'}
+                        </p>
+                        <p className="text-sm text-muted-foreground break-words">
+                          Responsável: {auth.guardian_name || '—'}
+                        </p>
+                        <p className="text-sm text-foreground/90">
+                          Local da viagem: {trip?.destination || '—'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Viagem: {trip?.title || '—'}
+                          {trip?.departure_at
+                            ? ` · saída ${new Date(trip.departure_at).toLocaleString('pt-BR')}`
+                            : ''}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-left sm:text-right">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                          Assinada
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {auth.signed_at
+                            ? new Date(auth.signed_at).toLocaleString('pt-BR')
+                            : '—'}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       {loading ? (
         <div className="flex justify-center py-16">
@@ -355,8 +436,10 @@ export default function AdminTrips() {
                   <CardContent className="space-y-2 text-sm text-muted-foreground">
                     <p>Matrícula: {auth.profiles?.registration_number || '—'}</p>
                     <p>
-                      Responsável: {auth.guardian_name || '—'} · {auth.guardian_phone || '—'}
+                      Responsável: {auth.guardian_name || '—'}
+                      {auth.guardian_phone ? ` · ${auth.guardian_phone}` : ''}
                     </p>
+                    <p>Local da viagem: {detailTrip?.destination || '—'}</p>
                     {auth.signed_at ? (
                       <p>Assinado em {new Date(auth.signed_at).toLocaleString('pt-BR')}</p>
                     ) : null}
