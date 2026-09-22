@@ -17,7 +17,6 @@ import { isGuardian, isSystemAdmin, roleLabel } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 import { ProfileCompletionBanner } from '@/components/portal/ProfileCompletionBanner'
-import { isMinor } from '@/lib/formatters'
 
 const PORTAL_NAV = [
   { name: 'Dashboard', shortName: 'Painel', path: '/portal', icon: LayoutDashboard },
@@ -58,7 +57,6 @@ export default function PortalLayout() {
   const guardian = isGuardian(profile?.role)
   const navItems = PORTAL_NAV.filter((item) => {
     if (guardian) return GUARDIAN_NAV_PATHS.has(item.path)
-    if (item.path === '/portal/autorizacoes') return isMinor(profile?.birth_date)
     return true
   })
 

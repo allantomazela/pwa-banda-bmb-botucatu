@@ -30,7 +30,8 @@ export function EmergencyContactsFields({ contacts, onChange, max = 3 }: Props) 
       <div>
         <p className="text-sm font-medium text-amber-200">Responsáveis / emergência</p>
         <p className="text-xs text-muted-foreground">
-          Até {max} contatos na carteirinha do menor. O primeiro é o contato principal.
+          Até {max} contatos de emergência na carteirinha. O primeiro é o principal. Para dar
+          acesso ao portal (autorizações), o admin vincula pela matrícula do responsável.
         </p>
       </div>
 

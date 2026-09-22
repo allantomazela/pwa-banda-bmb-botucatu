@@ -118,10 +118,11 @@ export function GuardianDigitalSection({ studentId, onLinked }: GuardianDigitalS
   return (
     <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.03] p-4">
       <div>
-        <h3 className="text-sm font-semibold">Responsável legal (carteirinha e autorizações)</h3>
+        <h3 className="text-sm font-semibold">Responsáveis legais (carteirinha e autorizações)</h3>
         <p className="text-xs text-muted-foreground">
-          Vincule um responsável já cadastrado pela matrícula (ex.: BMB-0012) ou convide por
-          e-mail. O nome do vínculo ativo aparece na carteirinha do menor.
+          Um aluno pode ter vários responsáveis, e o mesmo responsável pode ter vários alunos.
+          Vincule pela matrícula (ex.: BMB-0001) ou convide por e-mail. Contas aprovadas de
+          responsável, administrador ou outro adulto entram como vínculo ativo na carteirinha.
         </p>
       </div>
 
@@ -129,11 +130,13 @@ export function GuardianDigitalSection({ studentId, onLinked }: GuardianDigitalS
         <div className="flex justify-center py-4">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
-      ) : links.length === 0 ? (
+      ) : links.filter((l) => l.status !== 'revoked').length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum responsável vinculado ainda.</p>
       ) : (
         <ul className="space-y-2">
-          {links.map((link) => (
+          {links
+            .filter((link) => link.status !== 'revoked')
+            .map((link) => (
             <li
               key={link.id}
               className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/10 bg-background/40 px-3 py-2 text-sm"
@@ -169,6 +172,13 @@ export function GuardianDigitalSection({ studentId, onLinked }: GuardianDigitalS
           ))}
         </ul>
       )}
+
+      {links.some((l) => l.status === 'revoked') ? (
+        <p className="text-xs text-muted-foreground">
+          Há {links.filter((l) => l.status === 'revoked').length} vínculo(s) revogado(s); pode
+          religar pela mesma matrícula ou e-mail.
+        </p>
+      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="gd-rel">Parentesco / tipo</Label>

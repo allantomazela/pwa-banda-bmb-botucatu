@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { DigitalIdCard } from '@/components/portal/DigitalIdCard'
 import { IdCard } from 'lucide-react'
 import { useEffect } from 'react'
-import { ROLE_CARD_COPY, isGuardian, resolveCardVariant } from '@/lib/roles'
+import { ROLE_CARD_COPY, resolveCardVariant } from '@/lib/roles'
 import { useFetch } from '@/hooks/use-fetch'
 import {
   listMyLinkedStudents,
@@ -29,10 +29,10 @@ const iconTone: Record<string, string> = {
 
 export default function DigitalId() {
   const { profile, refreshProfile } = useAuth()
-  const guardian = isGuardian(profile?.role)
+  // Qualquer conta com vínculo ativo (ex.: admin que também é pai) vê os alunos na carteirinha
   const { data: linkedRows } = useFetch(
-    () => (guardian ? listMyLinkedStudents() : Promise.resolve([])),
-    [guardian, profile?.id],
+    () => listMyLinkedStudents(),
+    [profile?.id],
   )
 
   const linkedStudents: LinkedStudentSummary[] = (linkedRows ?? [])

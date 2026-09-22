@@ -21,12 +21,13 @@ export default function Dashboard() {
     [guardian],
   )
   const { data: linkedStudents } = useFetch(
-    () => (guardian ? listMyLinkedStudents() : Promise.resolve([])),
-    [guardian, profile?.id],
+    () => listMyLinkedStudents(),
+    [profile?.id],
   )
 
   const firstName = profile?.full_name?.split(' ')[0] || (guardian ? 'responsável' : 'membro')
   const showTravel = !guardian && isMinor(profile?.birth_date)
+  const linkedAsGuardian = !guardian && (linkedStudents?.length ?? 0) > 0
 
   if (guardian) {
     return (
@@ -125,6 +126,37 @@ export default function Dashboard() {
         <h1 className="font-display text-3xl font-bold">Ola, {firstName}!</h1>
         <p className="text-muted-foreground">Bem-vindo de volta ao Portal do Aluno BMB.</p>
       </header>
+
+      {linkedAsGuardian ? (
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/20 to-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Users className="h-5 w-5 text-primary" /> Alunos sob sua responsabilidade
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <ul className="space-y-2">
+              {linkedStudents!.map((link) => (
+                <li
+                  key={link.id}
+                  className="rounded-md border border-white/10 bg-background/40 px-3 py-2 text-sm"
+                >
+                  <p className="font-medium">{link.profiles?.full_name || 'Aluno'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {link.relationship}
+                    {link.profiles?.registration_number
+                      ? ` · Matrícula ${link.profiles.registration_number}`
+                      : ''}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <Button asChild variant="outline" className="w-full min-h-11 sm:w-auto">
+              <Link to="/portal/autorizacoes">Autorizações dos alunos</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/20 to-card">
