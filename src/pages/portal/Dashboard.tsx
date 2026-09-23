@@ -10,6 +10,7 @@ import { Calendar, FileText, ChevronRight, FilePenLine, Users } from 'lucide-rea
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { PwaInstallButton } from '@/components/PwaInstallButton'
 import { isMinor } from '@/lib/formatters'
 import { isGuardian } from '@/lib/roles'
 import { hasProfilePhoto } from '@/lib/profile-completion'
@@ -44,6 +45,9 @@ export default function Dashboard() {
           <p className="text-muted-foreground">
             Portal do responsável — acompanhe e assine autorizações dos alunos vinculados.
           </p>
+          <div className="mt-3">
+            <PwaInstallButton label="Instalar app no celular" />
+          </div>
         </header>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -140,6 +144,9 @@ export default function Dashboard() {
       <header>
         <h1 className="font-display text-3xl font-bold">Ola, {firstName}!</h1>
         <p className="text-muted-foreground">Bem-vindo de volta ao Portal do Aluno BMB.</p>
+        <div className="mt-3">
+          <PwaInstallButton label="Instalar app no celular" />
+        </div>
       </header>
 
       {linkedAsGuardian ? (

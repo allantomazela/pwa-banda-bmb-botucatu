@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react'
-import { Share, X, Download } from 'lucide-react'
+import { Download, PlusSquare, Share, Smartphone, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
   dismissInstallPrompt,
+  isIosDevice,
   isIosSafari,
   isStandaloneMode,
+  PWA_OPEN_INSTALL_EVENT,
   wasInstallPromptDismissed,
 } from '@/lib/pwa'
 
@@ -14,92 +24,181 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PwaInstallPrompt() {
-  const [visible, setVisible] = useState(false)
+  const [open, setOpen] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isIos, setIsIos] = useState(false)
+  const [iosSafari, setIosSafari] = useState(false)
 
   useEffect(() => {
-    if (isStandaloneMode() || wasInstallPromptDismissed()) return
+    if (isStandaloneMode()) return
 
-    const ios = isIosSafari()
+    const ios = isIosDevice()
+    const safari = isIosSafari()
     setIsIos(ios)
+    setIosSafari(safari)
+
+    function openGuide() {
+      if (isStandaloneMode()) return
+      setOpen(true)
+    }
+
+    function onRequestOpen() {
+      openGuide()
+    }
+
+    window.addEventListener(PWA_OPEN_INSTALL_EVENT, onRequestOpen)
 
     if (ios) {
-      const timer = window.setTimeout(() => setVisible(true), 2500)
-      return () => window.clearTimeout(timer)
+      if (!wasInstallPromptDismissed()) {
+        const timer = window.setTimeout(openGuide, 1800)
+        return () => {
+          window.clearTimeout(timer)
+          window.removeEventListener(PWA_OPEN_INSTALL_EVENT, onRequestOpen)
+        }
+      }
+      return () => window.removeEventListener(PWA_OPEN_INSTALL_EVENT, onRequestOpen)
     }
 
     function onBeforeInstallPrompt(event: Event) {
       event.preventDefault()
       setDeferredPrompt(event as BeforeInstallPromptEvent)
-      setVisible(true)
+      if (!wasInstallPromptDismissed()) {
+        setOpen(true)
+      }
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+      window.removeEventListener(PWA_OPEN_INSTALL_EVENT, onRequestOpen)
+    }
   }, [])
 
-  function closePrompt() {
-    dismissInstallPrompt()
-    setVisible(false)
-    setDeferredPrompt(null)
+  function closePrompt(persistDismiss: boolean) {
+    if (persistDismiss) dismissInstallPrompt()
+    setOpen(false)
   }
 
   async function installAndroid() {
     if (!deferredPrompt) return
     await deferredPrompt.prompt()
     await deferredPrompt.userChoice
-    closePrompt()
+    setDeferredPrompt(null)
+    closePrompt(true)
   }
 
-  if (!visible) return null
+  if (isStandaloneMode()) return null
 
   return (
-    <div
-      role="dialog"
-      aria-label="Instalar aplicativo"
-      className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-[60] px-3 pb-2 sm:bottom-4 sm:px-4 lg:bottom-6"
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) closePrompt(true)
+        else setOpen(true)
+      }}
     >
-      <div className="mx-auto max-w-lg rounded-xl border border-primary/30 bg-card/95 p-4 shadow-lg backdrop-blur-md">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            {isIos ? <Share className="h-5 w-5" /> : <Download className="h-5 w-5" />}
-          </div>
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-sm font-semibold leading-snug">Instale o app da BMB</p>
-            {isIos ? (
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                No iPhone, toque em <strong className="text-foreground">Compartilhar</strong> na barra
-                do Safari e escolha <strong className="text-foreground">Adicionar à Tela de Início</strong>.
-              </p>
-            ) : (
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Acesse mais rápido com o app instalado na tela inicial do seu celular.
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {!isIos && deferredPrompt ? (
-                <Button size="sm" className="h-8 text-xs" onClick={installAndroid}>
-                  Instalar agora
-                </Button>
-              ) : null}
-              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={closePrompt}>
-                Agora não
-              </Button>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-md overflow-y-auto rounded-2xl border-primary/25 p-0 sm:w-full">
+        <div className="relative overflow-hidden px-5 pb-5 pt-6 sm:px-6">
+          <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
+          <DialogHeader className="space-y-3 text-left">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              {isIos ? <Smartphone className="h-5 w-5" /> : <Download className="h-5 w-5" />}
             </div>
-          </div>
-          <Button
+            <DialogTitle className="text-xl font-bold leading-tight">
+              Instalar o app da BMB
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
+              {isIos
+                ? 'No iPhone a Apple não permite instalação automática. Use o Safari e adicione à Tela de Início — fica como app.'
+                : 'Instale na tela inicial para abrir mais rápido, como um aplicativo.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {isIos ? (
+            <ol className="mt-5 space-y-3 text-sm">
+              {!iosSafari ? (
+                <li className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-amber-50">
+                  Abra este site no <strong className="text-white">Safari</strong> (ícone da bússola).
+                  Pelo Chrome ou Instagram o iPhone não permite “Adicionar à Tela de Início”.
+                </li>
+              ) : null}
+              <li className="flex gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                  1
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">Toque em Compartilhar</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    O ícone <Share className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" /> na barra
+                    inferior (ou superior) do Safari.
+                  </p>
+                </div>
+              </li>
+              <li className="flex gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                  2
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">Adicionar à Tela de Início</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Role a lista e escolha a opção com o ícone{' '}
+                    <PlusSquare className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" />.
+                  </p>
+                </div>
+              </li>
+              <li className="flex gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                  3
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground">Confirme em Adicionar</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    O ícone <strong className="text-foreground">BMB</strong> aparece na tela inicial,
+                    como um app.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          ) : (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Toque em <strong className="text-foreground">Instalar agora</strong> para confirmar no
+              navegador.
+            </p>
+          )}
+
+          <DialogFooter className="mt-6 flex-col gap-2 sm:flex-col">
+            {!isIos && deferredPrompt ? (
+              <Button className="h-11 w-full" onClick={installAndroid}>
+                <Download className="mr-2 h-4 w-4" />
+                Instalar agora
+              </Button>
+            ) : null}
+            <Button
+              variant="outline"
+              className="h-11 w-full"
+              onClick={() => closePrompt(true)}
+            >
+              Entendi
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-10 w-full text-muted-foreground"
+              onClick={() => closePrompt(true)}
+            >
+              Agora não
+            </Button>
+          </DialogFooter>
+
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground"
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/10"
             aria-label="Fechar"
-            onClick={closePrompt}
+            onClick={() => closePrompt(true)}
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

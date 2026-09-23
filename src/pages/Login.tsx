@@ -19,6 +19,7 @@ import {
   type EmergencyContact,
 } from '@/lib/image-consent'
 import { BrandMark } from '@/components/BrandMark'
+import { PwaInstallButton } from '@/components/PwaInstallButton'
 
 type AuthMode = 'login' | 'register' | 'register-guardian'
 
@@ -370,6 +371,9 @@ export default function Login() {
                   >
                     Sou responsável — criar conta
                   </button>
+                  <div className="pt-2">
+                    <PwaInstallButton className="w-full" label="Instalar app no iPhone" />
+                  </div>
                 </>
               ) : (
                 <button

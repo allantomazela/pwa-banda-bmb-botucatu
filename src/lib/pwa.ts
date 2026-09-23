@@ -1,5 +1,6 @@
 const DISMISS_KEY = 'bmb-pwa-install-dismissed'
-const DISMISS_DAYS = 7
+const DISMISS_DAYS = 3
+export const PWA_OPEN_INSTALL_EVENT = 'bmb:open-pwa-install'
 
 export function isStandaloneMode(): boolean {
   if (typeof window === 'undefined') return false
@@ -20,7 +21,10 @@ export function isIosDevice(): boolean {
 export function isIosSafari(): boolean {
   if (!isIosDevice()) return false
   const ua = navigator.userAgent
-  return /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)
+  // Safari iOS: tem Safari, não é Chrome/Firefox/Edge/Opera in-app
+  const isWebkit = /Safari/.test(ua) || /AppleWebKit/.test(ua)
+  const isOtherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|OPT\//.test(ua)
+  return isWebkit && !isOtherBrowser
 }
 
 export function wasInstallPromptDismissed(): boolean {
@@ -41,6 +45,25 @@ export function dismissInstallPrompt(): void {
   } catch {
     /* ignore quota / private mode */
   }
+}
+
+export function clearInstallPromptDismiss(): void {
+  try {
+    localStorage.removeItem(DISMISS_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Abre o guia/prompt de instalação (iOS ou Android) de qualquer tela. */
+export function requestPwaInstallPrompt(): void {
+  if (typeof window === 'undefined') return
+  clearInstallPromptDismiss()
+  window.dispatchEvent(new CustomEvent(PWA_OPEN_INSTALL_EVENT))
+}
+
+export function shouldOfferPwaInstall(): boolean {
+  return !isStandaloneMode()
 }
 
 export function registerServiceWorker(): void {
