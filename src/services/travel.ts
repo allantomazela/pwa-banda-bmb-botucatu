@@ -269,7 +269,99 @@ export async function verifyTravelAuthorization(
 }
 
 export function authorizationStatusLabel(status: string) {
-  if (status === 'signed') return 'Assinada'
-  if (status === 'revoked') return 'Revogada'
-  return 'Pendente'
+  return authorizationStatusMeta(status).label
 }
+
+export type AuthorizationStatusTone = 'success' | 'warning' | 'danger' | 'neutral'
+
+export function authorizationStatusMeta(status: string): {
+  label: string
+  tone: AuthorizationStatusTone
+  studentHint: string
+} {
+  if (status === 'signed') {
+    return {
+      label: 'Assinada',
+      tone: 'success',
+      studentHint: 'Um responsável legal já autorizou esta viagem.',
+    }
+  }
+  if (status === 'revoked') {
+    return {
+      label: 'Revogada',
+      tone: 'danger',
+      studentHint: 'Esta autorização foi revogada pela administração.',
+    }
+  }
+  return {
+    label: 'Pendente',
+    tone: 'warning',
+    studentHint: 'Aguardando assinatura de um responsável legal vinculado.',
+  }
+}
+
+export function authorizationStatusBadgeClass(tone: AuthorizationStatusTone): string {
+  if (tone === 'success') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+  if (tone === 'danger') return 'bg-destructive/15 text-destructive border-destructive/30'
+  if (tone === 'warning') return 'bg-amber-500/15 text-amber-200 border-amber-500/30'
+  return 'bg-muted text-muted-foreground border-border'
+}
+
+/** Resumo para o aluno menor (1 assinatura de responsável já valida no sistema BMB). */
+export function summarizeStudentAuthOverview(statuses: string[]): {
+  tone: AuthorizationStatusTone
+  title: string
+  description: string
+} {
+  const pending = statuses.filter((s) => s === 'pending').length
+  const signed = statuses.filter((s) => s === 'signed').length
+  const revoked = statuses.filter((s) => s === 'revoked').length
+
+  if (statuses.length === 0) {
+    return {
+      tone: 'neutral',
+      title: 'Nenhuma viagem pendente',
+      description:
+        'Quando houver viagem, o responsável legal vinculado assina por você. Nesta conta você só acompanha o status.',
+    }
+  }
+
+  if (pending === 0 && revoked === 0 && signed > 0) {
+    return {
+      tone: 'success',
+      title: 'Tudo autorizado',
+      description:
+        'Todas as viagens listadas já foram assinadas por um responsável legal vinculado. Basta um responsável assinar — não é necessário os dois. Você não assina nesta conta.',
+    }
+  }
+
+  if (pending > 0 && signed === 0 && revoked === 0) {
+    return {
+      tone: 'warning',
+      title: pending === 1 ? '1 autorização pendente' : `${pending} autorizações pendentes`,
+      description:
+        'Aguarde a assinatura de um responsável legal vinculado no portal. Você acompanha o status aqui; a assinatura não é feita nesta conta.',
+    }
+  }
+
+  if (revoked > 0 && pending === 0 && signed === 0) {
+    return {
+      tone: 'danger',
+      title: 'Autorização revogada',
+      description:
+        'Há autorização revogada. Fale com a administração ou com o responsável vinculado.',
+    }
+  }
+
+  const parts: string[] = []
+  if (signed > 0) parts.push(`${signed} assinada${signed > 1 ? 's' : ''}`)
+  if (pending > 0) parts.push(`${pending} pendente${pending > 1 ? 's' : ''}`)
+  if (revoked > 0) parts.push(`${revoked} revogada${revoked > 1 ? 's' : ''}`)
+
+  return {
+    tone: pending > 0 ? 'warning' : revoked > 0 ? 'danger' : 'success',
+    title: 'Status das autorizações',
+    description: `${parts.join(' · ')}. No sistema da BMB, a viagem fica autorizada com a assinatura de um responsável legal vinculado (não precisa dos dois). Você só visualiza o status nesta conta.`,
+  }
+}
+

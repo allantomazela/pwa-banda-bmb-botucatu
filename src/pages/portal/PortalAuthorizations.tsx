@@ -4,15 +4,18 @@ import { formatPhoneBR, isMinor } from '@/lib/formatters'
 import { isGuardian } from '@/lib/roles'
 import { isGovBrSigningEnabled, signatureMethodLabel, startGovBrSign } from '@/services/govbr'
 import {
-  authorizationStatusLabel,
+  authorizationStatusBadgeClass,
+  authorizationStatusMeta,
   listGuardianAuthorizations,
   listMyAuthorizations,
   signTravelAuthorization,
+  summarizeStudentAuthOverview,
   type TravelAuthorizationWithTrip,
 } from '@/services/travel'
 import { listMyLinkedStudents } from '@/services/guardian-links'
 import { SignaturePad, type SignaturePadHandle } from '@/components/portal/SignaturePad'
 import { TravelAuthorizationPrintDoc } from '@/components/portal/TravelAuthorizationPrintDoc'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,7 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { BadgeCheck, Bus, FilePenLine, Loader2, Printer, ShieldCheck } from 'lucide-react'
+import { AlertCircle, BadgeCheck, Bus, Clock3, FilePenLine, Loader2, Printer, ShieldCheck } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 const GOVBR_ERROR_MESSAGES: Record<string, string> = {
@@ -253,6 +256,29 @@ export default function PortalAuthorizations() {
   const studentName = (item: TravelAuthorizationWithTrip) =>
     item.profiles?.full_name || 'Aluno vinculado'
 
+  const studentOverview =
+    !asGuardian && minor ? summarizeStudentAuthOverview(items.map((i) => i.status)) : null
+
+  const overviewIcon =
+    studentOverview?.tone === 'success' ? (
+      <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+    ) : studentOverview?.tone === 'danger' ? (
+      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+    ) : studentOverview?.tone === 'warning' ? (
+      <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+    ) : (
+      <Bus className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+    )
+
+  const overviewCardClass =
+    studentOverview?.tone === 'success'
+      ? 'border-emerald-500/30 bg-emerald-500/10'
+      : studentOverview?.tone === 'danger'
+        ? 'border-destructive/30 bg-destructive/10'
+        : studentOverview?.tone === 'warning'
+          ? 'border-amber-500/30 bg-amber-500/10'
+          : 'border-white/10 bg-card/50'
+
   return (
     <div className="mx-auto max-w-3xl animate-fade-in space-y-6 p-4 sm:p-6 lg:p-10">
       <header>
@@ -262,23 +288,27 @@ export default function PortalAuthorizations() {
             ? govbrEnabled
               ? 'Assine com Gov.br (identidade verificada) ou no aparelho com assinatura manuscrita.'
               : 'Assine as viagens dos alunos vinculados. A assinatura Gov.br será habilitada pela administração.'
-            : 'Acompanhe o status das autorizações. A assinatura é feita pelo responsável digital vinculado.'}
+            : 'Acompanhe o status. A assinatura é feita por um responsável legal vinculado (basta um).'}
         </p>
       </header>
 
-      {!asGuardian && minor ? (
-        <Card className="border-amber-500/30 bg-amber-500/10">
-          <CardContent className="py-4 text-sm text-muted-foreground">
-            Aguarde o responsável assinar. Você pode ver o status aqui, mas não assina nesta conta.
+      {studentOverview ? (
+        <Card className={overviewCardClass}>
+          <CardContent className="flex gap-3 py-4 text-sm">
+            {overviewIcon}
+            <div className="min-w-0 space-y-1">
+              <p className="font-semibold text-foreground">{studentOverview.title}</p>
+              <p className="text-muted-foreground">{studentOverview.description}</p>
+              <p className="text-xs text-muted-foreground/90">
+                Uso dos dados: somente para organizar e comprovar a autorização de viagem da BMB
+                (LGPD).
+              </p>
+            </div>
           </CardContent>
         </Card>
       ) : null}
 
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : items.length === 0 ? (
+      {items.length === 0 ? (
         <Card className="border-dashed border-white/15 bg-card/40">
           <CardContent className="space-y-2 py-14 text-center text-muted-foreground">
             <Bus className="mx-auto mb-3 h-10 w-10 opacity-40" />
@@ -295,14 +325,18 @@ export default function PortalAuthorizations() {
         <div className="space-y-3">
           {items.map((item) => {
             const trip = item.travel_trips
+            const statusMeta = authorizationStatusMeta(item.status)
             return (
               <Card key={item.id} className="border-white/10 bg-card/50">
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-lg">
-                    <span>{trip?.title || 'Viagem'}</span>
-                    <span className="text-xs font-bold uppercase tracking-wide text-primary">
-                      {authorizationStatusLabel(item.status)}
-                    </span>
+                  <CardTitle className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-lg">
+                    <span className="min-w-0 break-words">{trip?.title || 'Viagem'}</span>
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 text-[10px] font-bold uppercase tracking-wide ${authorizationStatusBadgeClass(statusMeta.tone)}`}
+                    >
+                      {statusMeta.label}
+                    </Badge>
                   </CardTitle>
                   <CardDescription>
                     {asGuardian ? `${studentName(item)} · ` : ''}
@@ -317,15 +351,16 @@ export default function PortalAuthorizations() {
                     <p className="text-sm text-muted-foreground">{trip.description}</p>
                   ) : null}
                   {item.status === 'pending' && canSign ? (
-                    <Button onClick={() => openSign(item)}>
+                    <Button onClick={() => openSign(item)} className="min-h-11 w-full sm:w-auto">
                       <FilePenLine className="mr-2 h-4 w-4" />
                       Assinar autorização
                     </Button>
                   ) : null}
                   {item.status === 'pending' && !canSign ? (
-                    <p className="text-sm text-muted-foreground">
-                      Pendente — aguardando assinatura do responsável.
-                    </p>
+                    <div className="rounded-md border border-amber-500/25 bg-amber-500/10 p-3 text-sm text-amber-50/90">
+                      <p className="font-medium text-amber-100">Aguardando responsável</p>
+                      <p className="mt-1 text-muted-foreground">{statusMeta.studentHint}</p>
+                    </div>
                   ) : null}
                   {item.status === 'signed' ? (
                     <div className="space-y-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
@@ -335,11 +370,14 @@ export default function PortalAuthorizations() {
                           <p className="font-medium text-foreground">
                             {asGuardian
                               ? `Assinada${item.signature_method === 'govbr' ? ` via ${signatureMethodLabel(item.signature_method)}` : ''}`
-                              : 'Autorizado pelo responsável legal'}
+                              : 'Autorizada — assinatura registrada'}
                           </p>
+                          {!asGuardian ? (
+                            <p className="text-muted-foreground">{statusMeta.studentHint}</p>
+                          ) : null}
                           {!asGuardian && item.guardian_name ? (
                             <p className="text-foreground">
-                              Responsável: <strong>{item.guardian_name}</strong>
+                              Assinado por: <strong>{item.guardian_name}</strong>
                             </p>
                           ) : null}
                           {asGuardian && item.govbr_name ? (
@@ -347,7 +385,7 @@ export default function PortalAuthorizations() {
                           ) : null}
                           {item.signed_at ? (
                             <p className="text-xs text-muted-foreground">
-                              Assinado em {new Date(item.signed_at).toLocaleString('pt-BR')}
+                              Em {new Date(item.signed_at).toLocaleString('pt-BR')}
                             </p>
                           ) : null}
                           {trip?.destination ? (
@@ -361,7 +399,7 @@ export default function PortalAuthorizations() {
                         <img
                           src={item.signature_data}
                           alt="Assinatura registrada"
-                          className="max-h-28 rounded-md border border-white/10 bg-black"
+                          className="max-h-28 max-w-full rounded-md border border-white/10 bg-black object-contain"
                         />
                       ) : null}
                       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -379,9 +417,9 @@ export default function PortalAuthorizations() {
                     </div>
                   ) : null}
                   {item.status === 'revoked' ? (
-                    <p className="text-sm text-destructive">
-                      Esta autorização foi revogada pela administração.
-                    </p>
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                      {statusMeta.studentHint}
+                    </div>
                   ) : null}
                 </CardContent>
               </Card>

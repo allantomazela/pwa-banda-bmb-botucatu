@@ -225,8 +225,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Viagens da banda exigem assinatura do responsável digital. Aqui você acompanha o
-                status.
+                Viagens exigem assinatura de um responsável legal vinculado (basta um). Nesta conta
+                você só acompanha o status.
               </p>
               <Button asChild variant="outline">
                 <Link to="/portal/autorizacoes">Ver autorizações</Link>
