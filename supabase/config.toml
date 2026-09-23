@@ -19,8 +19,25 @@ port = 54323
 [auth]
 enabled = true
 site_url = "http://localhost:8080"
-additional_redirect_urls = ["http://localhost:8080"]
+additional_redirect_urls = [
+  "http://localhost:8080",
+  "http://localhost:8080/redefinir-senha",
+  "http://localhost:8080/login",
+  "http://localhost:8080/recuperar-senha",
+]
 enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+[auth.email.template.confirmation]
+subject = "BMB — Confirme seu e-mail (cadastro aguarda aprovação)"
+content_path = "./templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "BMB — Redefinir sua senha"
+content_path = "./templates/recovery.html"
 
 [functions.govbr-start]
 verify_jwt = true

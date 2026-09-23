@@ -1,9 +1,11 @@
-import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
+import { Outlet, Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import {
   IdCard,
   LayoutDashboard,
   Library,
+  Loader2,
   LogOut,
   UserCog,
   ShieldCheck,
@@ -38,6 +40,19 @@ const GUARDIAN_NAV_PATHS = new Set([
 export default function PortalLayout() {
   const { user, profile, loading, profileLoading, signOut } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [signingOut, setSigningOut] = useState(false)
+
+  const handleSignOut = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      await signOut()
+      navigate('/login', { replace: true })
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   if (loading)
     return <div className="flex min-h-dvh flex-1 items-center justify-center">Carregando...</div>
@@ -119,7 +134,7 @@ export default function PortalLayout() {
           <Button
             asChild
             variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-primary"
+            className="min-h-11 w-full justify-start text-muted-foreground hover:text-primary"
           >
             <Link to="/">
               <Home className="w-5 h-5 mr-3" />
@@ -127,22 +142,43 @@ export default function PortalLayout() {
             </Link>
           </Button>
           <Button
+            type="button"
             variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            onClick={() => signOut()}
+            className="min-h-11 w-full justify-start text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleSignOut}
+            disabled={signingOut}
           >
-            <LogOut className="w-5 h-5 mr-3" />
+            {signingOut ? (
+              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+            ) : (
+              <LogOut className="mr-3 h-5 w-5" />
+            )}
             Sair
           </Button>
         </div>
       </aside>
 
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col lg:ml-64">
-        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center border-b border-white/10 px-4 pt-safe glass lg:hidden">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
-            <Home className="w-4 h-4" />
-            Voltar ao site
+        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 pt-safe glass lg:hidden">
+          <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+            <Home className="h-4 w-4" />
+            Site
           </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="min-h-11 gap-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            {signingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            Sair
+          </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
           {profileLoading && !profile ? (

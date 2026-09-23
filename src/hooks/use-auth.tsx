@@ -127,7 +127,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (
               next.approval_status &&
               next.approval_status !== 'approved' &&
-              !window.location.pathname.startsWith('/redefinir-senha')
+              !window.location.pathname.startsWith('/redefinir-senha') &&
+              !window.location.pathname.startsWith('/recuperar-senha')
             ) {
               await supabase.auth.signOut()
               setProfile(null)

@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertCircle, KeyRound } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import type { AuthError } from '@supabase/supabase-js'
 import { EmergencyContactsFields } from '@/components/EmergencyContactsFields'
 import { ImageConsentFields } from '@/components/ImageConsentFields'
+import { PasswordInput } from '@/components/PasswordInput'
 import { getEmergencyContactsValidationError, isMinor } from '@/lib/formatters'
 import {
   IMAGE_CONSENT_VERSION,
@@ -19,7 +20,7 @@ import {
 } from '@/lib/image-consent'
 import { BrandMark } from '@/components/BrandMark'
 
-type AuthMode = 'login' | 'register' | 'register-guardian' | 'forgot'
+type AuthMode = 'login' | 'register' | 'register-guardian'
 
 export default function Login() {
   const [mode, setMode] = useState<AuthMode>('login')
@@ -35,15 +36,15 @@ export default function Login() {
   ])
   const [imageConsentChecked, setImageConsentChecked] = useState(false)
   const [imageConsentActor, setImageConsentActor] = useState('')
-  const { signIn, signUp, signUpGuardian, resetPassword, user, loading } = useAuth()
+  const { signIn, signUp, signUpGuardian, user, loading } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user && !submitting && mode !== 'forgot') navigate('/')
-  }, [user, submitting, navigate, mode])
+    if (user && !submitting) navigate('/')
+  }, [user, submitting, navigate])
 
   const getErrorMessage = (error: unknown): string => {
     const authError = error as AuthError
@@ -92,7 +93,7 @@ export default function Login() {
       return
     }
 
-    if (mode !== 'forgot' && !password.trim()) {
+    if (!password.trim()) {
       setErrorMessage('Informe a senha.')
       return
     }
@@ -109,9 +110,7 @@ export default function Login() {
           return
         }
       }
-      if (isMinor(birthDate)) {
-        // Menor: LGPD fica pendente — só o responsável vinculado autoriza depois
-      } else if (!imageConsentChecked) {
+      if (!isMinor(birthDate) && !imageConsentChecked) {
         setErrorMessage('É necessário ler e autorizar o uso de imagem (LGPD) para concluir o cadastro.')
         return
       }
@@ -124,28 +123,6 @@ export default function Login() {
 
     setSubmitting(true)
     try {
-      if (mode === 'forgot') {
-        const { error } = await resetPassword(email)
-        if (error) {
-          const msg = getErrorMessage(error)
-          setErrorMessage(msg)
-          toast({
-            title: 'Erro ao enviar recuperação',
-            description: msg,
-            variant: 'destructive',
-          })
-        } else {
-          setErrorMessage(null)
-          toast({
-            title: 'E-mail enviado',
-            description:
-              'Se existir uma conta com este e-mail, você receberá o link para redefinir a senha.',
-          })
-          switchMode('login')
-        }
-        return
-      }
-
       if (mode === 'login') {
         const { error } = await signIn(email, password)
         if (error) {
@@ -179,7 +156,7 @@ export default function Login() {
           toast({
             title: 'Cadastro enviado!',
             description:
-              'Seu pedido de responsável foi registrado e aguarda aprovação do administrador antes do primeiro login.',
+              'Confirme seu e-mail e aguarde a aprovação do administrador antes do primeiro login.',
           })
           switchMode('login')
           setPassword('')
@@ -220,7 +197,7 @@ export default function Login() {
         toast({
           title: 'Cadastro enviado!',
           description:
-            'Seu pedido foi registrado e aguarda aprovação do administrador antes do primeiro login.',
+            'Confirme seu e-mail e aguarde a aprovação do administrador antes do primeiro login.',
         })
         switchMode('login')
         setPassword('')
@@ -242,10 +219,6 @@ export default function Login() {
     'register-guardian': {
       title: 'Conta de Responsável',
       description: 'Cadastre-se com o e-mail convidado e aguarde a aprovação do administrador',
-    },
-    forgot: {
-      title: 'Recuperar senha',
-      description: 'Enviaremos um link de redefinição para o seu e-mail',
     },
   }
 
@@ -344,30 +317,27 @@ export default function Login() {
                 required
               />
             </div>
-            {mode !== 'forgot' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="password">Senha</Label>
-                  {mode === 'login' && (
-                    <button
-                      type="button"
-                      className="text-xs text-muted-foreground transition-colors hover:text-primary"
-                      onClick={() => switchMode('forgot')}
-                    >
-                      Esqueci minha senha
-                    </button>
-                  )}
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  className="h-12 bg-background/50"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="password">Senha</Label>
+                {mode === 'login' ? (
+                  <Link
+                    to="/recuperar-senha"
+                    className="text-xs text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    Esqueci minha senha
+                  </Link>
+                ) : null}
               </div>
-            )}
+              <PasswordInput
+                id="password"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                className="h-12 bg-background/50"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
             <Button
               type="submit"
               className="h-12 w-full text-base font-bold"
@@ -379,53 +349,36 @@ export default function Login() {
                 'Entrar no Portal'
               ) : mode === 'register' ? (
                 'Enviar cadastro de aluno'
-              ) : mode === 'register-guardian' ? (
-                'Criar conta de responsável'
               ) : (
-                <>
-                  <KeyRound className="mr-2 h-4 w-4" />
-                  Enviar link de recuperação
-                </>
+                'Criar conta de responsável'
               )}
             </Button>
             <div className="space-y-2 text-center">
-              {mode === 'forgot' ? (
+              {mode === 'login' ? (
+                <>
+                  <button
+                    type="button"
+                    className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                    onClick={() => switchMode('register')}
+                  >
+                    Não tem conta? Cadastre-se como aluno
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
+                    onClick={() => switchMode('register-guardian')}
+                  >
+                    Sou responsável — criar conta
+                  </button>
+                </>
+              ) : (
                 <button
                   type="button"
                   className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
                   onClick={() => switchMode('login')}
                 >
-                  Voltar ao login
+                  Já tem conta? Faça login
                 </button>
-              ) : (
-                <>
-                  {mode === 'login' ? (
-                    <>
-                      <button
-                        type="button"
-                        className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
-                        onClick={() => switchMode('register')}
-                      >
-                        Não tem conta? Cadastre-se como aluno
-                      </button>
-                      <button
-                        type="button"
-                        className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
-                        onClick={() => switchMode('register-guardian')}
-                      >
-                        Sou responsável — criar conta
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
-                      onClick={() => switchMode('login')}
-                    >
-                      Já tem conta? Faça login
-                    </button>
-                  )}
-                </>
               )}
             </div>
           </form>

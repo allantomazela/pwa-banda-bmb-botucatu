@@ -29,6 +29,7 @@ export const RESERVED_SLUGS = [
   'portal',
   'admin',
   'redefinir-senha',
+  'recuperar-senha',
   'pagina',
 ]
 

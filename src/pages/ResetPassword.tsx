@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PasswordInput } from '@/components/PasswordInput'
+import { BrandMark } from '@/components/BrandMark'
 import { useToast } from '@/hooks/use-toast'
-import { AlertCircle, KeyRound, Loader2, Music } from 'lucide-react'
+import { AlertCircle, KeyRound, Loader2 } from 'lucide-react'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -75,13 +76,11 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background p-4">
-      <div className="absolute left-[-8rem] top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+    <div className="relative flex min-h-dvh flex-1 items-center justify-center overflow-x-clip bg-background p-4 pb-safe px-safe">
+      <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       <Card className="relative z-10 w-full max-w-md border-white/10 bg-card/80 shadow-2xl backdrop-blur-xl">
         <CardHeader className="space-y-3 pb-6 text-center">
-          <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-glow">
-            <Music className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <BrandMark variant="login" />
           <CardTitle className="text-2xl font-bold">Redefinir senha</CardTitle>
           <CardDescription>
             {ready
@@ -91,12 +90,20 @@ export default function ResetPassword() {
         </CardHeader>
         <CardContent>
           {!ready ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Link inválido ou expirado. Solicite uma nova recuperação na tela de login.
-              </AlertDescription>
-            </Alert>
+            <div className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Link inválido ou expirado. Solicite uma nova recuperação.
+                </AlertDescription>
+              </Alert>
+              <Button asChild className="h-11 w-full">
+                <Link to="/recuperar-senha">Solicitar novo link</Link>
+              </Button>
+              <Button asChild variant="ghost" className="h-11 w-full">
+                <Link to="/login">Voltar ao login</Link>
+              </Button>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {errorMessage && (
@@ -107,9 +114,8 @@ export default function ResetPassword() {
               )}
               <div className="space-y-2">
                 <Label htmlFor="password">Nova senha</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   autoComplete="new-password"
                   className="h-12 bg-background/50"
                   value={password}
@@ -119,9 +125,8 @@ export default function ResetPassword() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirmar nova senha</Label>
-                <Input
+                <PasswordInput
                   id="confirm"
-                  type="password"
                   autoComplete="new-password"
                   className="h-12 bg-background/50"
                   value={confirm}
