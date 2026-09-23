@@ -298,8 +298,8 @@ export function DigitalIdCard({
     (showLinkedStudents && linkedStudents.length > 1) ||
     Boolean(profile.disability_info?.trim())
   const cardHeightClass = isDense
-    ? 'min-h-[clamp(32rem,88dvh,38rem)]'
-    : 'min-h-[clamp(30rem,85dvh,35rem)]'
+    ? 'h-[clamp(32rem,88dvh,38rem)] min-h-[32rem]'
+    : 'h-[clamp(30rem,85dvh,35rem)] min-h-[30rem]'
 
   useEffect(() => {
     setPhotoBroken(false)
@@ -334,7 +334,7 @@ export function DigitalIdCard({
           {/* Frente */}
           <div
             className={cn(
-              'id-card-face absolute inset-0 h-full w-full overflow-hidden rounded-[1.35rem] shadow-2xl ring-1',
+              'id-card-face h-full w-full overflow-hidden rounded-[1.35rem] ring-1',
               status.borderClass,
             )}
             style={
@@ -675,10 +675,11 @@ export function DigitalIdCard({
 
           {/* Verso */}
           <div
-            className="id-card-face id-card-back absolute inset-0 h-full w-full overflow-hidden rounded-[1.35rem] shadow-2xl"
+            className="id-card-face id-card-back h-full w-full overflow-hidden rounded-[1.35rem]"
             style={
               { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } as React.CSSProperties
             }
+            aria-hidden={!isFlipped}
           >
             <div className={cn('absolute inset-0', theme.backBg)} />
             <div className="absolute inset-0 id-holo-pattern" />
