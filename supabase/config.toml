@@ -30,6 +30,8 @@ enable_signup = true
 [auth.email]
 enable_signup = true
 enable_confirmations = true
+# Link/OTP de e-mail (confirmação, recovery, etc.) — 4 horas
+otp_expiry = 14400
 
 [auth.email.template.confirmation]
 subject = "BMB — Confirme seu e-mail (cadastro aguarda aprovação)"

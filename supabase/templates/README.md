@@ -63,6 +63,15 @@ Em **Authentication → URL Configuration**:
 
 Salve e peça um **novo** e-mail de reset (links antigos podem ainda apontar para a Home).
 
+### 4.1 Expiração do link (OTP)
+
+O tempo do link de recuperação/confirmação é o **Email OTP expiration**:
+
+- **Local:** `supabase/config.toml` → `auth.email.otp_expiry = 14400` (4 horas)
+- **Produção (Dashboard):** **Authentication → Sign In / Providers → Email** → **Email OTP expiration** = `14400`
+
+Depois de alterar o HTML de recovery, cole de novo o template **Reset password** no Dashboard.
+
 ### 5. Testar
 
 1. Cadastro com e-mail real → e-mail de confirmação.
