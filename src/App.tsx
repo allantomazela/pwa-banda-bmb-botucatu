@@ -47,11 +47,13 @@ import { SiteSettingsProvider } from '@/hooks/use-site-settings'
 import { SitePagesProvider } from '@/hooks/use-site-pages'
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt'
 import { AppBootSplash } from '@/components/AppBootSplash'
+import { PasswordRecoveryRedirect } from '@/components/PasswordRecoveryRedirect'
 
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
       <AppBootSplash />
+      <PasswordRecoveryRedirect />
       <SiteSettingsProvider>
         <SitePagesProvider>
           <TooltipProvider>

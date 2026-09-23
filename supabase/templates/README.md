@@ -49,14 +49,19 @@ Salve. Docs: [Resend + Supabase SMTP](https://resend.com/docs/send-with-supabase
 1. **Confirm signup** — assunto: `BMB — Confirme seu e-mail (cadastro aguarda aprovação)` · corpo: HTML de `confirmation.html`
 2. **Reset password** — assunto: `BMB — Redefinir sua senha` · corpo: HTML de `recovery.html`
 
-### 4. URL Configuration
+### 4. URL Configuration (obrigatório — senão o reset abre a Home)
 
-- **Site URL:** `https://seu-dominio-do-app`
-- **Redirect URLs:**  
-  `https://seu-dominio/login`  
-  `https://seu-dominio/redefinir-senha`  
-  `https://seu-dominio/recuperar-senha`  
-  (local) `http://localhost:8080/**`
+Em **Authentication → URL Configuration**:
+
+- **Site URL:** `https://bandabmb.com.br`
+- **Redirect URLs** (adicione **todas**; se faltar `/redefinir-senha`, o Auth cai no Site URL = Home):
+  - `https://bandabmb.com.br/**`
+  - `https://bandabmb.com.br/redefinir-senha`
+  - `https://bandabmb.com.br/recuperar-senha`
+  - `https://bandabmb.com.br/login`
+  - (local) `http://localhost:8080/**`
+
+Salve e peça um **novo** e-mail de reset (links antigos podem ainda apontar para a Home).
 
 ### 5. Testar
 

@@ -90,13 +90,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })
 
     // getUser() valida o JWT no servidor; se estiver corrompido, limpa a sessão local.
-    // Em /redefinir-senha não limpa: a sessão de recovery pode estar sendo estabelecida (PKCE).
+    // Não limpa durante callback de recovery (página /redefinir-senha ou ?code= na Home).
     void (async () => {
-      const onPasswordReset = window.location.pathname.startsWith('/redefinir-senha')
+      const params = new URLSearchParams(window.location.search)
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const authRecoveryCallback =
+        window.location.pathname.startsWith('/redefinir-senha') ||
+        params.has('code') ||
+        hashParams.get('type') === 'recovery'
+
       const { data: sessionData } = await supabase.auth.getSession()
       const localSession = sessionData.session
 
-      if (localSession && !onPasswordReset) {
+      if (localSession && !authRecoveryCallback) {
         const { error } = await supabase.auth.getUser()
         if (error) {
           await supabase.auth.signOut({ scope: 'local' })
@@ -130,7 +136,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               next.approval_status &&
               next.approval_status !== 'approved' &&
               !window.location.pathname.startsWith('/redefinir-senha') &&
-              !window.location.pathname.startsWith('/recuperar-senha')
+              !window.location.pathname.startsWith('/recuperar-senha') &&
+              !new URLSearchParams(window.location.search).has('code') &&
+              new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type') !==
+                'recovery'
             ) {
               await supabase.auth.signOut()
               setProfile(null)
