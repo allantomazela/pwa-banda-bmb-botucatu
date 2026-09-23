@@ -89,12 +89,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false)
     })
 
-    // getUser() valida o JWT no servidor; se estiver corrompido, limpa a sessão local
+    // getUser() valida o JWT no servidor; se estiver corrompido, limpa a sessão local.
+    // Em /redefinir-senha não limpa: a sessão de recovery pode estar sendo estabelecida (PKCE).
     void (async () => {
+      const onPasswordReset = window.location.pathname.startsWith('/redefinir-senha')
       const { data: sessionData } = await supabase.auth.getSession()
       const localSession = sessionData.session
 
-      if (localSession) {
+      if (localSession && !onPasswordReset) {
         const { error } = await supabase.auth.getUser()
         if (error) {
           await supabase.auth.signOut({ scope: 'local' })
