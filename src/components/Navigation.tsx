@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 import {
   Home,
   Calendar,
@@ -127,8 +128,11 @@ export function MobileHeader() {
   const { user, profile, loading } = useAuth()
   const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
-  return (
-    <header className="sticky top-0 z-50 flex w-full min-w-0 items-center justify-between gap-3 border-b border-white/5 bg-background/80 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] backdrop-blur-md lg:hidden">
+  const header = (
+    <header
+      className="fixed inset-x-0 top-0 z-50 flex w-full min-w-0 items-center justify-between gap-3 border-b border-white/5 bg-background/80 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] backdrop-blur-md lg:hidden"
+      style={{ position: 'fixed', left: 0, right: 0, top: 0 }}
+    >
       <Link to="/" className="group inline-flex min-h-11 min-w-0 items-center">
         <BrandMark variant="header" />
       </Link>
@@ -156,6 +160,9 @@ export function MobileHeader() {
       )}
     </header>
   )
+
+  if (typeof document === 'undefined') return header
+  return createPortal(header, document.body)
 }
 
 export function BottomNav() {

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -9,10 +10,16 @@ interface AppBottomBarProps {
   scrollable?: boolean
 }
 
+/**
+ * Barra inferior fixa na viewport.
+ * Usa portal no `document.body` para não herdar overflow/transform dos layouts
+ * (iOS Safari/PWA trata fixed como relativo ao ancestral com overflow).
+ */
 export function AppBottomBar({ children, scrollable = false }: AppBottomBarProps) {
-  return (
+  const bar = (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 glass pb-safe lg:hidden"
+      style={{ position: 'fixed', left: 0, right: 0, bottom: 0 }}
       aria-label="Navegação principal"
     >
       {scrollable ? (
@@ -28,6 +35,9 @@ export function AppBottomBar({ children, scrollable = false }: AppBottomBarProps
       )}
     </nav>
   )
+
+  if (typeof document === 'undefined') return bar
+  return createPortal(bar, document.body)
 }
 
 interface BottomBarItemProps {

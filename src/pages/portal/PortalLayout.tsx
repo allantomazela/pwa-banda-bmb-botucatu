@@ -159,7 +159,7 @@ export default function PortalLayout() {
       </aside>
 
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col lg:ml-64">
-        <div className="sticky top-0 z-40 flex min-h-12 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] glass lg:hidden">
+        <div className="z-40 flex min-h-12 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] glass lg:hidden">
           <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
             <Home className="h-4 w-4" />
             Site

@@ -8,7 +8,7 @@ export default function Layout() {
   const bgUrl = settings.site_bg_image_url?.trim()
 
   return (
-    <div className="relative flex min-h-dvh min-w-0 flex-col overflow-x-clip bg-background text-foreground">
+    <div className="relative flex min-h-dvh min-w-0 flex-col bg-background text-foreground">
       {bgUrl ? (
         <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
           <img
@@ -22,7 +22,15 @@ export default function Layout() {
 
       <Header />
       <MobileHeader />
-      <main className="flex min-w-0 flex-1 flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      {/* Reserva altura do header mobile fixed (pt + conteúdo + pb) */}
+      <div
+        className="shrink-0 lg:hidden"
+        style={{
+          height: 'calc(3.25rem + max(0.5rem, env(safe-area-inset-top, 0px)))',
+        }}
+        aria-hidden
+      />
+      <main className="flex min-w-0 flex-1 flex-col overflow-x-clip pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <Outlet />
       </main>
       <Footer />

@@ -132,7 +132,7 @@ export default function AdminLayout() {
       </aside>
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col lg:ml-64">
-        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 pt-safe glass lg:hidden">
+        <div className="z-40 flex h-12 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 pt-safe glass lg:hidden">
           <Link
             to="/"
             className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"
