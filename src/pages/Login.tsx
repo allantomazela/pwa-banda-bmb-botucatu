@@ -362,7 +362,7 @@ export default function Login() {
                     className="w-full text-sm text-muted-foreground transition-colors hover:text-primary"
                     onClick={() => switchMode('register')}
                   >
-                    Não tem conta? Cadastre-se como aluno
+                    Não tem conta? Cadastre-se como membro
                   </button>
                   <button
                     type="button"
