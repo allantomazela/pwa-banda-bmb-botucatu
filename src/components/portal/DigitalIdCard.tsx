@@ -297,9 +297,10 @@ export function DigitalIdCard({
     multiGuardians ||
     (showLinkedStudents && linkedStudents.length > 1) ||
     Boolean(profile.disability_info?.trim())
+  // Altura previsível para o flip 3D; a página (DigitalId) faz scroll se a tela for baixa
   const cardHeightClass = isDense
-    ? 'h-[clamp(32rem,88dvh,38rem)] min-h-[32rem]'
-    : 'h-[clamp(30rem,85dvh,35rem)] min-h-[30rem]'
+    ? 'h-[clamp(28rem,72dvh,36rem)] min-h-[28rem]'
+    : 'h-[clamp(26rem,68dvh,34rem)] min-h-[26rem]'
 
   useEffect(() => {
     setPhotoBroken(false)

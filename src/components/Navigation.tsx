@@ -1,5 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Calendar, Image as ImageIcon, User, LogIn, Library } from 'lucide-react'
+import {
+  Home,
+  Calendar,
+  Image as ImageIcon,
+  User,
+  LogIn,
+  Library,
+  LayoutDashboard,
+  IdCard,
+  UserCog,
+  FilePenLine,
+  ShieldCheck,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { useSitePages } from '@/hooks/use-site-pages'
@@ -7,7 +19,7 @@ import { publicPagePath } from '@/lib/cms'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { BrandMark } from '@/components/BrandMark'
-import { isSystemAdmin } from '@/lib/roles'
+import { isGuardian, isSystemAdmin } from '@/lib/roles'
 import { AppBottomBar, BottomBarItem } from '@/components/layout/AppBottomBar'
 
 const PUBLIC_NAV = [
@@ -112,25 +124,33 @@ export function Header() {
 }
 
 export function MobileHeader() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 w-full min-w-0 items-center justify-between px-4 pt-safe glass lg:hidden">
-      <Link to="/" className="group">
+    <header className="sticky top-0 z-50 flex w-full min-w-0 items-center justify-between gap-3 border-b border-white/5 bg-background/80 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))] backdrop-blur-md lg:hidden">
+      <Link to="/" className="group inline-flex min-h-11 min-w-0 items-center">
         <BrandMark variant="header" />
       </Link>
-      {user ? (
-        <Link to={portalPath} className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 border-2 border-primary/50">
+      {!loading && user ? (
+        <Link
+          to={portalPath}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full p-1"
+          aria-label="Abrir área restrita"
+        >
+          <Avatar className="h-9 w-9 border-2 border-primary/50">
             <AvatarImage src={profile?.avatar_url || undefined} />
-            <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
+            <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
               {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
         </Link>
       ) : (
-        <Button asChild variant="ghost" size="default" className="touch-target text-primary font-semibold">
+        <Button
+          asChild
+          variant="ghost"
+          className="min-h-11 shrink-0 touch-target px-3 text-sm font-semibold text-primary"
+        >
           <Link to="/login">Área Restrita</Link>
         </Button>
       )}
@@ -139,15 +159,81 @@ export function MobileHeader() {
 }
 
 export function BottomNav() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const location = useLocation()
+  const guardian = isGuardian(profile?.role)
+  const admin = isSystemAdmin(profile?.role)
 
   if (location.pathname.startsWith('/portal') || location.pathname.startsWith('/admin')) return null
 
-  const portalPath = isSystemAdmin(profile?.role) ? '/admin' : '/portal'
+  // Enquanto auth carrega, evita flash incorreto (Entrar vs Portal)
+  if (loading) {
+    return (
+      <AppBottomBar>
+        <BottomBarItem to="/" icon={Home} label="Início" active={location.pathname === '/'} />
+        <BottomBarItem
+          to="/agenda"
+          icon={Calendar}
+          label="Agenda"
+          active={location.pathname === '/agenda'}
+        />
+        <BottomBarItem
+          to="/media"
+          icon={ImageIcon}
+          label="Mídia"
+          active={location.pathname === '/media'}
+        />
+        <BottomBarItem to="/login" icon={LogIn} label="Entrar" active={false} />
+      </AppBottomBar>
+    )
+  }
+
+  if (user) {
+    return (
+      <AppBottomBar key={`auth-${user.id}-${profile?.role ?? 'u'}`}>
+        <BottomBarItem
+          to="/portal"
+          icon={LayoutDashboard}
+          label="Painel"
+          active={location.pathname === '/portal'}
+        />
+        <BottomBarItem
+          to="/portal/id"
+          icon={IdCard}
+          label="Carteira"
+          active={location.pathname.startsWith('/portal/id')}
+        />
+        {!guardian ? (
+          <BottomBarItem
+            to="/portal/perfil"
+            icon={UserCog}
+            label="Perfil"
+            active={location.pathname.startsWith('/portal/perfil')}
+          />
+        ) : (
+          <BottomBarItem
+            to="/portal/autorizacoes"
+            icon={FilePenLine}
+            label="Autoriz."
+            active={location.pathname.startsWith('/portal/autorizacoes')}
+          />
+        )}
+        <BottomBarItem
+          to={admin ? '/admin' : '/portal'}
+          icon={admin ? ShieldCheck : User}
+          label={admin ? 'Admin' : 'Portal'}
+          active={
+            admin
+              ? location.pathname.startsWith('/admin')
+              : location.pathname.startsWith('/portal')
+          }
+        />
+      </AppBottomBar>
+    )
+  }
 
   return (
-    <AppBottomBar>
+    <AppBottomBar key="guest">
       <BottomBarItem to="/" icon={Home} label="Início" active={location.pathname === '/'} />
       <BottomBarItem
         to="/agenda"
@@ -162,14 +248,10 @@ export function BottomNav() {
         active={location.pathname === '/media'}
       />
       <BottomBarItem
-        to={user ? portalPath : '/login'}
-        icon={user ? User : LogIn}
-        label={user ? (isSystemAdmin(profile?.role) ? 'Admin' : 'Portal') : 'Entrar'}
-        active={
-          location.pathname.includes('/login') ||
-          location.pathname.startsWith('/portal') ||
-          location.pathname.startsWith('/admin')
-        }
+        to="/login"
+        icon={LogIn}
+        label="Entrar"
+        active={location.pathname.includes('/login')}
       />
     </AppBottomBar>
   )

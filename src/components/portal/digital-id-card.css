@@ -22,6 +22,7 @@
 .id-card-perspective {
   perspective: 1000px;
   -webkit-perspective: 1000px;
+  /* Não use touch-action: none — bloqueia scroll da página no Android */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }

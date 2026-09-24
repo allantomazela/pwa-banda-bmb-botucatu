@@ -62,9 +62,9 @@ export default function DigitalId() {
   const copy = ROLE_CARD_COPY[variant]
 
   return (
-    <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-3 py-8 animate-fade-in sm:px-4">
-      <div className={`pointer-events-none absolute inset-0 ${pageGlow[variant]}`} />
-      <div className="no-print relative mb-8 w-full max-w-[360px] text-center">
+    <div className="relative flex w-full flex-col items-center px-3 py-6 animate-fade-in sm:px-4 sm:py-8">
+      <div className={`pointer-events-none absolute inset-0 ${pageGlow[variant]}`} aria-hidden />
+      <div className="no-print relative mb-6 w-full max-w-[360px] text-center sm:mb-8">
         <div
           className={`mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ${iconTone[variant]}`}
         >
@@ -77,7 +77,7 @@ export default function DigitalId() {
           <PwaInstallButton label="Instalar app no iPhone" />
         </div>
       </div>
-      <div className="relative flex w-full max-w-[360px] justify-center">
+      <div className="relative mb-10 flex w-full max-w-[360px] justify-center pb-6">
         <DigitalIdCard profile={profile} linkedStudents={linkedStudents} />
       </div>
     </div>

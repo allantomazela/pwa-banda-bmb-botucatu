@@ -44,7 +44,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user && !submitting) navigate('/')
+    if (user && !submitting) navigate('/portal', { replace: true })
   }, [user, submitting, navigate])
 
   const getErrorMessage = (error: unknown): string => {

@@ -50,8 +50,8 @@ export default function VerifyIdCard() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-3 py-8">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12),transparent_55%)]" />
+    <div className="relative flex min-h-dvh flex-col items-center overflow-y-auto overscroll-y-contain bg-background px-3 py-8 [-webkit-overflow-scrolling:touch]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.12),transparent_55%)]" aria-hidden />
 
       {inApp && (
         <div className="relative z-10 mb-4 w-full max-w-[360px] rounded-xl border border-amber-400/35 bg-amber-500/10 p-4 text-center">

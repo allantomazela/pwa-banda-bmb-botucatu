@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Download, PlusSquare, Share, Smartphone, X } from 'lucide-react'
+import { Download, PlusSquare, Share, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -98,7 +98,7 @@ export function PwaInstallPrompt() {
       }}
     >
       <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-md overflow-y-auto rounded-2xl border-primary/25 p-0 sm:w-full">
-        <div className="relative overflow-hidden px-5 pb-5 pt-6 sm:px-6">
+        <div className="relative px-5 pb-5 pt-6 pr-14 sm:px-6 sm:pr-14">
           <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
           <DialogHeader className="space-y-3 text-left">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
@@ -173,30 +173,17 @@ export function PwaInstallPrompt() {
                 Instalar agora
               </Button>
             ) : null}
-            <Button
-              variant="outline"
-              className="h-11 w-full"
-              onClick={() => closePrompt(true)}
-            >
+            <Button variant="outline" className="h-11 w-full" onClick={() => closePrompt(true)}>
               Entendi
             </Button>
             <Button
               variant="ghost"
-              className="h-10 w-full text-muted-foreground"
+              className="h-11 w-full text-muted-foreground"
               onClick={() => closePrompt(true)}
             >
               Agora não
             </Button>
           </DialogFooter>
-
-          <button
-            type="button"
-            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/10"
-            aria-label="Fechar"
-            onClick={() => closePrompt(true)}
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
       </DialogContent>
     </Dialog>
