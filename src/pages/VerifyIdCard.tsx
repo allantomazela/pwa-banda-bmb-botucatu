@@ -81,6 +81,7 @@ export default function VerifyIdCard() {
         <div className="relative w-full max-w-[360px]">
           <DigitalIdCard
             showActions={false}
+            enableFullscreen={false}
             profile={{
               id,
               full_name: data.full_name,

@@ -72,7 +72,9 @@ export default function DigitalId() {
         </div>
         <h1 className="font-display text-2xl font-bold sm:text-3xl">{copy.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{copy.subtitle}</p>
-        <p className="mt-2 text-xs text-muted-foreground/80">Toque no cartão para ver o verso</p>
+        <p className="mt-2 text-xs text-muted-foreground/80">
+          Toque na carteirinha para ampliar; no modo ampliado, toque para ver o verso
+        </p>
         <div className="mt-4 flex justify-center">
           <PwaInstallButton label="Instalar app no iPhone" />
         </div>

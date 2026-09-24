@@ -321,6 +321,7 @@ export function MembersManager() {
                 profile={cardProfile}
                 linkedStudents={cardLinkedStudents}
                 showActions={false}
+                enableFullscreen={false}
               />
             </div>
           )}

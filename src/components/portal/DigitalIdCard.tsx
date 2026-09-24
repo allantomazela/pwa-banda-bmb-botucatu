@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import {
   Accessibility,
@@ -18,6 +19,8 @@ import {
   Users,
   UserRound,
   Crown,
+  Maximize2,
+  X,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -259,6 +262,13 @@ interface DigitalIdCardProps {
   linkedStudents?: Array<{ full_name: string; registration_number: string }>
   showActions?: boolean
   className?: string
+  /**
+   * Quando true, o toque vira a carteirinha (modo já ampliado).
+   * Quando false (padrão), o toque abre a visualização em tela cheia.
+   */
+  isFullscreenView?: boolean
+  /** Permite abrir overlay fullscreen (desligado no card interno do overlay). */
+  enableFullscreen?: boolean
 }
 
 export function DigitalIdCard({
@@ -266,9 +276,16 @@ export function DigitalIdCard({
   linkedStudents = [],
   showActions = true,
   className,
+  isFullscreenView = false,
+  enableFullscreen = true,
 }: DigitalIdCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
   const [photoBroken, setPhotoBroken] = useState(false)
+  const historyPushedRef = useRef(false)
+
+  const canOpenFullscreen = enableFullscreen && !isFullscreenView
+  const flipOnTap = isFullscreenView || !enableFullscreen
 
   const variant = resolveCardVariant(profile.role)
   const meta = ROLE_CARD_COPY[variant]
@@ -306,22 +323,127 @@ export function DigitalIdCard({
     setPhotoBroken(false)
   }, [profile.avatar_url])
 
+  useEffect(() => {
+    if (!fullscreen) return
+
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setFullscreen(false)
+        if (historyPushedRef.current) {
+          historyPushedRef.current = false
+          window.history.back()
+        }
+      }
+    }
+
+    window.history.pushState({ bmbIdCardFs: true }, '')
+    historyPushedRef.current = true
+
+    const onPopState = () => {
+      historyPushedRef.current = false
+      setFullscreen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('popstate', onPopState)
+
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [fullscreen])
+
+  function closeFullscreen() {
+    setFullscreen(false)
+    if (historyPushedRef.current) {
+      historyPushedRef.current = false
+      window.history.back()
+    }
+  }
+
+  function handleCardActivate() {
+    if (flipOnTap) {
+      setIsFlipped((prev) => !prev)
+      return
+    }
+    if (canOpenFullscreen) {
+      setFullscreen(true)
+    }
+  }
+
+  const cardAriaLabel = flipOnTap
+    ? `${meta.title} de ${profile.full_name}. Toque para ${isFlipped ? 'ver a frente' : 'ver o verso'}.`
+    : `${meta.title} de ${profile.full_name}. Toque para ampliar em tela cheia.`
+
+  const fullscreenOverlay =
+    fullscreen && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            className="id-card-fs-overlay fixed inset-0 z-[80] flex flex-col bg-[#0a1018]/96 backdrop-blur-md"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Carteirinha em tela cheia"
+          >
+            <div className="flex shrink-0 items-center justify-between gap-3 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))]">
+              <p className="min-w-0 truncate text-sm font-medium text-white/80">
+                Toque na carteirinha para virar
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 shrink-0 rounded-full text-white hover:bg-white/10"
+                aria-label="Fechar tela cheia"
+                onClick={closeFullscreen}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-start overflow-y-auto overscroll-contain px-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] pt-2 [-webkit-overflow-scrolling:touch]">
+              <DigitalIdCard
+                profile={profile}
+                linkedStudents={linkedStudents}
+                showActions={false}
+                isFullscreenView
+                enableFullscreen={false}
+                className="w-full max-w-[min(100%,420px)]"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-5 min-h-11 w-full max-w-[min(100%,420px)] border-white/20 bg-white/5 text-white hover:bg-white/10"
+                onClick={closeFullscreen}
+              >
+                Fechar
+              </Button>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
+
   return (
     <div className={cn('flex w-full flex-col items-center', className)}>
       <div
         className={cn(
           'printable-id id-card-perspective relative w-full max-w-[340px] cursor-pointer select-none sm:max-w-[360px]',
+          isFullscreenView && 'max-w-[min(100%,420px)] sm:max-w-[min(100%,420px)]',
           cardShellClass,
           theme.variantClass,
         )}
-        onClick={() => setIsFlipped(!isFlipped)}
+        onClick={handleCardActivate}
         role="button"
         tabIndex={0}
-        aria-label={`${meta.title} de ${profile.full_name}. Toque para ${isFlipped ? 'ver a frente' : 'ver o verso'}.`}
+        aria-label={cardAriaLabel}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            setIsFlipped(!isFlipped)
+            handleCardActivate()
           }
         }}
       >
@@ -794,22 +916,41 @@ export function DigitalIdCard({
       </div>
 
       {showActions && (
-        <div className="no-print mt-5 flex flex-col items-center gap-3 sm:mt-6 sm:gap-4">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <RefreshCcw className="h-3.5 w-3.5" /> Toque para virar
-          </div>
+        <div className="no-print mt-5 flex w-full max-w-[340px] flex-col items-center gap-3 sm:mt-6 sm:max-w-[360px] sm:gap-4">
+          {canOpenFullscreen ? (
+            <>
+              <p className="flex items-center gap-1.5 text-center text-xs text-muted-foreground">
+                <Maximize2 className="h-3.5 w-3.5 shrink-0" />
+                Toque na carteirinha para ampliar
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11 w-full border-white/10 bg-white/10 text-foreground hover:bg-white/15"
+                onClick={() => setFullscreen(true)}
+              >
+                <Maximize2 className="mr-2 h-4 w-4" /> Ampliar
+              </Button>
+            </>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <RefreshCcw className="h-3.5 w-3.5" /> Toque para virar
+            </div>
+          )}
           <Button
             variant="outline"
             onClick={() => {
               setIsFlipped(false)
               setTimeout(() => window.print(), 100)
             }}
-            className="no-print min-h-11 border-white/15 bg-white/5 hover:bg-white/10"
+            className="no-print min-h-11 w-full border-white/15 bg-white/5 hover:bg-white/10"
           >
             <Printer className="mr-2 h-4 w-4" /> Imprimir / Salvar PDF
           </Button>
         </div>
       )}
+
+      {fullscreenOverlay}
     </div>
   )
 }
