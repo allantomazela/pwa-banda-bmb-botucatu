@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
+import { isFatalAuthError } from '@/lib/supabase/session-recovery'
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 
@@ -83,14 +84,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      setUser(nextSession?.user ?? null)
       setLoading(false)
     })
 
-    // getUser() valida o JWT no servidor; se estiver corrompido, limpa a sessão local.
-    // Não limpa durante callback de recovery (página /redefinir-senha ou ?code= na Home).
+    // Restaura sessão do localStorage e renova o access token se precisar.
+    // Não desloga por falha de rede ou token só expirado — só se o refresh for inválido.
     void (async () => {
       const params = new URLSearchParams(window.location.search)
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
@@ -100,16 +101,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         hashParams.get('type') === 'recovery'
 
       const { data: sessionData } = await supabase.auth.getSession()
-      const localSession = sessionData.session
+      let localSession = sessionData.session
 
       if (localSession && !authRecoveryCallback) {
-        const { error } = await supabase.auth.getUser()
-        if (error) {
-          await supabase.auth.signOut({ scope: 'local' })
-          setSession(null)
-          setUser(null)
-          setLoading(false)
-          return
+        const expiresAtMs = (localSession.expires_at ?? 0) * 1000
+        const needsRefresh = expiresAtMs < Date.now() + 60_000
+
+        if (needsRefresh) {
+          const { data: refreshed, error } = await supabase.auth.refreshSession()
+          if (refreshed.session) {
+            localSession = refreshed.session
+          } else if (isFatalAuthError(error)) {
+            await supabase.auth.signOut({ scope: 'local' })
+            setSession(null)
+            setUser(null)
+            setLoading(false)
+            return
+          }
+          // Rede/instabilidade: mantém a sessão local; autoRefreshToken tenta de novo.
         }
       }
 
