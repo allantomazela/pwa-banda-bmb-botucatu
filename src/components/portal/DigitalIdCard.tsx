@@ -168,6 +168,14 @@ function displayOrDash(value: string | null | undefined): string {
   return value
 }
 
+/** Evita mostrar blocos “Nenhuma / N/A” como se fossem informação útil. */
+function hasMeaningfulInfo(value: string | null | undefined): boolean {
+  if (!value) return false
+  const v = value.trim().toLowerCase()
+  if (!v) return false
+  return !/^(nenhuma|nenhum|n\/a|na|nao|não|-|—|\.|sem)$/i.test(v)
+}
+
 function getStatus(validUntil: string | null): {
   label: string
   active: boolean
@@ -189,7 +197,7 @@ function getStatus(validUntil: string | null): {
       active: true,
       color: 'bg-green-500',
       glowClass: 'id-glow-active',
-      borderClass: 'ring-green-500/40',
+      borderClass: 'ring-emerald-500/35',
     }
   return {
     label: 'Expirado',
@@ -203,7 +211,7 @@ function getStatus(validUntil: string | null): {
 function getNameFontSize(name: string): string {
   const len = name.trim().length
   if (len <= 18) return 'text-lg'
-  if (len <= 26) return 'text-base'
+  if (len <= 26) return 'text-[15px]'
   if (len <= 35) return 'text-sm'
   if (len <= 45) return 'text-xs'
   return 'text-[11px]'
@@ -214,32 +222,29 @@ function InfoCell({
   label,
   value,
   accentClass,
-  compact = false,
+  className,
 }: {
   icon: LucideIcon
   label: string
   value: string
   accentClass: string
-  compact?: boolean
+  className?: string
 }) {
   return (
     <div
       className={cn(
-        'min-w-0 overflow-hidden rounded-xl border border-white/10 bg-black/20 backdrop-blur-sm',
-        compact ? 'px-2 py-1.5' : 'px-2.5 py-2',
+        'min-w-0 rounded-lg border border-white/10 bg-black/25 px-2.5 py-2',
+        className,
       )}
     >
-      <div className="mb-0.5 flex items-center gap-1">
-        <Icon className={cn('h-2.5 w-2.5 shrink-0', accentClass)} />
-        <span className="truncate text-[8px] uppercase tracking-[0.12em] text-white/50">
+      <div className="mb-1 flex items-center gap-1.5">
+        <Icon className={cn('h-3 w-3 shrink-0 opacity-90', accentClass)} />
+        <span className="truncate text-[9px] font-semibold uppercase tracking-[0.14em] text-white/55">
           {label}
         </span>
       </div>
       <p
-        className={cn(
-          'break-words font-mono font-medium leading-tight text-white',
-          compact ? 'text-[9px]' : 'text-[10px]',
-        )}
+        className="break-words font-sans text-[11px] font-semibold leading-snug text-white"
         style={{ textWrap: 'balance' as const }}
       >
         {value}
@@ -293,14 +298,9 @@ export function DigitalIdCard({
   const primaryLinked = linkedStudents[0]
   const extraLinkedCount = Math.max(0, linkedStudents.length - 1)
   const showPhoto = hasPhoto && !photoBroken
-  const isDense =
-    multiGuardians ||
-    (showLinkedStudents && linkedStudents.length > 1) ||
-    Boolean(profile.disability_info?.trim())
-  // Altura previsível para o flip 3D; a página (DigitalId) faz scroll se a tela for baixa
-  const cardHeightClass = isDense
-    ? 'h-[clamp(28rem,72dvh,36rem)] min-h-[28rem]'
-    : 'h-[clamp(26rem,68dvh,34rem)] min-h-[26rem]'
+  const showAccessibility = hasMeaningfulInfo(profile.disability_info)
+  // Altura pelo conteúdo (grid 3D); página faz scroll — evita “cortar” o topo no Android
+  const cardShellClass = 'min-h-[22rem]'
 
   useEffect(() => {
     setPhotoBroken(false)
@@ -310,8 +310,8 @@ export function DigitalIdCard({
     <div className={cn('flex w-full flex-col items-center', className)}>
       <div
         className={cn(
-          'printable-id id-card-perspective relative w-full max-w-[360px] cursor-pointer select-none',
-          cardHeightClass,
+          'printable-id id-card-perspective relative w-full max-w-[340px] cursor-pointer select-none sm:max-w-[360px]',
+          cardShellClass,
           theme.variantClass,
         )}
         onClick={() => setIsFlipped(!isFlipped)}
@@ -328,14 +328,14 @@ export function DigitalIdCard({
         <div
           className={cn(
             'id-card-inner relative h-full w-full',
-            cardHeightClass,
+            cardShellClass,
             isFlipped && 'flipped',
           )}
         >
           {/* Frente */}
           <div
             className={cn(
-              'id-card-face h-full w-full overflow-hidden rounded-[1.35rem] ring-1',
+              'id-card-face flex h-full min-h-full w-full flex-col overflow-hidden rounded-2xl ring-1',
               status.borderClass,
             )}
             style={
@@ -344,68 +344,57 @@ export function DigitalIdCard({
           >
             <div className={cn('absolute inset-0', theme.faceBg)} />
             <div className="absolute inset-0 id-holo-pattern" />
-            <div className={cn('absolute inset-0 opacity-40', theme.mesh)} />
+            <div className={cn('absolute inset-0 opacity-35', theme.mesh)} />
             <div
               className={cn(
-                'absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl',
+                'absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl',
                 theme.glowA,
               )}
             />
             <div
               className={cn(
-                'absolute -bottom-12 -left-8 h-32 w-32 rounded-full blur-3xl',
+                'absolute -bottom-12 -left-8 h-28 w-28 rounded-full blur-3xl',
                 theme.glowB,
               )}
             />
 
-            <div className={cn('relative z-10 flex h-full flex-col', cardHeightClass)}>
+            <div className="relative z-10 flex min-h-full flex-col">
               <div
                 className={cn(
-                  'relative flex shrink-0 items-center justify-between overflow-hidden px-4',
-                  isDense ? 'h-14' : 'h-16',
+                  'relative flex h-12 shrink-0 items-center justify-between overflow-hidden px-3.5 sm:px-4',
                   theme.header,
                 )}
               >
                 <div className="absolute inset-0 id-card-shimmer" />
-                <div className="relative z-10 flex items-center gap-2.5">
-                  <div className="h-9 w-9 overflow-hidden rounded-full bg-[#1B263B] shadow-md ring-1 ring-white/20">
+                <div className="relative z-10 flex min-w-0 items-center gap-2">
+                  <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-[#1B263B] shadow-md ring-1 ring-white/20">
                     <img
                       src="/brand-logo.png"
                       alt="Brasão da Banda Marcial de Botucatu"
                       className="h-full w-full object-contain"
                     />
                   </div>
-                  <div className="leading-tight">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1B263B]/90">
+                  <div className="min-w-0 leading-tight">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#1B263B]/85">
                       Banda Marcial
                     </p>
-                    <p className="text-sm font-extrabold uppercase tracking-wide text-[#1B263B]">
+                    <p className="truncate text-xs font-extrabold uppercase tracking-wide text-[#1B263B]">
                       {meta.badge}
                     </p>
                   </div>
                 </div>
-                <BadgeIcon className="relative z-10 h-6 w-6 text-[#1B263B]/70" />
+                <BadgeIcon className="relative z-10 h-5 w-5 shrink-0 text-[#1B263B]/65" />
               </div>
 
-              <div
-                className={cn(
-                  'flex min-h-0 flex-1 flex-col items-center overflow-y-auto overscroll-contain px-3.5 pb-3',
-                  isDense ? 'pt-3' : 'pt-4',
-                )}
-              >
-                <div className={cn('relative shrink-0', isDense ? 'mb-2' : 'mb-3')}>
+              <div className="flex flex-1 flex-col items-center px-3 pb-3 pt-3 sm:px-3.5 sm:pb-3.5">
+                <div className="relative mb-2.5 shrink-0">
                   <div
                     className={cn(
-                      'absolute -inset-[3px] rounded-[1.15rem] opacity-90 blur-[1px]',
+                      'absolute -inset-[2px] rounded-[0.95rem] opacity-90 blur-[0.5px]',
                       theme.photoRing,
                     )}
                   />
-                  <div
-                    className={cn(
-                      'relative aspect-square overflow-hidden rounded-[1rem] border border-white/25 bg-zinc-950 shadow-xl',
-                      isDense ? 'h-[4.75rem] w-[4.75rem]' : 'h-[5.5rem] w-[5.5rem]',
-                    )}
-                  >
+                  <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-[0.85rem] border border-white/25 bg-zinc-950 shadow-lg sm:h-20 sm:w-20">
                     {showPhoto ? (
                       <img
                         src={avatarSrc}
@@ -415,7 +404,7 @@ export function DigitalIdCard({
                       />
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-zinc-900/90 px-2 text-center">
-                        <UserRound className="h-8 w-8 text-white/35" aria-hidden />
+                        <UserRound className="h-7 w-7 text-white/35" aria-hidden />
                         <span className="text-[8px] font-medium uppercase tracking-wide text-white/45">
                           Sem foto
                         </span>
@@ -426,7 +415,7 @@ export function DigitalIdCard({
 
                 <h2
                   className={cn(
-                    'mb-1 w-full break-words text-center font-display font-extrabold leading-tight text-white hyphens-auto',
+                    'mb-1.5 w-full break-words text-center font-display font-extrabold leading-snug text-white hyphens-auto',
                     nameFontSize,
                   )}
                   style={{ textWrap: 'balance' as const }}
@@ -436,15 +425,14 @@ export function DigitalIdCard({
 
                 <div
                   className={cn(
-                    'inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full border px-3 py-1',
-                    isDense ? 'mb-2' : 'mb-3',
+                    'mb-3 inline-flex max-w-full items-center gap-1.5 overflow-hidden rounded-full border px-2.5 py-1',
                     theme.chip,
                   )}
                 >
                   <BadgeCheck className={cn('h-3 w-3 shrink-0', theme.accentSoft)} />
                   <span
                     className={cn(
-                      'truncate text-[10px] font-bold uppercase tracking-[0.14em]',
+                      'truncate text-[9px] font-bold uppercase tracking-[0.12em]',
                       theme.accentText,
                     )}
                   >
@@ -452,53 +440,42 @@ export function DigitalIdCard({
                   </span>
                 </div>
 
-                <div
-                  className={cn(
-                    'grid w-full grid-cols-2',
-                    isDense ? 'gap-1.5' : 'gap-2',
-                  )}
-                >
+                <div className="grid w-full grid-cols-2 gap-1.5">
                   <InfoCell
                     icon={Music2}
                     label="Instrumento"
                     value={displayOrDash(profile.instrument)}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   <InfoCell
                     icon={Hash}
                     label="Matrícula"
                     value={displayOrDash(profile.registration_number)}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   <InfoCell
                     icon={MapPin}
                     label="Cidade/UF"
                     value={cityUF}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   <InfoCell
                     icon={CalendarDays}
                     label="Nascimento"
                     value={formatDate(profile.birth_date)}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   <InfoCell
                     icon={CreditCard}
                     label="CPF"
                     value={displayOrDash(profile.cpf)}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   <InfoCell
                     icon={IdCard}
                     label="RG"
                     value={displayOrDash(profile.rg)}
                     accentClass={theme.accentSoft}
-                    compact={isDense}
                   />
                   {!showGuardian ? (
                     <InfoCell
@@ -506,46 +483,45 @@ export function DigitalIdCard({
                       label="Telefone"
                       value={displayOrDash(profile.phone)}
                       accentClass={theme.accentSoft}
-                      compact={isDense}
+                      className="col-span-2"
                     />
                   ) : null}
                 </div>
 
-                {profile.disability_info && profile.disability_info.trim() !== '' && (
+                {showAccessibility ? (
                   <div
                     className={cn(
-                      'mt-2 w-full rounded-xl border px-2.5 py-2 backdrop-blur-sm',
+                      'mt-1.5 w-full rounded-lg border px-2.5 py-2',
                       theme.infoBox,
                     )}
                   >
-                    <div className="mb-0.5 flex items-center gap-1">
-                      <Accessibility className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
+                    <div className="mb-1 flex items-center gap-1.5">
+                      <Accessibility className={cn('h-3 w-3 shrink-0', theme.accentSoft)} />
                       <span
                         className={cn(
-                          'text-[8px] font-semibold uppercase tracking-wide',
+                          'text-[9px] font-semibold uppercase tracking-[0.14em]',
                           theme.accentText,
                         )}
                       >
                         Acessibilidade
                       </span>
                     </div>
-                    <p className="break-words text-[9px] leading-tight text-white/90">
+                    <p className="break-words text-[11px] font-medium leading-snug text-white/90">
                       {profile.disability_info}
                     </p>
                   </div>
-                )}
+                ) : null}
 
-                {showGuardian && frontGuardians.length > 0 && (
+                {showGuardian && frontGuardians.length > 0 ? (
                   <div
                     className={cn(
-                      'w-full rounded-xl border border-amber-400/30 bg-amber-500/10 backdrop-blur-sm',
-                      isDense ? 'mt-2 px-2.5 py-2' : 'mt-2 px-2.5 py-2.5',
+                      'mt-1.5 w-full rounded-lg border border-amber-400/25 bg-amber-500/10 px-2.5 py-2',
                     )}
                   >
                     <div className="mb-1.5 flex items-center justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-1">
-                        <Users className="h-2.5 w-2.5 shrink-0 text-amber-300" />
-                        <span className="text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Users className="h-3 w-3 shrink-0 text-amber-300" />
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-amber-200/90">
                           {multiGuardians
                             ? `${emergencyContacts.length} responsáveis`
                             : 'Responsável'}
@@ -557,13 +533,13 @@ export function DigitalIdCard({
                         </span>
                       ) : null}
                     </div>
-                    <ul className={cn(multiGuardians ? 'space-y-0' : 'space-y-2')}>
+                    <ul className={cn(multiGuardians ? 'space-y-0' : 'space-y-1.5')}>
                       {frontGuardians.map((contact) => (
                         <li
                           key={`${contact.name}-${contact.phone}`}
-                          className="min-w-0 rounded-lg bg-black/15 px-2 py-1.5"
+                          className="min-w-0 rounded-md bg-black/20 px-2 py-1.5"
                         >
-                          <p className="truncate text-[10px] font-medium leading-snug text-white">
+                          <p className="truncate text-[11px] font-semibold leading-snug text-white">
                             {contact.name}
                           </p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -585,38 +561,42 @@ export function DigitalIdCard({
                     </ul>
                     {multiGuardians ? (
                       <p className="mt-1.5 text-center text-[9px] leading-snug text-white/55">
-                        Demais contatos e telefones no verso da carteirinha
+                        Demais contatos no verso
                       </p>
                     ) : null}
                   </div>
-                )}
+                ) : null}
 
                 <div
                   className={cn(
-                    'mt-2 w-full rounded-lg border px-2 font-medium',
-                    isDense ? 'py-1 text-[8px]' : 'py-1.5 text-[9px]',
+                    'mt-1.5 flex w-full items-center gap-1.5 rounded-lg border px-2.5 py-2 text-[10px] font-medium',
                     imageConsentOk
-                      ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
-                      : 'border-white/15 bg-white/5 text-white/60',
+                      ? 'border-emerald-400/25 bg-emerald-500/10 text-emerald-100'
+                      : 'border-white/12 bg-white/5 text-white/65',
                   )}
                 >
-                  LGPD · {imageConsentLabel(imageConsent)}
+                  <ShieldCheck
+                    className={cn(
+                      'h-3.5 w-3.5 shrink-0',
+                      imageConsentOk ? 'text-emerald-300' : 'text-white/45',
+                    )}
+                  />
+                  <span>LGPD · {imageConsentLabel(imageConsent)}</span>
                 </div>
 
                 {showLinkedStudents && primaryLinked ? (
                   <div
                     className={cn(
-                      'mt-2 w-full rounded-xl border backdrop-blur-sm',
-                      isDense ? 'px-2.5 py-1.5' : 'px-2.5 py-2',
+                      'mt-1.5 w-full rounded-lg border px-2.5 py-2',
                       theme.infoBox,
                     )}
                   >
-                    <div className="mb-0.5 flex items-center justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-1">
-                        <GraduationCap className={cn('h-2.5 w-2.5 shrink-0', theme.accentSoft)} />
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <GraduationCap className={cn('h-3 w-3 shrink-0', theme.accentSoft)} />
                         <span
                           className={cn(
-                            'text-[8px] font-semibold uppercase tracking-wide',
+                            'text-[9px] font-semibold uppercase tracking-[0.14em]',
                             theme.accentText,
                           )}
                         >
@@ -631,26 +611,21 @@ export function DigitalIdCard({
                         </span>
                       ) : null}
                     </div>
-                    <p className="truncate text-[10px] font-medium leading-snug text-white">
+                    <p className="truncate text-[11px] font-semibold leading-snug text-white">
                       {primaryLinked.full_name}
                     </p>
-                    <p className="mt-0.5 font-mono text-[10px] text-white/85">
+                    <p className="mt-0.5 font-mono text-[10px] text-white/75">
                       Matrícula {displayOrDash(primaryLinked.registration_number)}
                     </p>
                   </div>
                 ) : null}
 
-                <div
-                  className={cn(
-                    'mt-auto flex w-full shrink-0 items-end justify-between border-t border-white/10',
-                    isDense ? 'pt-2' : 'pt-3',
-                  )}
-                >
+                <div className="mt-3 flex w-full shrink-0 items-end justify-between border-t border-white/10 pt-2.5">
                   <div className="min-w-0">
-                    <p className="text-[8px] uppercase tracking-[0.14em] text-white/45">
-                      Validade — território brasileiro
+                    <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-white/55">
+                      Validade
                     </p>
-                    <p className={cn('font-mono text-sm font-bold', theme.accentSoft)}>
+                    <p className={cn('font-mono text-sm font-bold tabular-nums', theme.accentSoft)}>
                       {formatDate(profile.valid_until)}
                     </p>
                   </div>
@@ -686,12 +661,7 @@ export function DigitalIdCard({
             <div className="absolute inset-0 id-holo-pattern" />
             <div className={cn('absolute inset-0 opacity-35', theme.mesh)} />
 
-            <div
-              className={cn(
-                'relative z-10 flex h-full flex-col items-center overflow-y-auto overscroll-contain p-5 sm:p-6',
-                cardHeightClass,
-              )}
-            >
+            <div className="relative z-10 flex min-h-full flex-1 flex-col items-center overflow-y-auto overscroll-contain p-4 sm:p-5">
               <div className="w-full shrink-0 pt-0.5 text-center">
                 <div className="mb-1 flex items-center justify-center gap-2">
                   <img src="/brand-logo.png" alt="" className="h-7 w-7 object-contain" />
@@ -824,7 +794,7 @@ export function DigitalIdCard({
       </div>
 
       {showActions && (
-        <div className="no-print mt-7 flex flex-col items-center gap-4">
+        <div className="no-print mt-5 flex flex-col items-center gap-3 sm:mt-6 sm:gap-4">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <RefreshCcw className="h-3.5 w-3.5" /> Toque para virar
           </div>
@@ -834,7 +804,7 @@ export function DigitalIdCard({
               setIsFlipped(false)
               setTimeout(() => window.print(), 100)
             }}
-            className="no-print border-white/15 bg-white/5 hover:bg-white/10"
+            className="no-print min-h-11 border-white/15 bg-white/5 hover:bg-white/10"
           >
             <Printer className="mr-2 h-4 w-4" /> Imprimir / Salvar PDF
           </Button>

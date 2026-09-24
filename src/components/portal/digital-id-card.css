@@ -53,6 +53,7 @@
   height: 100%;
   min-height: inherit;
   min-width: 0;
+  align-self: stretch;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   /* translateZ evita “fantasma” das duas faces no Safari */
