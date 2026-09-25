@@ -7,7 +7,16 @@ export function getYouTubeId(url: string): string | null {
   return match?.[1] ?? null
 }
 
-export function toEmbedUrl(url: string, options?: { autoplay?: boolean }): string {
+export function toWatchUrl(url: string): string | null {
+  const trimmed = url.trim()
+  const youtubeId = getYouTubeId(trimmed)
+  if (youtubeId) return `https://www.youtube.com/watch?v=${youtubeId}`
+  if (VIMEO_ID.test(trimmed)) return trimmed
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return null
+}
+
+export function toEmbedUrl(url: string, options?: { autoplay?: boolean; muted?: boolean }): string {
   const trimmed = url.trim()
   const youtubeId = getYouTubeId(trimmed)
   if (youtubeId) {
@@ -16,14 +25,20 @@ export function toEmbedUrl(url: string, options?: { autoplay?: boolean }): strin
       modestbranding: '1',
       playsinline: '1',
     })
-    if (options?.autoplay) params.set('autoplay', '1')
-    // youtube.com/embed é mais estável que youtube-nocookie em PWAs iOS
+    // Autoplay no mobile só funciona com mute; sem isso o player fica preto
+    if (options?.autoplay) {
+      params.set('autoplay', '1')
+      params.set('mute', options.muted === false ? '0' : '1')
+    }
     return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`
   }
   const vimeo = trimmed.match(VIMEO_ID)
   if (vimeo) {
     const params = new URLSearchParams()
-    if (options?.autoplay) params.set('autoplay', '1')
+    if (options?.autoplay) {
+      params.set('autoplay', '1')
+      params.set('muted', options.muted === false ? '0' : '1')
+    }
     const qs = params.toString()
     return `https://player.vimeo.com/video/${vimeo[1]}${qs ? `?${qs}` : ''}`
   }

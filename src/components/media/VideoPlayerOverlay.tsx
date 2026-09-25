@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
+import { ExternalLink, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { toEmbedUrl } from '@/lib/video-embed'
+import { getYouTubeId, toEmbedUrl, toWatchUrl } from '@/lib/video-embed'
 
 interface VideoPlayerOverlayProps {
   open: boolean
@@ -13,8 +13,9 @@ interface VideoPlayerOverlayProps {
 }
 
 /**
- * Player em overlay no `document.body`, sem `transform` no ancestral do iframe
- * (no iOS Safari o translate do Dialog Radix impede o YouTube de renderizar).
+ * Player em overlay no `document.body`.
+ * Evita Dialog com transform (quebra iframe no iOS) e usa caixa 16:9
+ * com iframe em fluxo normal (mesma abordagem das seções CMS).
  */
 export function VideoPlayerOverlay({
   open,
@@ -48,15 +49,18 @@ export function VideoPlayerOverlay({
 
   if (!mounted || !open || !videoUrl) return null
 
-  const embedUrl = toEmbedUrl(videoUrl, { autoplay: true })
+  // Sem autoplay: no mobile o YouTube bloqueia e o player fica preto
+  const embedUrl = toEmbedUrl(videoUrl)
+  const watchUrl = toWatchUrl(videoUrl)
+  const hasYouTube = Boolean(getYouTubeId(videoUrl))
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-black/90"
+      className="fixed inset-0 z-[200] flex flex-col bg-[#0a0a0a]"
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      style={{ position: 'fixed', inset: 0 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 200 }}
     >
       <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pl-[max(0.75rem,env(safe-area-inset-left,0px))]">
         <div className="min-w-0 flex-1">
@@ -77,17 +81,36 @@ export function VideoPlayerOverlay({
         </Button>
       </div>
 
-      <div className="flex min-h-0 flex-1 items-center justify-center px-2 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2 sm:px-4">
-        <div className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-lg bg-black shadow-2xl">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-5">
+        <div
+          className="mx-auto w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-black"
+          style={{ aspectRatio: '16 / 9', minHeight: 200 }}
+        >
           <iframe
             key={embedUrl}
             src={embedUrl}
             title={title}
-            className="absolute inset-0 h-full w-full border-0"
+            className="h-full w-full max-w-full border-0"
+            style={{ minHeight: 200 }}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
+            referrerPolicy="no-referrer-when-downgrade"
           />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-white/60 sm:text-sm">
+            Toque no play do YouTube para assistir.
+            {hasYouTube ? ' Se o player não carregar, abra no YouTube.' : ''}
+          </p>
+          {watchUrl ? (
+            <Button asChild variant="secondary" className="min-h-11 w-full shrink-0 sm:w-auto">
+              <a href={watchUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Abrir no YouTube
+              </a>
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>,
