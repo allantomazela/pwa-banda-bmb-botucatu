@@ -47,6 +47,7 @@ export function toEmbedUrl(url: string, options?: { autoplay?: boolean; muted?: 
 
 export function getVideoThumbnail(url: string, fallback: string): string {
   const youtubeId = getYouTubeId(url)
-  if (youtubeId) return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+  // mqdefault: 320x180, proporção 16:9 limpa (hqdefault tem faixas pretas)
+  if (youtubeId) return `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`
   return fallback
 }

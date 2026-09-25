@@ -190,42 +190,48 @@ export default function Media() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,17.5rem),1fr))] gap-4 sm:gap-5">
+              <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                 {videos.map((video) => (
                   <button
                     key={video.id}
                     type="button"
                     onClick={() => setSelected({ kind: 'video', item: video })}
-                    className="media-mosaic-tile group overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="media-mosaic-tile group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    <div className="relative aspect-video overflow-hidden bg-black">
+                    <div
+                      className="relative w-full shrink-0 overflow-hidden bg-black"
+                      style={{ aspectRatio: '16 / 9' }}
+                    >
                       <img
                         src={getVideoThumbnail(
                           video.video_url,
                           'https://img.usecurling.com/p/800/450?q=marching%20band&color=blue',
                         )}
                         alt=""
-                        className="h-full w-full object-cover opacity-85 transition-transform duration-700 ease-out group-hover:scale-105"
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover object-center opacity-90 transition-transform duration-700 ease-out group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/40 bg-primary/95 text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110">
-                          <Play className="ml-0.5 h-6 w-6" fill="currentColor" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/95 text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14">
+                          <Play className="ml-0.5 h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" />
                         </span>
                       </div>
                     </div>
-                    <div className="space-y-1 p-4">
+                    <div className="flex min-h-[6.5rem] flex-1 flex-col gap-1 p-3.5 sm:p-4">
                       <p className="font-crest text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
                         Assistir
                       </p>
-                      <h2 className="line-clamp-2 font-display font-semibold text-white">
+                      <h2 className="line-clamp-2 font-display text-sm font-semibold leading-snug text-white sm:text-base">
                         {video.title}
                       </h2>
                       {video.description ? (
-                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                        <p className="mt-auto line-clamp-2 text-xs text-muted-foreground sm:text-sm">
                           {video.description}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p className="mt-auto text-xs text-muted-foreground/50">Toque para assistir</p>
+                      )}
                     </div>
                   </button>
                 ))}
