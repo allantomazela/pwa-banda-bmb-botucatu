@@ -21,6 +21,7 @@ const DEFAULTS: Record<string, string> = {
   home_showcase_photo_ids: '[]',
   contact_email: 'contato@bandabmb.com.br',
   contact_phone: '(14) 99999-9999',
+  instagram_url: 'https://www.instagram.com/bmb.botucatu/',
   about_text:
     'Fundada com o propósito de levar cultura e disciplina aos jovens de Botucatu, a Banda Marcial de Botucatu se consolidou como um dos principais corpos musicais do interior paulista.',
   about_image_1_url: '',

@@ -271,6 +271,12 @@ export function SiteSettingsManager() {
             onChange={set('contact_phone')}
           />
           <Field
+            id="instagram_url"
+            label="Instagram (URL do perfil)"
+            value={form.instagram_url || ''}
+            onChange={set('instagram_url')}
+          />
+          <Field
             id="footer_address"
             label="Endereço (rodapé)"
             value={form.footer_address || ''}
