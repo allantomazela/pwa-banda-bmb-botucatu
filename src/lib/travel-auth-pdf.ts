@@ -14,11 +14,7 @@ type Html2CanvasFn = (
   },
 ) => Promise<HTMLCanvasElement>
 
-type JsPdfCtor = new (options?: {
-  orientation?: 'portrait' | 'landscape'
-  unit?: 'mm' | 'pt' | 'px'
-  format?: string
-}) => {
+type JsPdfDoc = {
   internal: { pageSize: { getWidth: () => number; getHeight: () => number } }
   addImage: (
     imageData: string,
@@ -32,12 +28,20 @@ type JsPdfCtor = new (options?: {
   output: (type: 'blob') => Blob
 }
 
+type JsPdfCtor = new (options?: {
+  orientation?: 'portrait' | 'landscape'
+  unit?: 'mm' | 'pt' | 'px'
+  format?: string
+}) => JsPdfDoc
+
 declare global {
   interface Window {
     html2canvas?: Html2CanvasFn
     jspdf?: { jsPDF: JsPdfCtor }
   }
 }
+
+type KeepRange = { start: number; end: number }
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -212,6 +216,108 @@ export function buildTravelAuthTextPdfBlob(input: TravelAuthPdfInput): Blob {
   return new Blob([pdf], { type: 'application/pdf' })
 }
 
+/** Intervalos (em px do canvas) que não devem ser cortados no meio (assinatura, rodapé). */
+function collectKeepTogetherRanges(element: HTMLElement, canvasHeight: number): KeepRange[] {
+  const elHeight = Math.max(element.scrollHeight, element.offsetHeight, 1)
+  const ratio = canvasHeight / elHeight
+  const rootTop = element.getBoundingClientRect().top + window.scrollY
+
+  const nodes = element.querySelectorAll<HTMLElement>(
+    '[data-pdf-keep-together], .travel-auth-doc__sign-box, .travel-auth-doc__section--signature, .travel-auth-doc__footer',
+  )
+
+  const ranges: KeepRange[] = []
+  nodes.forEach((node) => {
+    const top = node.getBoundingClientRect().top + window.scrollY - rootTop
+    const height = Math.max(node.offsetHeight, node.scrollHeight)
+    const start = Math.max(0, Math.floor(top * ratio))
+    const end = Math.min(canvasHeight, Math.ceil((top + height) * ratio))
+    if (end > start + 8) ranges.push({ start, end })
+  })
+
+  ranges.sort((a, b) => a.start - b.start)
+
+  // Mescla intervalos sobrepostos (ex.: seção 4 + caixa de assinatura)
+  const merged: KeepRange[] = []
+  for (const range of ranges) {
+    const last = merged[merged.length - 1]
+    if (last && range.start <= last.end + 4) {
+      last.end = Math.max(last.end, range.end)
+    } else {
+      merged.push({ ...range })
+    }
+  }
+  return merged
+}
+
+/**
+ * Define cortes de página evitando atravessar blocos “keep together”.
+ * Se um bloco não cabe na página, ele começa na página seguinte inteiro.
+ */
+function buildPageSlices(
+  canvasHeight: number,
+  pageHeightPx: number,
+  keepRanges: KeepRange[],
+): KeepRange[] {
+  if (canvasHeight <= pageHeightPx) {
+    return [{ start: 0, end: canvasHeight }]
+  }
+
+  const slices: KeepRange[] = []
+  let y = 0
+
+  while (y < canvasHeight - 1) {
+    let end = Math.min(y + pageHeightPx, canvasHeight)
+
+    for (const range of keepRanges) {
+      // Corte cairia no meio do bloco → quebra antes dele
+      if (range.start < end && range.end > end && range.start > y) {
+        end = range.start
+        break
+      }
+      // Bloco começa nesta página mas não cabe → empurra para a próxima
+      if (range.start >= y && range.start < end && range.end > y + pageHeightPx) {
+        if (range.start > y + 24) {
+          end = range.start
+          break
+        }
+      }
+    }
+
+    if (end <= y) {
+      end = Math.min(y + pageHeightPx, canvasHeight)
+    }
+
+    slices.push({ start: y, end })
+    y = end
+  }
+
+  return slices
+}
+
+function canvasSliceToJpeg(source: HTMLCanvasElement, startY: number, endY: number): string {
+  const sliceHeight = Math.max(1, Math.ceil(endY - startY))
+  const slice = document.createElement('canvas')
+  slice.width = source.width
+  slice.height = sliceHeight
+  const ctx = slice.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D indisponível')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, slice.width, slice.height)
+  ctx.drawImage(
+    source,
+    0,
+    startY,
+    source.width,
+    sliceHeight,
+    0,
+    0,
+    source.width,
+    sliceHeight,
+  )
+  return slice.toDataURL('image/jpeg', 0.92)
+}
+
 /** Captura o documento visual (QR + assinatura) e monta PDF A4. */
 export async function buildTravelAuthVisualPdfBlob(element: HTMLElement): Promise<Blob> {
   const { html2canvas, jsPDF } = await ensureVisualPdfLibs()
@@ -244,26 +350,36 @@ export async function buildTravelAuthVisualPdfBlob(element: HTMLElement): Promis
       windowWidth: Math.max(element.scrollWidth, 794),
     })
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.92)
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
-    const margin = 8
+    const margin = 10
     const usableWidth = pageWidth - margin * 2
-    const imgHeight = (canvas.height * usableWidth) / canvas.width
+    const usablePageHeight = pageHeight - margin * 2
+    const imgHeightMm = (canvas.height * usableWidth) / canvas.width
 
-    let heightLeft = imgHeight
-    let position = margin
-
-    pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight)
-    heightLeft -= pageHeight - margin * 2
-
-    while (heightLeft > 0) {
-      position = margin - (imgHeight - heightLeft)
-      pdf.addPage()
-      pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight)
-      heightLeft -= pageHeight - margin * 2
+    // Cabe em uma folha (ou com leve redução): evita qualquer corte na assinatura
+    const maxShrink = 0.82
+    if (imgHeightMm <= usablePageHeight / maxShrink) {
+      const fit = Math.min(1, usablePageHeight / imgHeightMm)
+      const w = usableWidth * fit
+      const h = imgHeightMm * fit
+      const x = margin + (usableWidth - w) / 2
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', x, margin, w, h)
+      return pdf.output('blob')
     }
+
+    // Multi-página: fatia o canvas sem atravessar assinatura/rodapé
+    const pageHeightPx = (usablePageHeight / usableWidth) * canvas.width
+    const keepRanges = collectKeepTogetherRanges(element, canvas.height)
+    const slices = buildPageSlices(canvas.height, pageHeightPx, keepRanges)
+
+    slices.forEach((slice, index) => {
+      if (index > 0) pdf.addPage()
+      const jpeg = canvasSliceToJpeg(canvas, slice.start, slice.end)
+      const sliceHeightMm = ((slice.end - slice.start) * usableWidth) / canvas.width
+      pdf.addImage(jpeg, 'JPEG', margin, margin, usableWidth, sliceHeightMm)
+    })
 
     return pdf.output('blob')
   } finally {

@@ -3,29 +3,29 @@
   background: #ffffff;
   border-radius: 0.75rem;
   border: 1px solid #e5e7eb;
-  padding: 1.25rem 1.25rem 1.5rem;
-  font-size: 0.875rem;
-  line-height: 1.45;
+  padding: 1rem 1.1rem 1.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 
 .travel-auth-doc__header {
   display: flex;
-  gap: 0.875rem;
+  gap: 0.75rem;
   align-items: flex-start;
   border-bottom: 2px solid #1b263b;
-  padding-bottom: 0.875rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.75rem;
 }
 
 .travel-auth-doc__logo {
-  width: 3rem;
-  height: 3rem;
+  width: 2.75rem;
+  height: 2.75rem;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .travel-auth-doc__org {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -33,36 +33,38 @@
 }
 
 .travel-auth-doc__title {
-  margin-top: 0.15rem;
-  font-size: 1.15rem;
+  margin-top: 0.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.25;
 }
 
 .travel-auth-doc__meta {
-  margin-top: 0.25rem;
-  font-size: 0.7rem;
+  margin-top: 0.2rem;
+  font-size: 0.65rem;
   color: #64748b;
 }
 
 .travel-auth-doc__section {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .travel-auth-doc__section h2 {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #1b263b;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .travel-auth-doc__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.55rem 1rem;
+  gap: 0.45rem 0.85rem;
 }
 
 @media (min-width: 640px) {
@@ -72,7 +74,7 @@
 }
 
 .travel-auth-doc__grid dt {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #64748b;
@@ -85,67 +87,76 @@
 }
 
 .travel-auth-doc__desc {
-  margin-top: 0.65rem;
-  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
   color: #334155;
 }
 
 .travel-auth-doc__body {
   white-space: pre-wrap;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #1e293b;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
-  padding: 0.75rem;
+  padding: 0.65rem;
 }
 
 .travel-auth-doc__sign-box {
-  margin-top: 0.75rem;
+  margin-top: 0.55rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.5rem;
-  padding: 0.65rem;
+  padding: 0.55rem;
   background: #fff;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .travel-auth-doc__sign-box p {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #64748b;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .travel-auth-doc__sign-box img {
-  max-height: 5.5rem;
+  max-height: 4.25rem;
   max-width: 100%;
   object-fit: contain;
-  background: #000;
+  background: #fff;
   border-radius: 0.25rem;
 }
 
 .travel-auth-doc__govbr {
-  margin-top: 0.65rem;
-  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
   color: #334155;
 }
 
+.travel-auth-doc__section--signature {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 .travel-auth-doc__footer {
-  margin-top: 1.25rem;
-  padding-top: 0.75rem;
+  margin-top: 0.85rem;
+  padding-top: 0.6rem;
   border-top: 1px solid #e2e8f0;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #64748b;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .travel-auth-doc__verify {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-  padding: 0.75rem;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+  padding: 0.6rem;
   border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   background: #f8fafc;
@@ -160,7 +171,7 @@
 
 .travel-auth-doc__qr {
   flex-shrink: 0;
-  padding: 0.35rem;
+  padding: 0.3rem;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 0.35rem;
@@ -172,18 +183,18 @@
 }
 
 .travel-auth-doc__verify-title {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #1b263b;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .travel-auth-doc__verify-url {
-  margin-top: 0.35rem;
+  margin-top: 0.3rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   word-break: break-all;
   color: #334155;
 }
@@ -194,7 +205,7 @@
 }
 
 .travel-auth-doc__footer p + p {
-  margin-top: 0.35rem;
+  margin-top: 0.3rem;
   font-weight: 600;
   color: #1b263b;
 }
@@ -218,7 +229,7 @@
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 12mm 14mm !important;
+    padding: 8mm 10mm !important;
     box-shadow: none !important;
     background: #fff !important;
     color: #000 !important;
@@ -227,12 +238,21 @@
     print-color-adjust: exact;
   }
 
+  .travel-auth-doc__section,
+  .travel-auth-doc__section--signature,
+  .travel-auth-doc__sign-box,
+  .travel-auth-doc__footer,
+  .travel-auth-doc__verify {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
   .no-print {
     display: none !important;
   }
 
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 10mm;
   }
 }

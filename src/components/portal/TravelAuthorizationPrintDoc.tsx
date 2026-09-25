@@ -376,7 +376,7 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
             <pre className="travel-auth-doc__body">{body}</pre>
           </section>
 
-          <section className="travel-auth-doc__section">
+          <section className="travel-auth-doc__section travel-auth-doc__section--signature" data-pdf-keep-together>
             <h2>4. Responsável e assinatura</h2>
             <dl className="travel-auth-doc__grid">
               <div>
@@ -424,12 +424,12 @@ export function TravelAuthorizationPrintDoc({ open, onOpenChange, auth, student 
             ) : null}
           </section>
 
-          <footer className="travel-auth-doc__footer">
+          <footer className="travel-auth-doc__footer" data-pdf-keep-together>
             <div className="travel-auth-doc__verify">
               <div className="travel-auth-doc__qr">
                 <VerifyQrCode
                   value={verifyUrl}
-                  size={112}
+                  size={96}
                   title="QR Code de verificação da autorização"
                 />
               </div>
