@@ -11,14 +11,21 @@ export function toEmbedUrl(url: string, options?: { autoplay?: boolean }): strin
   const trimmed = url.trim()
   const youtubeId = getYouTubeId(trimmed)
   if (youtubeId) {
-    const params = new URLSearchParams({ rel: '0', modestbranding: '1' })
+    const params = new URLSearchParams({
+      rel: '0',
+      modestbranding: '1',
+      playsinline: '1',
+    })
     if (options?.autoplay) params.set('autoplay', '1')
-    return `https://www.youtube-nocookie.com/embed/${youtubeId}?${params.toString()}`
+    // youtube.com/embed é mais estável que youtube-nocookie em PWAs iOS
+    return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`
   }
   const vimeo = trimmed.match(VIMEO_ID)
   if (vimeo) {
-    const autoplay = options?.autoplay ? '?autoplay=1' : ''
-    return `https://player.vimeo.com/video/${vimeo[1]}${autoplay}`
+    const params = new URLSearchParams()
+    if (options?.autoplay) params.set('autoplay', '1')
+    const qs = params.toString()
+    return `https://player.vimeo.com/video/${vimeo[1]}${qs ? `?${qs}` : ''}`
   }
   return trimmed
 }

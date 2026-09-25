@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Play, Video } from 'lucide-react'
 import type { VideoItem } from '@/services/videos'
@@ -8,11 +8,12 @@ import {
   getCategoryColor,
 } from '@/components/library/video-utils'
 import { cn } from '@/lib/utils'
-import { MediaLightbox } from '@/components/media/MediaLightbox'
+import { VideoPlayerOverlay } from '@/components/media/VideoPlayerOverlay'
 
 export function VideoGrid({ videos }: { videos: VideoItem[] }) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const active = videos.find((v) => v.id === activeId) ?? null
+  const closePlayer = useCallback(() => setActiveId(null), [])
 
   if (videos.length === 0) {
     return (
@@ -35,7 +36,7 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
               key={video.id}
               type="button"
               onClick={() => setActiveId(video.id)}
-              className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-card/40 text-left transition-all hover:border-primary/40 hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group flex min-h-[44px] min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-card/40 text-left transition-all hover:border-primary/40 hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`Assistir ${video.title}`}
             >
               <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
@@ -45,8 +46,8 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/95 text-primary-foreground shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14">
                     <Play className="ml-0.5 h-5 w-5 fill-current sm:h-6 sm:w-6" aria-hidden />
                   </span>
@@ -54,7 +55,7 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
                 {video.category ? (
                   <Badge
                     className={cn(
-                      'absolute left-2 top-2 border-0 text-[10px] font-bold uppercase tracking-wider shadow-sm',
+                      'pointer-events-none absolute left-2 top-2 border-0 text-[10px] font-bold uppercase tracking-wider shadow-sm',
                       getCategoryColor(video.category),
                     )}
                   >
@@ -82,12 +83,14 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
         })}
       </div>
 
-      <MediaLightbox
-        open={!!active}
-        title={active?.title || 'Videoaula'}
-        videoUrl={active?.video_url}
-        onClose={() => setActiveId(null)}
-      />
+      {active?.video_url ? (
+        <VideoPlayerOverlay
+          open
+          title={active.title || 'Videoaula'}
+          videoUrl={active.video_url}
+          onClose={closePlayer}
+        />
+      ) : null}
     </>
   )
 }

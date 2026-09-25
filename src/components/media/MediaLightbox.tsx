@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { toEmbedUrl } from '@/lib/video-embed'
+import { VideoPlayerOverlay } from '@/components/media/VideoPlayerOverlay'
 
 interface MediaLightboxProps {
   open: boolean
@@ -26,9 +26,25 @@ export function MediaLightbox({
 }: MediaLightboxProps) {
   const hasNav = Boolean(onPrev || onNext)
 
+  // Vídeo: overlay sem transform (iOS + YouTube). Foto: Dialog existente.
+  if (videoUrl) {
+    return (
+      <VideoPlayerOverlay
+        open={open}
+        title={title || 'Vídeo'}
+        videoUrl={videoUrl}
+        onClose={onClose}
+        eyebrow={counter ? `Galeria BMB · ${counter}` : 'Galeria BMB'}
+      />
+    )
+  }
+
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="w-[calc(100%-0.75rem)] max-w-5xl overflow-hidden border-primary/20 bg-zinc-950 p-0 shadow-[0_0_80px_rgba(251,192,45,0.12)] sm:w-full">
+      <DialogContent
+        hideCloseButton
+        className="z-[100] w-[calc(100%-0.75rem)] max-w-5xl overflow-hidden border-primary/20 bg-zinc-950 p-0 shadow-[0_0_80px_rgba(251,192,45,0.12)] sm:w-full"
+      >
         <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4 sm:px-6">
           <div className="min-w-0 flex-1 pr-2">
             <p className="mb-1 font-crest text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
@@ -44,7 +60,7 @@ export function MediaLightbox({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/5 text-white hover:bg-primary hover:text-primary-foreground"
+            className="h-11 w-11 shrink-0 rounded-full border border-white/10 bg-white/5 text-white hover:bg-primary hover:text-primary-foreground"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
@@ -52,18 +68,7 @@ export function MediaLightbox({
         </div>
 
         <div className="relative bg-black">
-          {open && videoUrl ? (
-            <div className="relative aspect-video w-full">
-              <iframe
-                src={toEmbedUrl(videoUrl, { autoplay: true })}
-                title={title}
-                className="absolute inset-0 h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
-          ) : imageUrl ? (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={title || 'Foto'}
