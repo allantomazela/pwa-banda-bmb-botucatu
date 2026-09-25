@@ -235,8 +235,8 @@ export function VideosManager() {
               <div className="space-y-1">
                 <Label htmlFor="v-public">Vídeo público</Label>
                 <p className="text-xs text-muted-foreground">
-                  Ligado: aparece na galeria de mídia do site. Desligado: exclusivo do portal dos
-                  membros.
+                  Ligado: também aparece na galeria de mídia do site. Em ambos os casos o vídeo
+                  fica disponível na Biblioteca do portal para membros.
                 </p>
               </div>
               <Switch

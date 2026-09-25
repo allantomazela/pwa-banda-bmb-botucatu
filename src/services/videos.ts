@@ -20,11 +20,11 @@ export async function getPublicVideos(): Promise<VideoItem[]> {
   return (data as VideoItem[]) ?? []
 }
 
+/** Todos os vídeos da biblioteca para membros autenticados (públicos + exclusivos). */
 export async function getMemberVideos(): Promise<VideoItem[]> {
   const { data, error } = await supabase
     .from('videos')
     .select('*')
-    .eq('is_public', false)
     .order('created_at', { ascending: false })
   if (error) throw error
   return (data as VideoItem[]) ?? []

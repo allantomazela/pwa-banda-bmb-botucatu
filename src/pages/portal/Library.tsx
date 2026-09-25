@@ -102,7 +102,7 @@ export default function Library() {
 
           <TabsContent value={TAB_VIDEOS} className="mt-6 space-y-8">
             {videoGroups.length === 0 ? (
-              <EmptyLibrary text="Nenhuma videoaula exclusiva encontrada." />
+              <EmptyLibrary text="Nenhuma videoaula encontrada." />
             ) : (
               videoGroups.map(({ category, items }) => (
                 <section key={category}>

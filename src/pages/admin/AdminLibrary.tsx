@@ -16,8 +16,8 @@ export default function AdminLibrary() {
       <header>
         <h1 className="mb-2 font-display text-3xl font-bold">Biblioteca Digital</h1>
         <p className="text-muted-foreground">
-          Organize o acervo dos membros: material didático e videoaulas. Vídeos marcados como
-          públicos também aparecem na galeria do site.
+          Organize o acervo dos membros: material didático e videoaulas. Vídeos públicos também
+          aparecem na galeria do site; todos ficam na Biblioteca do portal.
         </p>
       </header>
 
